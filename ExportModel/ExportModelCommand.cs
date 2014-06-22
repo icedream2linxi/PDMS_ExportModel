@@ -16,7 +16,22 @@ namespace Aveva.Presentation.AttributeBrowserAddin
 
 		public override void Execute()
 		{
-			MessageBox.Show("ExportModel");
+			try
+			{
+				ExportModel.ExportData export = new ExportModel.ExportData();
+				export.Export();
+			}
+			catch (Exception ex)
+			{
+				String err = ex.StackTrace;
+				Console.WriteLine(ex.Message);
+				Console.WriteLine(err);
+				if (ex.InnerException != null)
+				{
+					Console.WriteLine(ex.InnerException.Message);
+					Console.WriteLine(ex.InnerException.StackTrace);
+				}
+			}
 		}
 	}
 }

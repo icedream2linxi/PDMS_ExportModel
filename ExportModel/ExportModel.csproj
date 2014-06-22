@@ -65,12 +65,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ExportData.cs" />
     <Compile Include="ExportModelAddin.cs" />
     <Compile Include="ExportModelCommand.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ExportModel.uic" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DbModel\DbModel.csproj">
+      <Project>{59c95a5b-acb6-4cd1-bdbc-e53b7aee3be3}</Project>
+      <Name>DbModel</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
