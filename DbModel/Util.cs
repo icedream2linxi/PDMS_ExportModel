@@ -36,6 +36,8 @@ namespace DbModel
 				using(ITransaction tx = session.BeginTransaction())
 				{
 					Box b = new Box();
+					Point org = new Point(1, 2, 3);
+					b.Org = org;
 					session.Save(b);
 					tx.Commit();
 				}
@@ -43,6 +45,13 @@ namespace DbModel
 			catch (System.Exception ex)
 			{
 				String err = ex.StackTrace;
+				Console.WriteLine(ex.Message);
+				Console.WriteLine(err);
+				if (ex.InnerException != null)
+				{
+					Console.WriteLine(ex.InnerException.Message);
+					Console.WriteLine(ex.InnerException.StackTrace);
+				}
 			}
 		}
 	}
