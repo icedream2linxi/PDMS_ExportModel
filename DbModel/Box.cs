@@ -19,7 +19,7 @@ namespace DbModel
 		//[Column(1, Name = "org_x")]
 		//[Column(1, Name = "org_y")]
 		//[Column(1, Name = "org_z")]
-		[Point(After = typeof(IdAttribute), Name="Org", Prefix = "org")]
+		[Point(After = typeof(IdAttribute), Name="Org")]
 		public virtual Point Org { get; set; }
 
 		//[Property(Column="org_x")]

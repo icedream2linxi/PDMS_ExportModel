@@ -1,7 +1,9 @@
 ﻿using NHibernate.Mapping.Attributes;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace DbModel
@@ -9,8 +11,17 @@ namespace DbModel
 	class PointAttribute : RawXmlAttribute
 	{
 		private string type = HbmWriterHelper.GetNameWithAssembly(typeof(PointType));
+		private string name;
 		public virtual string Prefix { get; set; }
-		public virtual string Name { get; set; }
+		public virtual string Name {
+			get { return name; }
+			set
+			{
+				name = value;
+				if (Prefix == null && value != null)
+					Prefix = value.ToLower();
+			}
+		}
 		public override string Content {
 			get
 			{
