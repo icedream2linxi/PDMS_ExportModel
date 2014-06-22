@@ -13,27 +13,34 @@ namespace DbModel
 		[Key(1)]
 		[Generator(2, Class="native")]
 		public virtual int ID { get; set; }
+		//[Property(0)]
+		//[Type(1, NameType = typeof(PointType))]
+		//[Param(2, Name="prefix", Content="org")]
+		[Property(0, TypeType=typeof(PointType))]
+		[Column(1, Name="org_x")]
+		[Column(1, Name="org_y")]
+		[Column(1, Name="org_z")]
 		public virtual Point Org { get; set; }
 
-		[Property(Column="org_x")]
-		public virtual double OrgX
-		{
-			get { return Org.X; }
-			set { Org.X = value; }
-		}
+		//[Property(Column="org_x")]
+		//public virtual double OrgX
+		//{
+		//	get { return Org.X; }
+		//	set { Org.X = value; }
+		//}
 
-		[Property(Column="org_y")]
-		public virtual double OrgY
-		{
-			get { return Org.Y; }
-			set { Org.Y = value; }
-		}
+		//[Property(Column="org_y")]
+		//public virtual double OrgY
+		//{
+		//	get { return Org.Y; }
+		//	set { Org.Y = value; }
+		//}
 
-		[Property(Column="org_z")]
-		public virtual double OrgZ
-		{
-			get { return Org.Z; }
-			set { Org.Z = value; }
-		}
+		//[Property(Column="org_z")]
+		//public virtual double OrgZ
+		//{
+		//	get { return Org.Z; }
+		//	set { Org.Z = value; }
+		//}
 	}
 }
