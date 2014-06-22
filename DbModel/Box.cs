@@ -13,13 +13,13 @@ namespace DbModel
 		[Key(1)]
 		[Generator(2, Class="native")]
 		public virtual int ID { get; set; }
-		[Property(0)]
-		[Type(1, NameType = typeof(PointType))]
-		[Param(2, Name = "prefix", Content = "org")]
-		//[Property(0, TypeType=typeof(PointType))]
-		[Column(1, Name = "org_x")]
-		[Column(1, Name = "org_y")]
-		[Column(1, Name = "org_z")]
+		//[Property(0)]
+		//[Type(1, NameType = typeof(PointType))]
+		//[Param(2, Name = "prefix", Content = "org")]
+		//[Column(1, Name = "org_x")]
+		//[Column(1, Name = "org_y")]
+		//[Column(1, Name = "org_z")]
+		[Point(After = typeof(IdAttribute), Name="Org", Prefix = "org")]
 		public virtual Point Org { get; set; }
 
 		//[Property(Column="org_x")]

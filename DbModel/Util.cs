@@ -2,6 +2,7 @@
 using NHibernate.Cfg;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -24,8 +25,17 @@ namespace DbModel
 				cf = new Configuration();
 				cf.Properties = settings;
 
-				System.IO.MemoryStream stream = new System.IO.MemoryStream();
 				NHibernate.Mapping.Attributes.HbmSerializer.Default.Validate = true;
+				using (FileStream fs = File.Create(@"g:\temp\nhibernate.xml"))
+				{
+					System.IO.MemoryStream stream1 = new System.IO.MemoryStream();
+					NHibernate.Mapping.Attributes.HbmSerializer.Default.Serialize(
+						stream1, System.Reflection.Assembly.GetExecutingAssembly());
+					stream1.Position = 0;
+					stream1.WriteTo(fs);
+					stream1.Close();
+				}
+				System.IO.MemoryStream stream = new System.IO.MemoryStream();
 				NHibernate.Mapping.Attributes.HbmSerializer.Default.Serialize(
 					stream, System.Reflection.Assembly.GetExecutingAssembly());
 				stream.Position = 0;
@@ -36,7 +46,7 @@ namespace DbModel
 				using(ITransaction tx = session.BeginTransaction())
 				{
 					Box b = new Box();
-					Point org = new Point(1, 2, 3);
+					Point org = new Point(1, 2, 4);
 					b.Org = org;
 					session.Save(b);
 					tx.Commit();

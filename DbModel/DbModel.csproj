@@ -59,6 +59,7 @@
   <ItemGroup>
     <Compile Include="Box.cs" />
     <Compile Include="Class1.cs" />
+    <Compile Include="CustomTypeAttribute.cs" />
     <Compile Include="Point.cs" />
     <Compile Include="PointType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
