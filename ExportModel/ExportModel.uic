@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UserInterfaceCustomization xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="www.aveva.com">
+  <Version>1.0</Version>
+  <Tools>
+    <StateButtonTool Name="Fulongtech.ExportModelAddin.Show">
+      <Command>
+        <Type>Instance</Type>
+        <CommandId>Fulongtech.ExportModelCommand</CommandId>
+        <Arguments />
+      </Command>
+      <Image />
+      <Caption>ExportModel</Caption>
+    </StateButtonTool>
+  </Tools>
+  <InstanceTools />
+  <MenuBar />
+  <CommandBars>
+    <CommandBar Name="Fulongtech.ExportModelAddin.ExportModel">
+      <Tools>
+        <Tool Name="Fulongtech.ExportModelAddin.Show" />
+      </Tools>
+      <DockedColumn>1</DockedColumn>
+      <DockedRow>1</DockedRow>
+      <DockedPosition>Top</DockedPosition>
+      <AllowFloating>true</AllowFloating>
+      <AllowHiding>true</AllowHiding>
+      <FillEntireRow>false</FillEntireRow>
+      <ShowInToolbarList>true</ShowInToolbarList>
+      <Caption>ExportModel</Caption>
+    </CommandBar>
+  </CommandBars>
+  <TaskPanes />
+  <ContextMenus />
+  <Namespace>Fulongtech.ExportModelAddin</Namespace>
+</UserInterfaceCustomization>
