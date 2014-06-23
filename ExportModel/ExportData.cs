@@ -4,6 +4,7 @@ using Aveva.Pdms.Shared;
 using DbModel;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -14,6 +15,7 @@ namespace ExportModel
 	{
 		private string dbPath;
 		private string dbName;
+		private HashSet<string> exprSet = new HashSet<string>();
 
 		public void Export()
 		{
@@ -44,6 +46,8 @@ namespace ExportModel
 			util.init(fileDlg.FileName);
 
 			Export(CurrentElement.Element);
+
+			Console.WriteLine("Export model finish!!!");
 		}
 
 		private void Export(DbElement ele)
@@ -60,6 +64,7 @@ namespace ExportModel
 				ExportEquip(ele);
 			else if (ele.GetElementType() == DbElementTypeInstance.BRANCH)
 				ExportBranch(ele);
+			SaveExpr();
 		}
 
 		private bool IsReadableEle(DbElement ele)
@@ -111,7 +116,7 @@ namespace ExportModel
 			while (ele != null && ele.IsValid)
 			{
 				if (IsReadableEle(ele) && ele.GetElementType() == DbElementTypeInstance.BRANCH)
-					ExportZone(ele);
+					ExportBranch(ele);
 				ele = ele.Next();
 			}
 		}
@@ -153,16 +158,20 @@ namespace ExportModel
 						{
 							string expr = gEle.GetAsString(DbAttributeInstance.PAXI);
 							//Direction paxi = cateEle.EvaluateDirection(DbExpression.Parse(expr));
+							AddExpr(expr);
 
 							expr = gEle.GetAsString(DbAttributeInstance.PHEI);
-							double phei = cateEle.EvaluateDouble(DbExpression.Parse(expr), DbAttributeUnit.DIST);
+							//double phei = cateEle.EvaluateDouble(DbExpression.Parse(expr), DbAttributeUnit.DIST);
+							AddExpr(expr);
 
 							expr = gEle.GetAsString(DbAttributeInstance.PDIA);
 							//double pdia = cateEle.EvaluateDouble(DbExpression.Parse(expr), DbAttributeUnit.DIST);
-							double pdia = gEle.EvaluateDouble(DbExpression.Parse(expr), DbAttributeUnit.DIST);
+							//double pdia = gEle.EvaluateDouble(DbExpression.Parse(expr), DbAttributeUnit.DIST);
+							AddExpr(expr);
 
 							expr = gEle.GetAsString(DbAttributeInstance.PDIS);
-							double pdis = cateEle.EvaluateDouble(DbExpression.Parse(expr), DbAttributeUnit.DIST);
+							//double pdis = cateEle.EvaluateDouble(DbExpression.Parse(expr), DbAttributeUnit.DIST);
+							AddExpr(expr);
 						}
 					}
 
@@ -176,6 +185,29 @@ namespace ExportModel
 		private void ExportEquip(DbElement equipEle)
 		{
 
+		}
+
+		private void AddExpr(string expr)
+		{
+			double db;
+			if (expr == null || Double.TryParse(expr, out db))
+				return;
+			exprSet.Add(expr);
+		}
+
+		private void SaveExpr()
+		{
+			using (StreamWriter sw = new StreamWriter(@"g:\temp\expr.txt"))
+			{
+				string[] arr = new string[exprSet.Count];
+				exprSet.CopyTo(arr);
+				Array.Sort(arr);
+				foreach (string str in arr)
+				{
+					sw.WriteLine(str);
+				}
+				sw.Flush();
+			}
 		}
 	}
 }
