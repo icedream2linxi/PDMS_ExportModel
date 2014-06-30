@@ -65,6 +65,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EvalDirection.cs" />
+    <Compile Include="Experssion.cs" />
     <Compile Include="ExportData.cs" />
     <Compile Include="ExportModelAddin.cs" />
     <Compile Include="ExportModelCommand.cs" />

@@ -16,6 +16,7 @@ namespace ExportModel
 		private string dbPath;
 		private string dbName;
 		private HashSet<string> exprSet = new HashSet<string>();
+		private Dictionary<DbAttribute, Dictionary<string, Experssion>> experMap = new Dictionary<DbAttribute, Dictionary<string, Experssion>>();
 
 		public void Export()
 		{
@@ -119,6 +120,25 @@ namespace ExportModel
 					ExportBranch(ele);
 				ele = ele.Next();
 			}
+		}
+
+		private Experssion GetExper(DbElement ele, DbAttribute attr)
+		{
+			Dictionary<string, Experssion> map = experMap[attr];
+			if (map == null)
+			{
+				map = new Dictionary<string, Experssion>();
+				experMap[attr] = map;
+			}
+
+			Experssion exper = map[ele.GetAsString(DbAttributeInstance.NAME)];
+			if (exper == null)
+			{
+				exper = new Experssion(ele.GetAsString(attr));
+				map[ele.GetAsString(DbAttributeInstance.NAME)] = exper;
+			}
+
+			return exper;
 		}
 
 		private void ExportBranch(DbElement branchEle)
