@@ -238,7 +238,7 @@ namespace ExportModel
 
 		private void SaveExpr()
 		{
-			using (StreamWriter sw = new StreamWriter(@"g:\temp\expr.txt"))
+			using (StreamWriter sw = new StreamWriter(@"f:\temp\expr.txt"))
 			{
 				string[] arr = new string[exprSet.Count];
 				exprSet.CopyTo(arr);

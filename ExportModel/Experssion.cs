@@ -50,7 +50,7 @@ namespace ExportModel
 		{
 			CharEnumerator experIter = Exper.GetEnumerator();
 			if (experIter.MoveNext())
-				Parse(experIter, ref op);
+				Parse(experIter, OperatorOrder.NONE, ref op);
 			else
 				op = new ValOp(0.0);
 		}
@@ -82,7 +82,7 @@ namespace ExportModel
 				IOperator valueOp = null;
 				if (isEof)
 					throw new FormatException();
-				isEof = Parse(experIter, ref valueOp);
+				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
 				switch (curCh)
 				{
 					case '-':
@@ -142,10 +142,10 @@ namespace ExportModel
 				if (op is TwoObjOp)
 					((TwoObjOp)op).LhsItem = prevOp;
 			}
-			return false;
+			return isEof;
 		}
 
-		private bool Parse(CharEnumerator experIter, ref IOperator op)
+		private bool Parse(CharEnumerator experIter, OperatorOrder opOrder, ref IOperator op)
 		{
 			op = null;
 			if (!SkipSpace(experIter))
@@ -159,7 +159,7 @@ namespace ExportModel
 					isEof = !experIter.MoveNext();
 					IOperator valueOp = null;
 					if (!isEof)
-						isEof = Parse(experIter, ref valueOp);
+						isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
 					if (valueOp == null)
 						throw new FormatException();
 					op = new NegOp(valueOp);
@@ -169,7 +169,7 @@ namespace ExportModel
 					isEof = !experIter.MoveNext();
 					if (isEof)
 						throw new FormatException();
-					isEof = Parse(experIter, ref op);
+					isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref op);
 				}
 				else
 					throw new FormatException();
@@ -183,7 +183,7 @@ namespace ExportModel
 				if (!SkipSpace(experIter))
 					throw new FormatException();
 
-				isEof = Parse(experIter, ref op);
+				isEof = Parse(experIter, OperatorOrder.NONE, ref op);
 			}
 			else if (experIter.Current == ')')
 			{
@@ -195,7 +195,7 @@ namespace ExportModel
 				isEof = ParseItem(experIter, OperatorOrder.NEED_VALUE, ref op);
 			}
 
-			while (!isEof)
+			while (!isEof && opOrder == OperatorOrder.NONE)
 			{
 				IOperator nextValueOp = null;
 				isEof = Parse(experIter, op, ref nextValueOp);
@@ -249,36 +249,30 @@ namespace ExportModel
 			if (item.Equals("TIMES"))
 			{
 				IOperator valueOp = null;
-				isEof = Parse(experIter, ref valueOp);
+				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
 				op = new MulOp(null, valueOp);
 			}
 			else if (item.Equals("DIFFERENCE"))
 			{
 				IOperator valueOp = null;
-				isEof = Parse(experIter, ref valueOp);
+				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
 				IOperator nextValueOp = null;
-				isEof = Parse(experIter, valueOp, ref nextValueOp);
-				if (nextValueOp == null)
-					op = new SubOp(null, valueOp);
-				else
-					op = new SubOp(null, nextValueOp);
+				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref nextValueOp);
+				op = new SubOp(valueOp, valueOp);
 			}
 			else if (item.Equals("SUM"))
 			{
 				IOperator valueOp = null;
-				isEof = Parse(experIter, ref valueOp);
+				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
 				IOperator nextValueOp = null;
-				isEof = Parse(experIter, valueOp, ref nextValueOp);
-				if (nextValueOp == null)
-					op = new AddOp(null, valueOp);
-				else
-					op = new AddOp(null, nextValueOp);
+				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref nextValueOp);
+				op = new AddOp(valueOp, valueOp);
 			}
 			else if (item.Equals("PARAM"))
 			{
 				ParamOp paramOp = new ParamOp(this);
 				IOperator valueOp = null;
-				isEof = Parse(experIter, ref valueOp);
+				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
 				paramOp.Item = valueOp;
 				op = paramOp;
 				return isEof;
@@ -287,7 +281,7 @@ namespace ExportModel
 			{
 				IParamOp paramOp = new IParamOp(this);
 				IOperator valueOp = null;
-				isEof = Parse(experIter, ref valueOp);
+				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
 				paramOp.Item = valueOp;
 				op = paramOp;
 				return isEof;
@@ -311,7 +305,7 @@ namespace ExportModel
 				{
 					DParamOp paramOp = new DParamOp(this);
 					IOperator valueOp = null;
-					isEof = Parse(experIter, ref valueOp);
+					isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
 					paramOp.Item = valueOp;
 					op = paramOp;
 					return isEof;
@@ -320,7 +314,7 @@ namespace ExportModel
 					throw new FormatException();
 			}
 
-			return false;
+			return isEof;
 		}
 	}
 
@@ -494,7 +488,7 @@ namespace ExportModel
 		{
 			DbElement spref = Exper.ModelElement.GetElement(DbAttributeInstance.SPRE);
 			DbElement cate = spref.GetElement(DbAttributeInstance.CATR);
-			return cate.GetDoubleArray(DbAttributeInstance.PARA)[(int)Item.Eval()];
+			return cate.GetDoubleArray(DbAttributeInstance.PARA)[(int)Item.Eval() - 1];
 		}
 	}
 
@@ -507,7 +501,7 @@ namespace ExportModel
 
 		public override double Eval()
 		{
-			return Exper.ModelElement.GetDoubleArray(DbAttributeInstance.PARA)[(int)Item.Eval()];
+			return Exper.ModelElement.GetDoubleArray(DbAttributeInstance.PARA)[(int)Item.Eval() - 1];
 		}
 	}
 
@@ -520,7 +514,7 @@ namespace ExportModel
 
 		public override double Eval()
 		{
-			return Exper.ModelElement.GetElement(DbAttributeInstance.ISPE).GetDoubleArray(DbAttributeInstance.IPAR)[(int)Item.Eval()];
+			return Exper.ModelElement.GetElement(DbAttributeInstance.ISPE).GetDoubleArray(DbAttributeInstance.IPAR)[(int)Item.Eval() - 1];
 		}
 	}
 
