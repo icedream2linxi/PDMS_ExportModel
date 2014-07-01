@@ -26,7 +26,9 @@ namespace Aveva.Presentation.AttributeBrowserAddin
 			commandManager.Commands.Add(showCommand);
 
 			CommandBarManager commandBarManager = (CommandBarManager)serviceManager.GetService(typeof(CommandBarManager));
-			commandBarManager.AddUICustomizationFile("ExportModel.uic", "ExportModel");
+			CommandBar commandBar = commandBarManager.CommandBars.AddCommandBar("Export Model");
+			commandBarManager.RootTools.AddButtonTool(showCommand.Key, "Export Model", null, showCommand);
+			commandBar.Tools.AddTool(showCommand.Key);
 		}
 
 		public void Stop()

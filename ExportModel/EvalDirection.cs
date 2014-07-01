@@ -9,7 +9,7 @@ namespace ExportModel
 {
 	class EvalDirection
 	{
-		public PointVector Eval(DbElement modelEle, string exper)
+		public static PointVector Eval(DbElement modelEle, string exper)
 		{
 			exper = exper.Trim().ToUpper();
 			if (exper.Contains('P'))
@@ -18,18 +18,21 @@ namespace ExportModel
 				if (exper[0] == '-')
 				{
 					isNeg = true;
-					exper = exper.Substring(1).Trim().Substring(1);
+					exper = exper.Substring(1).Trim();
 				}
 
+				exper = exper.Substring(1);
+
 				int num = int.Parse(exper);
+				return MakeDirection(num, isNeg, modelEle);
 			}
 			else
 			{
-				return PointVector.Create(null, Direction.Create(exper));
+				return PointVector.Create(Position.Create(), Direction.Create(exper));
 			}
 		}
 
-		private PointVector MakeDirection(int num, bool isNeg, DbElement modelEle)
+		private static PointVector MakeDirection(int num, bool isNeg, DbElement modelEle)
 		{
 			DbElement cate = modelEle.GetElement(DbAttributeInstance.SPRE).GetElement(DbAttributeInstance.CATR);
 			DbElement ptre = cate.GetElement(DbAttributeInstance.PTRE);
@@ -46,9 +49,9 @@ namespace ExportModel
 				if (type == DbElementTypeInstance.PTAXIS)
 					return MakeAxialDirection(num, isNeg, pt, modelEle);
 				else if (type == DbElementTypeInstance.PTCAR)
-					return MakeCartesianDirection(num, isNeg, cate);
+					return MakeCartesianDirection(num, isNeg, pt, modelEle);
 				else if (type == DbElementTypeInstance.PTMIX)
-					return MakeMixedDirection(num, isNeg, cate);
+					return MakeMixedDirection(num, isNeg, pt, modelEle);
 				else if (type == DbElementTypeInstance.PTPOS)
 					return MakePositionTypeDirection(num, isNeg, cate);
 				pt = pt.Next();
@@ -56,24 +59,27 @@ namespace ExportModel
 			return null;
 		}
 
-		private PointVector MakeAxialDirection(int num, bool isNeg, DbElement pnt, DbElement modelEle)
+		private static PointVector MakeAxialDirection(int num, bool isNeg, DbElement pnt, DbElement modelEle)
 		{
-			string exper = pnt.GetString(DbAttributeInstance.PAXI);
+			string exper = pnt.GetAsString(DbAttributeInstance.PAXI);
 			if (exper.Contains("DDANGLE"))
 				exper = exper.Replace("DDANGLE", modelEle.GetAsString(DbAttributeInstance.ANGL));
 			Direction dir = Direction.Create(exper);
+			double offset = EvalDouble(pnt.GetAsString(DbAttributeInstance.PDIS), modelEle);
 			if (isNeg)
 				dir = dir.Opposite();
-			return PointVector.Create(null, dir);
+			Position pos = Position.Create();
+			pos.MoveBy(dir, offset);
+			return PointVector.Create(pos, dir);
 		}
 
-		private double EvalDouble(string strExper, DbElement modelEle)
+		private static double EvalDouble(string strExper, DbElement modelEle)
 		{
 			Experssion exper = new Experssion(strExper);
 			return exper.Eval(modelEle);
 		}
 
-		private PointVector MakeCartesianDirection(int num, bool isNeg, DbElement pnt, DbElement modelEle)
+		private static PointVector MakeCartesianDirection(int num, bool isNeg, DbElement pnt, DbElement modelEle)
 		{
 			Direction dir = Direction.Create(pnt.GetAsString(DbAttributeInstance.PTCD));
 			double x = EvalDouble(pnt.GetAsString(DbAttributeInstance.PX), modelEle);
@@ -82,12 +88,12 @@ namespace ExportModel
 			return PointVector.Create(Position.Create(x, y, z), dir);
 		}
 
-		private PointVector MakeMixedDirection(int num, bool isNeg, DbElement pnt, DbElement modelEle)
+		private static PointVector MakeMixedDirection(int num, bool isNeg, DbElement pnt, DbElement modelEle)
 		{
 			return MakeCartesianDirection(num, isNeg, pnt, modelEle);
 		}
 
-		private PointVector MakePositionTypeDirection(int num, bool isNeg, DbElement cate)
+		private static PointVector MakePositionTypeDirection(int num, bool isNeg, DbElement cate)
 		{
 			return null;
 		}

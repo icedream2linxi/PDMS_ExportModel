@@ -2,6 +2,7 @@
 using Aveva.Pdms.Geometry;
 using Aveva.Pdms.Shared;
 using DbModel;
+using NHibernate;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,6 +18,7 @@ namespace ExportModel
 		private string dbName;
 		private HashSet<string> exprSet = new HashSet<string>();
 		private Dictionary<DbAttribute, Dictionary<string, Experssion>> experMap = new Dictionary<DbAttribute, Dictionary<string, Experssion>>();
+		private ISession session = null;
 
 		public void Export()
 		{
@@ -43,10 +45,18 @@ namespace ExportModel
 			dbName.Replace('/', '\\');
 			dbName = dbName.Substring(dbName.LastIndexOf('\\') + 1, dbName.Length - dbName.LastIndexOf('\\') - 1);
 
-			Util util = new Util();
-			util.init(fileDlg.FileName);
+			using (Util util = new Util())
+			{
+				util.init(fileDlg.FileName);
 
-			Export(CurrentElement.Element);
+				using (session = util.SessionFactory.OpenSession())
+				using (ITransaction tx = session.BeginTransaction())
+				{
+					Export(CurrentElement.Element);
+
+					tx.Commit();
+				}
+			}
 
 			Console.WriteLine("Export model finish!!!");
 		}
@@ -122,20 +132,20 @@ namespace ExportModel
 			}
 		}
 
-		private Experssion GetExper(DbElement ele, DbAttribute attr)
+		private Experssion GetExper(DbElement gEle, DbAttribute attr)
 		{
-			Dictionary<string, Experssion> map = experMap[attr];
-			if (map == null)
+			Dictionary<string, Experssion> map = null;
+			if (!experMap.TryGetValue(attr, out map))
 			{
 				map = new Dictionary<string, Experssion>();
-				experMap[attr] = map;
+				experMap.Add(attr, map);
 			}
 
-			Experssion exper = map[ele.GetAsString(DbAttributeInstance.NAME)];
-			if (exper == null)
+			Experssion exper = null;
+			if (!map.TryGetValue(gEle.GetAsString(DbAttributeInstance.NAME), out exper))
 			{
-				exper = new Experssion(ele.GetAsString(attr));
-				map[ele.GetAsString(DbAttributeInstance.NAME)] = exper;
+				exper = new Experssion(gEle.GetAsString(attr));
+				map.Add(gEle.GetAsString(DbAttributeInstance.NAME), exper);
 			}
 
 			return exper;
@@ -177,21 +187,32 @@ namespace ExportModel
 						if (gEle.GetElementType() == DbElementTypeInstance.SCYLINDER)
 						{
 							string expr = gEle.GetAsString(DbAttributeInstance.PAXI);
-							//Direction paxi = cateEle.EvaluateDirection(DbExpression.Parse(expr));
 							AddExpr(expr);
+							PointVector paxi = EvalDirection.Eval(ele, expr);
 
 							expr = gEle.GetAsString(DbAttributeInstance.PHEI);
-							//double phei = cateEle.EvaluateDouble(DbExpression.Parse(expr), DbAttributeUnit.DIST);
 							AddExpr(expr);
+							double phei = GetExper(gEle, DbAttributeInstance.PHEI).Eval(ele);
 
 							expr = gEle.GetAsString(DbAttributeInstance.PDIA);
-							//double pdia = cateEle.EvaluateDouble(DbExpression.Parse(expr), DbAttributeUnit.DIST);
-							//double pdia = gEle.EvaluateDouble(DbExpression.Parse(expr), DbAttributeUnit.DIST);
 							AddExpr(expr);
+							double pdia = GetExper(gEle, DbAttributeInstance.PDIA).Eval(ele);
 
 							expr = gEle.GetAsString(DbAttributeInstance.PDIS);
-							//double pdis = cateEle.EvaluateDouble(DbExpression.Parse(expr), DbAttributeUnit.DIST);
 							AddExpr(expr);
+							double pdis = GetExper(gEle, DbAttributeInstance.PDIS).Eval(ele);
+
+							Aveva.Pdms.Geometry.Orientation ori = ele.GetOrientation(DbAttributeInstance.ORI);
+							Direction dir = ori.AbsoluteDirection(paxi.Direction);
+							Position pos = ori.AbsolutePosition(paxi.Position);
+
+							Cylinder cyl = new Cylinder();
+							cyl.Org = new Point(pos)
+								.MoveBy(ele.GetPosition(DbAttributeInstance.POS))
+								.MoveBy(dir, pdia);
+							cyl.Height = new Point(dir).Mul(phei);
+							cyl.Radius = pdia / 2.0;
+							session.Save(cyl);
 						}
 					}
 

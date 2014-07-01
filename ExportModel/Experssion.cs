@@ -23,6 +23,7 @@ namespace ExportModel
 		public Experssion(string exper)
 		{
 			this.exper = exper.ToUpper();
+			Parse();
 		}
 
 		private bool IsSplit(char ch)
@@ -48,7 +49,10 @@ namespace ExportModel
 		public void Parse()
 		{
 			CharEnumerator experIter = Exper.GetEnumerator();
-			Parse(experIter, ref op);
+			if (experIter.MoveNext())
+				Parse(experIter, ref op);
+			else
+				op = new ValOp(0.0);
 		}
 
 		public double Eval(DbElement ele)
@@ -69,19 +73,26 @@ namespace ExportModel
 			if (!SkipSpace(experIter))
 				return true;
 
+			char curCh = experIter.Current;
 			bool isEof = false;
-			if (IsOp(experIter.Current))
+			if (IsOp(curCh))
 			{
+				isEof = !experIter.MoveNext();
+
 				IOperator valueOp = null;
+				if (isEof)
+					throw new FormatException();
 				isEof = Parse(experIter, ref valueOp);
-				switch (experIter.Current)
+				switch (curCh)
 				{
 					case '-':
 						{
 							if (!isEof)
 							{
 								IOperator nextValueOp = null;
-								isEof = Parse(experIter, valueOp, ref nextValueOp);
+								isEof = !experIter.MoveNext();
+								if (!isEof)
+									isEof = Parse(experIter, valueOp, ref nextValueOp);
 								if (nextValueOp == null)
 									op = new SubOp(prevOp, valueOp);
 								else
@@ -96,7 +107,9 @@ namespace ExportModel
 							if (!isEof)
 							{
 								IOperator nextValueOp = null;
-								isEof = Parse(experIter, valueOp, ref nextValueOp);
+								isEof = !experIter.MoveNext();
+								if (!isEof)
+									isEof = Parse(experIter, valueOp, ref nextValueOp);
 								if (nextValueOp == null)
 									op = new AddOp(prevOp, valueOp);
 								else
@@ -118,8 +131,8 @@ namespace ExportModel
 
 				return isEof;
 			}
-			else if (experIter.Current == '('
-				|| experIter.Current == ')')
+			else if (curCh == '('
+				|| curCh == ')')
 			{
 				throw new FormatException();
 			}
@@ -143,14 +156,19 @@ namespace ExportModel
 			{
 				if (experIter.Current == '-')
 				{
+					isEof = !experIter.MoveNext();
 					IOperator valueOp = null;
-					isEof = Parse(experIter, ref valueOp);
+					if (!isEof)
+						isEof = Parse(experIter, ref valueOp);
 					if (valueOp == null)
 						throw new FormatException();
 					op = new NegOp(valueOp);
 				}
 				else if (experIter.Current == '+')
 				{
+					isEof = !experIter.MoveNext();
+					if (isEof)
+						throw new FormatException();
 					isEof = Parse(experIter, ref op);
 				}
 				else
@@ -158,13 +176,19 @@ namespace ExportModel
 			}
 			else if (experIter.Current == '(')
 			{
+				isEof = !experIter.MoveNext();
+				if (isEof)
+					throw new FormatException();
+
 				if (!SkipSpace(experIter))
 					throw new FormatException();
+
 				isEof = Parse(experIter, ref op);
 			}
 			else if (experIter.Current == ')')
 			{
-				return false;
+				isEof = !experIter.MoveNext();
+				return isEof;
 			}
 			else
 			{
@@ -256,6 +280,7 @@ namespace ExportModel
 				IOperator valueOp = null;
 				isEof = Parse(experIter, ref valueOp);
 				paramOp.Item = valueOp;
+				op = paramOp;
 				return isEof;
 			}
 			else if (item.Equals("IPARAM"))
@@ -264,6 +289,7 @@ namespace ExportModel
 				IOperator valueOp = null;
 				isEof = Parse(experIter, ref valueOp);
 				paramOp.Item = valueOp;
+				op = paramOp;
 				return isEof;
 			}
 			else if (item.Equals("DESIGN"))
@@ -287,6 +313,7 @@ namespace ExportModel
 					IOperator valueOp = null;
 					isEof = Parse(experIter, ref valueOp);
 					paramOp.Item = valueOp;
+					op = paramOp;
 					return isEof;
 				}
 				else
@@ -299,7 +326,7 @@ namespace ExportModel
 
 	interface IOperator
 	{
-		public double Eval();
+		double Eval();
 	}
 
 	abstract class OneObjOp : IOperator
@@ -315,7 +342,7 @@ namespace ExportModel
 		}
 
 		public IOperator Item { get; set; }
-		public double Eval()
+		public virtual double Eval()
 		{
 			throw new NotImplementedException();
 		}
@@ -337,7 +364,7 @@ namespace ExportModel
 		public IOperator LhsItem { get; set; }
 		public IOperator RhsItem { get; set; }
 
-		public double Eval()
+		public virtual double Eval()
 		{
 			throw new NotImplementedException();
 		}
@@ -355,7 +382,7 @@ namespace ExportModel
 
 		}
 
-		public double Eval()
+		public override double Eval()
 		{
 			return LhsItem.Eval() + RhsItem.Eval();
 		}
@@ -373,7 +400,7 @@ namespace ExportModel
 
 		}
 
-		public double Eval()
+		public override double Eval()
 		{
 			return LhsItem.Eval() / RhsItem.Eval();
 		}
@@ -391,7 +418,7 @@ namespace ExportModel
 
 		}
 
-		public double Eval()
+		public override double Eval()
 		{
 			return LhsItem.Eval() * RhsItem.Eval();
 		}
@@ -409,7 +436,7 @@ namespace ExportModel
 
 		}
 
-		public double Eval()
+		public override double Eval()
 		{
 			return LhsItem.Eval() / RhsItem.Eval();
 		}
@@ -427,7 +454,7 @@ namespace ExportModel
 
 		}
 
-		public double Eval()
+		public override double Eval()
 		{
 			return -Item.Eval();
 		}
@@ -463,7 +490,7 @@ namespace ExportModel
 		{
 		}
 
-		public double Eval()
+		public override double Eval()
 		{
 			DbElement spref = Exper.ModelElement.GetElement(DbAttributeInstance.SPRE);
 			DbElement cate = spref.GetElement(DbAttributeInstance.CATR);
@@ -478,7 +505,7 @@ namespace ExportModel
 		{
 		}
 
-		public double Eval()
+		public override double Eval()
 		{
 			return Exper.ModelElement.GetDoubleArray(DbAttributeInstance.PARA)[(int)Item.Eval()];
 		}
@@ -491,7 +518,7 @@ namespace ExportModel
 		{
 		}
 
-		public double Eval()
+		public override double Eval()
 		{
 			return Exper.ModelElement.GetElement(DbAttributeInstance.ISPE).GetDoubleArray(DbAttributeInstance.IPAR)[(int)Item.Eval()];
 		}
@@ -504,7 +531,7 @@ namespace ExportModel
 
 		}
 
-		public double Eval()
+		public override double Eval()
 		{
 			return Exper.ModelElement.GetDouble(DbAttributeInstance.HEIG);
 		}
@@ -518,7 +545,7 @@ namespace ExportModel
 
 		}
 
-		public double Eval()
+		public override double Eval()
 		{
 			return Exper.ModelElement.GetDouble(DbAttributeInstance.ANGL);
 		}
@@ -532,7 +559,7 @@ namespace ExportModel
 
 		}
 
-		public double Eval()
+		public override double Eval()
 		{
 			return Exper.ModelElement.GetDouble(DbAttributeInstance.RADI);
 		}

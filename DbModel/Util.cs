@@ -8,9 +8,24 @@ using System.Text;
 
 namespace DbModel
 {
-	public class Util
+	public class Util : IDisposable
 	{
 		Configuration cf = null;
+		private ISessionFactory sessionFactory = null;
+
+		public ISessionFactory SessionFactory
+		{
+			get
+			{
+				return sessionFactory;
+			}
+		}
+
+		~Util()
+		{
+			Dispose();
+		}
+
 		public void init(String dbPath)
 		{
 			IDictionary<String, String> settings = new Dictionary<String, String>();
@@ -26,7 +41,7 @@ namespace DbModel
 				cf.Properties = settings;
 
 				NHibernate.Mapping.Attributes.HbmSerializer.Default.Validate = true;
-				using (FileStream fs = File.Create(@"g:\temp\nhibernate.xml"))
+				using (FileStream fs = File.Create(@"f:\temp\nhibernate.xml"))
 				{
 					System.IO.MemoryStream stream1 = new System.IO.MemoryStream();
 					NHibernate.Mapping.Attributes.HbmSerializer.Default.Serialize(
@@ -41,16 +56,7 @@ namespace DbModel
 				stream.Position = 0;
 				cf.AddInputStream(stream);
 
-				using(ISessionFactory sf = cf.BuildSessionFactory())
-				using(ISession session = sf.OpenSession())
-				using(ITransaction tx = session.BeginTransaction())
-				{
-					Box b = new Box();
-					Point org = new Point(1, 2, 4);
-					b.Org = org;
-					session.Save(b);
-					tx.Commit();
-				}
+				sessionFactory = cf.BuildSessionFactory();
 			}
 			catch (System.Exception ex)
 			{
@@ -63,6 +69,15 @@ namespace DbModel
 					Console.WriteLine(ex.InnerException.StackTrace);
 				}
 				throw;
+			}
+		}
+
+		public void Dispose()
+		{
+			if (sessionFactory != null)
+			{
+				sessionFactory.Dispose();
+				sessionFactory = null;
 			}
 		}
 	}
