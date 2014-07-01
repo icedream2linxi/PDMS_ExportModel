@@ -47,7 +47,7 @@ namespace ExportModel
 
 			using (Util util = new Util())
 			{
-				util.init(fileDlg.FileName);
+				util.init(fileDlg.FileName, true);
 
 				using (session = util.SessionFactory.OpenSession())
 				using (ITransaction tx = session.BeginTransaction())

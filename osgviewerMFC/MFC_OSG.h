@@ -1,5 +1,6 @@
 #pragma once
 
+#include <osg/ShapeDrawable>
 #include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers>
 #include <osgViewer/api/win32/GraphicsWindowWin32>
@@ -32,6 +33,10 @@ public:
     osgViewer::Viewer* getViewer() { return mViewer; }
 
 private:
+	osg::Group *InitOSGFromDb();
+	osg::Geode *CreateCylinders(NHibernate::ISession^ session);
+
+private:
     bool mDone;
     std::string m_ModelName;
     HWND m_hWnd;
@@ -40,6 +45,7 @@ private:
     osg::ref_ptr<osg::Node> mModel;
     osg::ref_ptr<osgGA::TrackballManipulator> trackball;
     osg::ref_ptr<osgGA::KeySwitchMatrixManipulator> keyswitchManipulator;
+	osg::ref_ptr<osg::TessellationHints> mHints;
 };
 
 class CRenderingThread : public OpenThreads::Thread

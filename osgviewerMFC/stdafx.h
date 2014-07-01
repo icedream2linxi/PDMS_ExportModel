@@ -48,6 +48,11 @@
 
 #include <process.h>
 
+#include <filesystem>
+#include <string>
+
+using namespace std;
+using namespace std::tr2::sys;
 
 #ifdef _UNICODE
 #if defined _M_IX86

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
+VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExportModel", "ExportModel\ExportModel.csproj", "{3EE582D9-7382-4B5D-80C8-FA561B49C62C}"
 EndProject
@@ -59,7 +59,7 @@ Global
 		{02F3CCCF-94A6-484E-9D31-46F3107FC63C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{02F3CCCF-94A6-484E-9D31-46F3107FC63C}.Release|Win32.ActiveCfg = Release|Any CPU
 		{02F3CCCF-94A6-484E-9D31-46F3107FC63C}.Release|x64.ActiveCfg = Release|Any CPU
-		{1182C2E4-79B2-443F-AB02-D27B30ED2C2F}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{1182C2E4-79B2-443F-AB02-D27B30ED2C2F}.Debug|Any CPU.ActiveCfg = Debug|x64
 		{1182C2E4-79B2-443F-AB02-D27B30ED2C2F}.Debug|Mixed Platforms.ActiveCfg = Debug|x64
 		{1182C2E4-79B2-443F-AB02-D27B30ED2C2F}.Debug|Mixed Platforms.Build.0 = Debug|x64
 		{1182C2E4-79B2-443F-AB02-D27B30ED2C2F}.Debug|Win32.ActiveCfg = Debug|Win32

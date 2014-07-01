@@ -2,11 +2,16 @@
 //
 #include "stdafx.h"
 #include "MFC_OSG.h"
-
+using namespace System;
+using namespace System::Collections::Generic;
+using namespace NHibernate;
+using namespace DbModel;
 
 cOSG::cOSG(HWND hWnd) :
-   m_hWnd(hWnd) 
+   m_hWnd(hWnd)
+   , mHints(new osg::TessellationHints)
 {
+	mHints->setDetailRatio(0.5f);
 }
 
 cOSG::~cOSG()
@@ -50,17 +55,24 @@ void cOSG::InitSceneGraph(void)
     // Init the main Root Node/Group
     mRoot  = new osg::Group;
 
-    // Load the Model from the model name
-    mModel = osgDB::readNodeFile(m_ModelName);
-    if (!mModel) return;
+	path modelFile(m_ModelName);
+	if (modelFile.extension() == ".db") {
+		mModel = InitOSGFromDb();
+	}
+	else {
+		// Load the Model from the model name
+		mModel = osgDB::readNodeFile(m_ModelName);
+	}
 
-    // Optimize the model
-    osgUtil::Optimizer optimizer;
-    optimizer.optimize(mModel.get());
-    optimizer.reset();
+	if (!mModel) return;
 
-    // Add the model to the scene
-    mRoot->addChild(mModel.get());
+	// Optimize the model
+	osgUtil::Optimizer optimizer;
+	optimizer.optimize(mModel.get());
+	optimizer.reset();
+
+	// Add the model to the scene
+	mRoot->addChild(mModel.get());
 }
 
 void cOSG::InitCameraConfig(void)
@@ -140,6 +152,64 @@ void cOSG::PreFrameUpdate()
 void cOSG::PostFrameUpdate()
 {
     // Due any postframe updates in this routine
+}
+
+osg::Group *cOSG::InitOSGFromDb()
+{
+	DbModel::Util^ util = gcnew DbModel::Util();
+	try {
+		util->init(gcnew String(m_ModelName.c_str()), false);
+		NHibernate::ISession^ session = util->SessionFactory->OpenSession();
+		try {
+			NHibernate::ITransaction^ tx = session->BeginTransaction();
+			try {
+				osg::Group* group = new osg::Group;
+				group->addChild(CreateCylinders(session));
+				tx->Commit();
+				return group;
+			}
+			catch (Exception ^e) {
+				tx->Rollback();
+				throw;
+			}
+		}
+		finally {
+			session->Close();
+		}
+	}
+	finally {
+		util->~Util();
+	}
+
+	return NULL;
+}
+
+inline void Point2Vec3(Point^ pnt, osg::Vec3 &vec)
+{
+	vec[0] = pnt->X;
+	vec[1] = pnt->Y;
+	vec[2] = pnt->Z;
+}
+
+osg::Geode* cOSG::CreateCylinders(NHibernate::ISession^ session)
+{
+	osg::Geode *pCylinders = new osg::Geode();
+	IList<Cylinder^>^ cylList = session->CreateQuery("from Cylinder")->List<Cylinder^>();
+	osg::Vec3 center, dir;
+	for each (Cylinder^ cyl in cylList) {
+		Point2Vec3(cyl->Org, center);
+		Point2Vec3(cyl->Height, dir);
+		float height = dir.length();
+		osg::Quat quat;
+		quat.set(osg::Matrixf::rotate(osg::Z_AXIS, dir));
+
+		osg::Cylinder *pOsgCyl = new osg::Cylinder(center, safe_cast<float>(cyl->Radius), height);
+		pOsgCyl->setRotation(quat);
+
+		pCylinders->addDrawable(new osg::ShapeDrawable(pOsgCyl, mHints));
+	}
+
+	return pCylinders;
 }
 
 /*void cOSG::Render(void* ptr)

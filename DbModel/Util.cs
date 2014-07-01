@@ -26,14 +26,14 @@ namespace DbModel
 			Dispose();
 		}
 
-		public void init(String dbPath)
+		public void init(String dbPath, bool create)
 		{
 			IDictionary<String, String> settings = new Dictionary<String, String>();
 			settings.Add("dialect", "NHibernate.Dialect.SQLiteDialect");
 			settings.Add("connection.provider", "NHibernate.Connection.DriverConnectionProvider");
 			settings.Add("connection.driver_class", "NHibernate.Driver.SQLite20Driver");
 			settings.Add("connection.connection_string", "Data Source=" + dbPath + ";Version=3");
-			settings.Add("hbm2ddl.auto", "create");
+			settings.Add("hbm2ddl.auto", create ? "create" : "update");
 
 			try
 			{
