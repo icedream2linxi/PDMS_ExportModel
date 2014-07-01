@@ -2,6 +2,7 @@ bin/
 obj/
 TestResults/
 packages/
+x64/
 
 *.suo
 *.swp
