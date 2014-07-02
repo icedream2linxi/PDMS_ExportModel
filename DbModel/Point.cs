@@ -54,6 +54,14 @@ namespace DbModel
 			return this;
 		}
 
+		public Point MoveBy(Point dir, double val)
+		{
+			X += dir.X * val;
+			Y += dir.Y * val;
+			Z += dir.Z * val;
+			return this;
+		}
+
 		public Point MoveBy(Position pos)
 		{
 			X += pos.X;

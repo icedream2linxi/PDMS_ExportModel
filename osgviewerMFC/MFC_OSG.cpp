@@ -207,6 +207,7 @@ osg::Group *cOSG::InitOSGFromDb()
 			try {
 				osg::Group* group = new osg::Group;
 				group->addChild(CreateCylinders(session));
+				group->addChild(CreateBoxs(session));
 				tx->Commit();
 				return group;
 			}
@@ -253,7 +254,6 @@ osg::Geode* cOSG::CreateCylinders(NHibernate::ISession^ session)
 		pOsgCyl->setRotation(quat);
 
 		osg::ShapeDrawable *pShape = new osg::ShapeDrawable(pOsgCyl, mHints);
-		pShape->setColor(osg::Vec4(1, 1, 1, 0.1f));
 		pCylinders->addDrawable(pShape);
 
 		CreatePoint(center, 0);
@@ -262,6 +262,35 @@ osg::Geode* cOSG::CreateCylinders(NHibernate::ISession^ session)
 	}
 
 	return pCylinders;
+}
+
+osg::Geode * cOSG::CreateBoxs(NHibernate::ISession^ session)
+{
+	osg::Geode *pBoxs = new osg::Geode();
+	IList<Box^>^ boxList = session->CreateQuery("from Box")->List<Box^>();
+	osg::Vec3 org, xlen, ylen, zlen;
+	for (int i = 0; i < boxList->Count; ++i) {
+		Box^ box = boxList->default[i];
+		Point2Vec3(box->Org, org);
+		Point2Vec3(box->XLen, xlen);
+		Point2Vec3(box->YLen, ylen);
+		Point2Vec3(box->ZLen, zlen);
+
+		osg::Vec3 center = org + xlen / 2.0 + ylen / 2.0 + zlen / 2.0;
+		osg::Box *pOsgBox = new osg::Box(center, xlen.length(), ylen.length(), zlen.length());
+
+		osg::Matrixf matrix = osg::Matrixf::rotate(osg::Z_AXIS, zlen);
+		osg::Vec3 y = matrix.preMult(osg::Y_AXIS);
+		matrix *= osg::Matrixf::rotate(y, ylen);
+		osg::Quat quat;
+		quat.set(matrix);
+		pOsgBox->setRotation(quat);
+
+		osg::ShapeDrawable *pShape = new osg::ShapeDrawable(pOsgBox, mHints);
+		pBoxs->addDrawable(pShape);
+	}
+	
+	return pBoxs;
 }
 
 void cOSG::CreatePoint(const osg::Vec3 &pos, int idx)

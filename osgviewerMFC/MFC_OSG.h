@@ -36,6 +36,7 @@ private:
 	void InitAxis(double width, double height);
 	osg::Group *InitOSGFromDb();
 	osg::Geode *CreateCylinders(NHibernate::ISession^ session);
+	osg::Geode *CreateBoxs(NHibernate::ISession^ session);
 	void CreatePoint(const osg::Vec3 &pos, int idx = 0);
 
 private:

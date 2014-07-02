@@ -17,13 +17,13 @@ namespace DbModel
 		[Point(After = typeof(IdAttribute), Name="Org")]
 		public virtual Point Org { get; set; }
 
-		[Point(After = typeof(IdAttribute), Name = "Length")]
-		public virtual Point Length { get; set; }
+		[Point(After = typeof(IdAttribute), Name = "XLen")]
+		public virtual Point XLen { get; set; }
 
-		[Point(After = typeof(IdAttribute), Name = "Width")]
-		public virtual Point Width { get; set; }
+		[Point(After = typeof(IdAttribute), Name = "YLen")]
+		public virtual Point YLen { get; set; }
 
-		[Point(After = typeof(IdAttribute), Name = "Height")]
-		public virtual Point Height { get; set; }
+		[Point(After = typeof(IdAttribute), Name = "ZLen")]
+		public virtual Point ZLen { get; set; }
 	}
 }

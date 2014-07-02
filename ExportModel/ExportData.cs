@@ -292,6 +292,50 @@ namespace ExportModel
 							cyl.Radius = pdia / 2.0;
 							session.Save(cyl);
 						}
+						else if (gEle.GetElementType() == DbElementTypeInstance.SBOX)
+						{
+							string exper = gEle.GetString(DbAttributeInstance.PXLE);
+							AddExpr(exper);
+							double pxlen = GetExper(gEle, DbAttributeInstance.PXLE).Eval(ele);
+
+							exper = gEle.GetString(DbAttributeInstance.PYLE);
+							AddExpr(exper);
+							double pylen = GetExper(gEle, DbAttributeInstance.PYLE).Eval(ele);
+
+							exper = gEle.GetString(DbAttributeInstance.PZLE);
+							AddExpr(exper);
+							double pzlen = GetExper(gEle, DbAttributeInstance.PZLE).Eval(ele);
+
+							exper = gEle.GetString(DbAttributeInstance.PX);
+							AddExpr(exper);
+							double px = GetExper(gEle, DbAttributeInstance.PX).Eval(ele);
+
+							exper = gEle.GetString(DbAttributeInstance.PY);
+							AddExpr(exper);
+							double py = GetExper(gEle, DbAttributeInstance.PY).Eval(ele);
+
+							exper = gEle.GetString(DbAttributeInstance.PZ);
+							AddExpr(exper);
+							double pz = GetExper(gEle, DbAttributeInstance.PZ).Eval(ele);
+							
+							Aveva.Pdms.Geometry.Orientation ori = ele.GetOrientation(DbAttributeInstance.ORI);
+							Point xlen = new Point(ori.AbsoluteDirection(Direction.Create(Axis.EAST)));
+							Point ylen = new Point(ori.AbsoluteDirection(Direction.Create(Axis.NORTH)));
+							Point zlen = new Point(ori.AbsoluteDirection(Direction.Create(Axis.UP)));
+
+							Point pos = new Point(ele.GetPosition(DbAttributeInstance.POS));
+							pos.MoveBy(xlen, px - pxlen / 2.0).MoveBy(ylen, py - pylen / 2.0).MoveBy(zlen, pz - pzlen / 2.0);
+							xlen.Mul(pxlen);
+							ylen.Mul(pylen);
+							zlen.Mul(pzlen);
+
+							Box box = new Box();
+							box.Org = pos;
+							box.XLen = xlen;
+							box.YLen = ylen;
+							box.ZLen = zlen;
+							session.Save(box);
+						}
 					}
 
 					gEle = gEle.Next();
