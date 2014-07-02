@@ -257,7 +257,7 @@ osg::Geode* cOSG::CreateCylinders(NHibernate::ISession^ session)
 		pCylinders->addDrawable(pShape);
 
 		CreatePoint(center, 0);
-		CreatePoint(center + osg::Z_AXIS * height, 1);
+		//CreatePoint(center + osg::Z_AXIS * height, 1);
 		CreatePoint(center + dir, 2);
 	}
 

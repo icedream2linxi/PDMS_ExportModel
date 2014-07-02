@@ -72,6 +72,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AxisDir.cs" />
     <Compile Include="EvalDirection.cs" />
     <Compile Include="Experssion.cs" />
     <Compile Include="ExportData.cs" />

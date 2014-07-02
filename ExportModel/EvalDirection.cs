@@ -9,7 +9,7 @@ namespace ExportModel
 {
 	class EvalDirection
 	{
-		public static PointVector Eval(DbElement modelEle, string exper)
+		public static AxisDir Eval(DbElement modelEle, string exper)
 		{
 			exper = exper.Trim().ToUpper();
 			if (exper.Contains('P'))
@@ -28,11 +28,11 @@ namespace ExportModel
 			}
 			else
 			{
-				return PointVector.Create(Position.Create(), Direction.Create(exper));
+				return new AxisDir(Position.Create(), Direction.Create(exper));
 			}
 		}
 
-		private static PointVector MakeDirection(int num, bool isNeg, DbElement modelEle)
+		private static AxisDir MakeDirection(int num, bool isNeg, DbElement modelEle)
 		{
 			DbElement cate = modelEle.GetElement(DbAttributeInstance.SPRE).GetElement(DbAttributeInstance.CATR);
 			DbElement ptre = cate.GetElement(DbAttributeInstance.PTRE);
@@ -59,7 +59,7 @@ namespace ExportModel
 			return null;
 		}
 
-		private static PointVector MakeAxialDirection(int num, bool isNeg, DbElement pnt, DbElement modelEle)
+		private static AxisDir MakeAxialDirection(int num, bool isNeg, DbElement pnt, DbElement modelEle)
 		{
 			string exper = pnt.GetAsString(DbAttributeInstance.PAXI);
 			if (exper.Contains("DDANGLE"))
@@ -70,7 +70,7 @@ namespace ExportModel
 				dir = dir.Opposite();
 			Position pos = Position.Create();
 			pos.MoveBy(dir, offset);
-			return PointVector.Create(pos, dir);
+			return new AxisDir(pos, dir);
 		}
 
 		private static double EvalDouble(string strExper, DbElement modelEle)
@@ -79,21 +79,21 @@ namespace ExportModel
 			return exper.Eval(modelEle);
 		}
 
-		private static PointVector MakeCartesianDirection(int num, bool isNeg, DbElement pnt, DbElement modelEle)
+		private static AxisDir MakeCartesianDirection(int num, bool isNeg, DbElement pnt, DbElement modelEle)
 		{
 			Direction dir = Direction.Create(pnt.GetAsString(DbAttributeInstance.PTCD));
 			double x = EvalDouble(pnt.GetAsString(DbAttributeInstance.PX), modelEle);
 			double y = EvalDouble(pnt.GetAsString(DbAttributeInstance.PY), modelEle);
 			double z = EvalDouble(pnt.GetAsString(DbAttributeInstance.PZ), modelEle);
-			return PointVector.Create(Position.Create(x, y, z), dir);
+			return new AxisDir(Position.Create(x, y, z), dir);
 		}
 
-		private static PointVector MakeMixedDirection(int num, bool isNeg, DbElement pnt, DbElement modelEle)
+		private static AxisDir MakeMixedDirection(int num, bool isNeg, DbElement pnt, DbElement modelEle)
 		{
 			return MakeCartesianDirection(num, isNeg, pnt, modelEle);
 		}
 
-		private static PointVector MakePositionTypeDirection(int num, bool isNeg, DbElement cate)
+		private static AxisDir MakePositionTypeDirection(int num, bool isNeg, DbElement cate)
 		{
 			return null;
 		}

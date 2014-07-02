@@ -159,7 +159,9 @@ namespace ExportModel
 				DbElement specEle = null;
 				if (!IsReadableEle(ele)
 					|| (specEle = ele.GetElement(DbAttributeInstance.SPRE)) == null
-					|| !IsReadableEle(specEle))
+					|| !IsReadableEle(specEle)
+					//|| ele.GetElementType() != DbElementTypeInstance.VALVE
+					)
 				{
 					ele = ele.Next();
 					continue;
@@ -182,13 +184,13 @@ namespace ExportModel
 				DbElement gEle = gmEle.FirstMember();
 				while (gEle != null && gEle.IsValid)
 				{
-					if (IsReadableEle(gEle))
+					if (IsReadableEle(gEle) && gEle.GetBool(DbAttributeInstance.TUFL))
 					{
 						if (gEle.GetElementType() == DbElementTypeInstance.SCYLINDER)
 						{
 							string expr = gEle.GetAsString(DbAttributeInstance.PAXI);
 							AddExpr(expr);
-							PointVector paxi = EvalDirection.Eval(ele, expr);
+							AxisDir paxi = EvalDirection.Eval(ele, expr);
 
 							expr = gEle.GetAsString(DbAttributeInstance.PHEI);
 							AddExpr(expr);
@@ -203,14 +205,54 @@ namespace ExportModel
 							double pdis = GetExper(gEle, DbAttributeInstance.PDIS).Eval(ele);
 
 							Aveva.Pdms.Geometry.Orientation ori = ele.GetOrientation(DbAttributeInstance.ORI);
-							Direction dir = ori.AbsoluteDirection(paxi.Direction);
-							Position pos = ori.AbsolutePosition(paxi.Position);
+							Direction dir = ori.AbsoluteDirection(paxi.Dir);
+							Position pos = Position.Create();
+							double dist = paxi.Pos.Distance(pos);
+							if (dist > 0.00001)
+							{
+								pos.MoveBy(ori.AbsoluteDirection(Direction.Create(paxi.Pos)), dist);
+							}
 
 							Cylinder cyl = new Cylinder();
 							cyl.Org = new Point(pos)
 								.MoveBy(ele.GetPosition(DbAttributeInstance.POS))
-								.MoveBy(dir, pdia);
+								.MoveBy(dir, pdis);
 							cyl.Height = new Point(dir).Mul(phei);
+							cyl.Radius = pdia / 2.0;
+							session.Save(cyl);
+						}
+						else if (gEle.GetElementType() == DbElementTypeInstance.LCYLINDER)
+						{
+							string expr = gEle.GetAsString(DbAttributeInstance.PAXI);
+							AddExpr(expr);
+							AxisDir paxi = EvalDirection.Eval(ele, expr);
+
+							expr = gEle.GetAsString(DbAttributeInstance.PDIA);
+							AddExpr(expr);
+							double pdia = GetExper(gEle, DbAttributeInstance.PDIA).Eval(ele);
+
+							expr = gEle.GetAsString(DbAttributeInstance.PBDI);
+							AddExpr(expr);
+							double pbdi = GetExper(gEle, DbAttributeInstance.PBDI).Eval(ele);
+
+							expr = gEle.GetAsString(DbAttributeInstance.PTDI);
+							AddExpr(expr);
+							double ptdi = GetExper(gEle, DbAttributeInstance.PTDI).Eval(ele);
+
+							Aveva.Pdms.Geometry.Orientation ori = ele.GetOrientation(DbAttributeInstance.ORI);
+							Direction dir = ori.AbsoluteDirection(paxi.Dir);
+							Position pos = Position.Create();
+							double dist = paxi.Pos.Distance(pos);
+							if (dist > 0.00001)
+							{
+								pos.MoveBy(ori.AbsoluteDirection(Direction.Create(paxi.Pos)), dist);
+							}
+
+							Cylinder cyl = new Cylinder();
+							cyl.Org = new Point(pos)
+								.MoveBy(ele.GetPosition(DbAttributeInstance.POS))
+								.MoveBy(dir, pbdi);
+							cyl.Height = new Point(dir).Mul(ptdi - pbdi);
 							cyl.Radius = pdia / 2.0;
 							session.Save(cyl);
 						}

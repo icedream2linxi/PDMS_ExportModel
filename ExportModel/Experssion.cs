@@ -258,7 +258,7 @@ namespace ExportModel
 				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
 				IOperator nextValueOp = null;
 				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref nextValueOp);
-				op = new SubOp(valueOp, valueOp);
+				op = new SubOp(valueOp, nextValueOp);
 			}
 			else if (item.Equals("SUM"))
 			{
@@ -266,7 +266,7 @@ namespace ExportModel
 				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
 				IOperator nextValueOp = null;
 				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref nextValueOp);
-				op = new AddOp(valueOp, valueOp);
+				op = new AddOp(valueOp, nextValueOp);
 			}
 			else if (item.Equals("PARAM"))
 			{
@@ -514,7 +514,15 @@ namespace ExportModel
 
 		public override double Eval()
 		{
-			return Exper.ModelElement.GetElement(DbAttributeInstance.ISPE).GetDoubleArray(DbAttributeInstance.IPAR)[(int)Item.Eval() - 1];
+			DbElement ispe = Exper.ModelElement.GetElement(DbAttributeInstance.ISPE);
+			if (ispe == null || !ispe.IsValid)
+				return 0.0;
+
+			Double[] ipar = ispe.GetDoubleArray(DbAttributeInstance.IPAR);
+			int idx = (int)Item.Eval();
+			if (ipar == null || ipar.Length < idx)
+				return 0.0;
+			return ipar[idx - 1];
 		}
 	}
 
