@@ -2,10 +2,39 @@
 //
 #include "stdafx.h"
 #include "MFC_OSG.h"
+#include <osgGA/StateSetManipulator>
+#include <osg/MatrixTransform>
+
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace NHibernate;
 using namespace DbModel;
+
+class AxesCallback : public osg::NodeCallback
+{
+public:
+	AxesCallback(cOSG* mOsg) :_mOsg(mOsg){}
+	virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+	{
+		if (nv->getVisitorType() == osg::NodeVisitor::UPDATE_VISITOR)
+		{
+			osg::Camera* camera = dynamic_cast<osg::Camera*>(node);
+			if (camera)
+			{
+				osg::Vec3 eye, center, up;
+				//_mOsg->getManipulator()->getMatrix().getLookAt(eye,center,up,30);
+				_mOsg->getViewer()->getCamera()->getViewMatrixAsLookAt(eye, center, up, 30);
+				osg::Matrixd matrix;
+				matrix.makeLookAt(eye - center, osg::Vec3(0, 0, 0), up); // always look at (0, 0, 0)
+				camera->setViewMatrix(matrix);
+				//camera->setProjectionMatrixAsOrtho(-1.5, _mOsg/50, -1.5, _height/50)
+			}
+		}
+		traverse(node, nv);
+	}
+private:
+	cOSG* _mOsg;
+};
 
 cOSG::cOSG(HWND hWnd) :
    m_hWnd(hWnd)
@@ -58,6 +87,12 @@ void cOSG::InitSceneGraph(void)
 	path modelFile(m_ModelName);
 	if (modelFile.extension() == ".db") {
 		mModel = InitOSGFromDb();
+		if (mModel == NULL)
+			return;
+		//osg::ref_ptr<osg::StateSet> stateSet = mModel->getOrCreateStateSet();
+		//stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
+		//stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+		//stateSet->setMode(GL_LIGHTING, )
 	}
 	else {
 		// Load the Model from the model name
@@ -69,10 +104,14 @@ void cOSG::InitSceneGraph(void)
 	// Optimize the model
 	osgUtil::Optimizer optimizer;
 	optimizer.optimize(mModel.get());
+	if (mPoints != NULL)
+		optimizer.optimize(mPoints);
 	optimizer.reset();
 
 	// Add the model to the scene
 	mRoot->addChild(mModel.get());
+	if (mPoints != NULL)
+		mRoot->addChild(mPoints);
 }
 
 void cOSG::InitCameraConfig(void)
@@ -85,7 +124,8 @@ void cOSG::InitCameraConfig(void)
 
     // Add a Stats Handler to the viewer
     mViewer->addEventHandler(new osgViewer::StatsHandler);
-    
+	mViewer->addEventHandler(new osgGA::StateSetManipulator(mViewer->getCamera()->getOrCreateStateSet()));
+
     // Get the current window size
     ::GetWindowRect(m_hWnd, &rect);
 
@@ -133,6 +173,8 @@ void cOSG::InitCameraConfig(void)
 
     // Set the Scene Data
     mViewer->setSceneData(mRoot.get());
+
+	InitAxis(traits->width, traits->height);
 
     // Realize the Viewer
     mViewer->realize();
@@ -196,21 +238,73 @@ osg::Geode* cOSG::CreateCylinders(NHibernate::ISession^ session)
 	osg::Geode *pCylinders = new osg::Geode();
 	IList<Cylinder^>^ cylList = session->CreateQuery("from Cylinder")->List<Cylinder^>();
 	osg::Vec3 center, dir;
-	for each (Cylinder^ cyl in cylList) {
+	//for each (Cylinder^ cyl in cylList) {
+	for (int i = 0; i < cylList->Count; ++i) {
+		Cylinder^ cyl = cylList->default[i];
 		Point2Vec3(cyl->Org, center);
 		Point2Vec3(cyl->Height, dir);
 		float height = dir.length();
-		osg::Quat quat;
-		quat.set(osg::Matrixf::rotate(osg::Z_AXIS, dir));
 
-		osg::Cylinder *pOsgCyl = new osg::Cylinder(center, safe_cast<float>(cyl->Radius), height);
+		osg::Matrixf matrix = osg::Matrixf::rotate(osg::Z_AXIS, dir);
+		osg::Quat quat;
+		quat.set(matrix);
+
+		osg::Cylinder *pOsgCyl = new osg::Cylinder(center + dir / 2.0, safe_cast<float>(cyl->Radius), height);
 		pOsgCyl->setRotation(quat);
 
-		pCylinders->addDrawable(new osg::ShapeDrawable(pOsgCyl, mHints));
+		osg::ShapeDrawable *pShape = new osg::ShapeDrawable(pOsgCyl, mHints);
+		pShape->setColor(osg::Vec4(1, 1, 1, 0.1f));
+		pCylinders->addDrawable(pShape);
+
+		CreatePoint(center, 0);
+		CreatePoint(center + osg::Z_AXIS * height, 1);
+		CreatePoint(center + dir, 2);
 	}
 
 	return pCylinders;
 }
+
+void cOSG::CreatePoint(const osg::Vec3 &pos, int idx)
+{
+	if (mPoints == NULL)
+		mPoints = new osg::Geode();
+	osg::Sphere *pSphere = new osg::Sphere(pos, 5.0f);
+	osg::ShapeDrawable *pShape = new osg::ShapeDrawable(pSphere, mHints);
+	osg::Vec4 col(1, 0, 0, 0);
+	switch (idx)
+	{
+	case 0:
+		col = osg::Vec4(1, 0, 0, 0);
+		break;
+	case 1:
+		col = osg::Vec4(0, 1, 0, 0);
+		break;
+	case 2:
+		col = osg::Vec4(0, 0, 1, 0);
+		break;
+	default:
+		break;
+	}
+	pShape->setColor(col);
+	mPoints->addDrawable(pShape);
+}
+
+void cOSG::InitAxis(double width, double height)
+{
+	//´´½¨×ø±êÖá
+	Axescamera = new osg::Camera;
+	Axescamera->setProjectionMatrix(osg::Matrix::ortho2D(-1.5, width / 50, -1.5, height / 50));
+	Axescamera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
+	Axescamera->setClearMask(GL_DEPTH_BUFFER_BIT);
+	Axescamera->setRenderOrder(osg::Camera::POST_RENDER);
+	Axescamera->setUpdateCallback(new AxesCallback(this));
+	std::string path = "axes.ive";
+	osg::ref_ptr<osg::Node> axes = osgDB::readNodeFile(path);
+	Axescamera->addChild(axes);
+	mRoot->addChild(Axescamera);
+}
+
+
 
 /*void cOSG::Render(void* ptr)
 {

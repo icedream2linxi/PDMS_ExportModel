@@ -33,8 +33,10 @@ public:
     osgViewer::Viewer* getViewer() { return mViewer; }
 
 private:
+	void InitAxis(double width, double height);
 	osg::Group *InitOSGFromDb();
 	osg::Geode *CreateCylinders(NHibernate::ISession^ session);
+	void CreatePoint(const osg::Vec3 &pos, int idx = 0);
 
 private:
     bool mDone;
@@ -43,9 +45,11 @@ private:
     osgViewer::Viewer* mViewer;
     osg::ref_ptr<osg::Group> mRoot;
     osg::ref_ptr<osg::Node> mModel;
+	osg::ref_ptr<osg::Geode> mPoints;
     osg::ref_ptr<osgGA::TrackballManipulator> trackball;
     osg::ref_ptr<osgGA::KeySwitchMatrixManipulator> keyswitchManipulator;
 	osg::ref_ptr<osg::TessellationHints> mHints;
+	osg::ref_ptr<osg::Camera> Axescamera;
 };
 
 class CRenderingThread : public OpenThreads::Thread
