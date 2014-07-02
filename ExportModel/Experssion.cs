@@ -514,11 +514,12 @@ namespace ExportModel
 
 		public override double Eval()
 		{
-			DbElement ispe = Exper.ModelElement.GetElement(DbAttributeInstance.ISPE);
-			if (ispe == null || !ispe.IsValid)
-				return 0.0;
+			//DbElement ispe = Exper.ModelElement.GetElement(DbAttributeInstance.ISPE);
+			//if (ispe == null || !ispe.IsValid)
+			//	return 0.0;
 
-			Double[] ipar = ispe.GetDoubleArray(DbAttributeInstance.IPAR);
+			//Double[] ipar = ispe.GetDoubleArray(DbAttributeInstance.PARA);
+			double[] ipar = Exper.ModelElement.GetDoubleArray(DbAttributeInstance.IPAR);
 			int idx = (int)Item.Eval();
 			if (ipar == null || ipar.Length < idx)
 				return 0.0;

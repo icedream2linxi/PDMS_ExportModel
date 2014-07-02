@@ -157,7 +157,14 @@ namespace ExportModel
 			double lbore = tubeEle.GetDoubleArray(DbAttributeInstance.PARA)[1];
 
 			DbElement prevEle = tubeEle.Previous;
-			int leave = prevEle.GetInteger(DbAttributeInstance.LEAV);
+			int leave = 1;
+			if (prevEle == null || !prevEle.IsValid)
+			{
+				prevEle = tubeEle.Next();
+				leave = prevEle.GetInteger(DbAttributeInstance.ARRI);
+			}
+			else
+				leave = prevEle.GetInteger(DbAttributeInstance.LEAV);
 			AxisDir ptax = EvalDirection.Eval(prevEle, "P" + leave);
 
 			Aveva.Pdms.Geometry.Orientation ori = prevEle.GetOrientation(DbAttributeInstance.ORI);
@@ -197,7 +204,9 @@ namespace ExportModel
 
 				DbElement specEle = null;
 				if ((specEle = ele.GetElement(DbAttributeInstance.SPRE)) == null
-					|| !IsReadableEle(specEle))
+					|| !IsReadableEle(specEle)
+					|| ele.GetElementType() == DbElementTypeInstance.ATTACHMENT
+					)
 				{
 					ele = ele.Next();
 					continue;
