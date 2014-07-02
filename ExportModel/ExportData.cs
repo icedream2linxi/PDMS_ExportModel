@@ -151,17 +151,53 @@ namespace ExportModel
 			return exper;
 		}
 
+		private void ExportTube(DbElement tubeEle)
+		{
+			double ltLength = tubeEle.GetDouble(DbAttributeInstance.ITLE);
+			double lbore = tubeEle.GetDoubleArray(DbAttributeInstance.PARA)[1];
+
+			DbElement prevEle = tubeEle.Previous;
+			int leave = prevEle.GetInteger(DbAttributeInstance.LEAV);
+			AxisDir ptax = EvalDirection.Eval(prevEle, "P" + leave);
+
+			Aveva.Pdms.Geometry.Orientation ori = prevEle.GetOrientation(DbAttributeInstance.ORI);
+			Direction dir = ori.AbsoluteDirection(ptax.Dir);
+			Position pos = Position.Create();
+			double dist = ptax.Pos.Distance(pos);
+			if (dist > 0.00001)
+			{
+				pos.MoveBy(ori.AbsoluteDirection(Direction.Create(ptax.Pos)), dist);
+			}
+
+			Cylinder cyl = new Cylinder();
+			cyl.Org = new Point(pos)
+				.MoveBy(prevEle.GetPosition(DbAttributeInstance.POS));
+			cyl.Height = new Point(dir).Mul(ltLength);
+			cyl.Radius = lbore / 2.0;
+			session.Save(cyl);
+		}
+
 		private void ExportBranch(DbElement branchEle)
 		{
 			DbElement ele = branchEle.FirstMember();
 			while (ele != null && ele.IsValid)
 			{
+				if (!IsReadableEle(ele))
+				{
+					ele = ele.Next();
+					continue;
+				}
+
+				if (ele.GetElementType() == DbElementTypeInstance.TUBING)
+				{
+					ExportTube(ele);
+					ele = ele.Next();
+					continue;
+				}
+
 				DbElement specEle = null;
-				if (!IsReadableEle(ele)
-					|| (specEle = ele.GetElement(DbAttributeInstance.SPRE)) == null
-					|| !IsReadableEle(specEle)
-					//|| ele.GetElementType() != DbElementTypeInstance.VALVE
-					)
+				if ((specEle = ele.GetElement(DbAttributeInstance.SPRE)) == null
+					|| !IsReadableEle(specEle))
 				{
 					ele = ele.Next();
 					continue;
@@ -175,7 +211,7 @@ namespace ExportModel
 				}
 
 				DbElement gmEle = null;
-				if ((gmEle = cateEle.GetElement(DbAttributeInstance.GMRE)) == null || !IsReadableEle(cateEle))
+				if ((gmEle = cateEle.GetElement(DbAttributeInstance.GMRE)) == null || !IsReadableEle(gmEle))
 				{
 					ele = ele.Next();
 					continue;
