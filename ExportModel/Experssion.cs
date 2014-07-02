@@ -396,7 +396,7 @@ namespace ExportModel
 
 		public override double Eval()
 		{
-			return LhsItem.Eval() / RhsItem.Eval();
+			return LhsItem.Eval() - RhsItem.Eval();
 		}
 	}
 
