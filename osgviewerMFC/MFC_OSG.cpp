@@ -4,6 +4,7 @@
 #include "MFC_OSG.h"
 #include <osgGA/StateSetManipulator>
 #include <osg/MatrixTransform>
+#include "GeometryUtility.h"
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -234,31 +235,34 @@ inline void Point2Vec3(Point^ pnt, osg::Vec3 &vec)
 	vec[2] = pnt->Z;
 }
 
-osg::Geode* cOSG::CreateCylinders(NHibernate::ISession^ session)
+osg::Node* cOSG::CreateCylinders(NHibernate::ISession^ session)
 {
-	osg::Geode *pCylinders = new osg::Geode();
+	//osg::Geode *pCylinders = new osg::Geode();
+	osg::Group *pCylinders = new osg::Group();
 	IList<Cylinder^>^ cylList = session->CreateQuery("from Cylinder")->List<Cylinder^>();
 	osg::Vec3 center, dir;
 	//for each (Cylinder^ cyl in cylList) {
 	for (int i = 0; i < cylList->Count; ++i) {
 		Cylinder^ cyl = cylList->default[i];
-		Point2Vec3(cyl->Org, center);
-		Point2Vec3(cyl->Height, dir);
-		float height = dir.length();
+		//Point2Vec3(cyl->Org, center);
+		//Point2Vec3(cyl->Height, dir);
+		//float height = dir.length();
 
-		osg::Matrixf matrix = osg::Matrixf::rotate(osg::Z_AXIS, dir);
-		osg::Quat quat;
-		quat.set(matrix);
+		//osg::Matrixf matrix = osg::Matrixf::rotate(osg::Z_AXIS, dir);
+		//osg::Quat quat;
+		//quat.set(matrix);
 
-		osg::Cylinder *pOsgCyl = new osg::Cylinder(center + dir / 2.0, safe_cast<float>(cyl->Radius), height);
-		pOsgCyl->setRotation(quat);
+		//osg::Cylinder *pOsgCyl = new osg::Cylinder(center + dir / 2.0, safe_cast<float>(cyl->Radius), height);
+		//pOsgCyl->setRotation(quat);
 
-		osg::ShapeDrawable *pShape = new osg::ShapeDrawable(pOsgCyl, mHints);
-		pCylinders->addDrawable(pShape);
+		//osg::ShapeDrawable *pShape = new osg::ShapeDrawable(pOsgCyl, mHints);
+		//pCylinders->addDrawable(pShape);
 
-		CreatePoint(center, 0);
+		pCylinders->addChild(BuildCylinder(cyl));
+
+		//CreatePoint(center, 0);
 		//CreatePoint(center + osg::Z_AXIS * height, 1);
-		CreatePoint(center + dir, 2);
+		//CreatePoint(center + dir, 2);
 	}
 
 	return pCylinders;

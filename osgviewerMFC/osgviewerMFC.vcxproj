@@ -100,21 +100,20 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>Create</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;WNT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>e:\OpenSourceCode\OpenSceneGraph\source\OpenSceneGraph-3.3.1\include\;e:\OpenSourceCode\OpenSceneGraph\build\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>e:\OpenSourceCode\OpenSceneGraph\source\OpenSceneGraph-3.3.1\include\;e:\OpenSourceCode\OpenSceneGraph\build\include\;e:\OpenSourceCode\OpenCasCade\source\ros\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>e:\OpenSourceCode\OpenSceneGraph\build\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>OpenThreadsrd.lib;osgDBrd.lib;osgGArd.lib;osgrd.lib;osgTextrd.lib;osgUtilrd.lib;osgViewerrd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>e:\OpenSourceCode\OpenSceneGraph\build\lib\;e:\OpenSourceCode\OpenCasCade\source\ros\build\out\lib\RelWithDebInfo\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>OpenThreadsrd.lib;osgDBrd.lib;osgGArd.lib;osgrd.lib;osgTextrd.lib;osgUtilrd.lib;osgViewerrd.lib;TKernel.lib;TKMath.lib;TKBrep.lib;TKMesh.lib;TKTopAlgo.lib;TKPrim.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -138,26 +137,26 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>Create</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;WNT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>e:\OpenSourceCode\OpenSceneGraph\source\OpenSceneGraph-3.3.1\include\;e:\OpenSourceCode\OpenSceneGraph\build\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>e:\OpenSourceCode\OpenSceneGraph\source\OpenSceneGraph-3.3.1\include\;e:\OpenSourceCode\OpenSceneGraph\build\include\;e:\OpenSourceCode\OpenCasCade\source\ros\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>e:\OpenSourceCode\OpenSceneGraph\build\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>e:\OpenSourceCode\OpenSceneGraph\build\lib\;e:\OpenSourceCode\OpenCasCade\source\ros\build\out\lib\RelWithDebInfo\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>OpenThreadsrd.lib;osgDBrd.lib;osgGArd.lib;osgrd.lib;osgTextrd.lib;osgUtilrd.lib;osgViewerrd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ChildFrm.h" />
+    <ClInclude Include="GeometryUtility.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="MFC_OSG.h" />
     <ClInclude Include="MFC_OSG_MDI.h" />
@@ -168,6 +167,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ChildFrm.cpp" />
+    <ClCompile Include="GeometryUtility.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="MFC_OSG.cpp" />
     <ClCompile Include="MFC_OSG_MDI.cpp" />
