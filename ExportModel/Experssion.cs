@@ -268,6 +268,14 @@ namespace ExportModel
 				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref nextValueOp);
 				op = new AddOp(valueOp, nextValueOp);
 			}
+			else if (item.Equals("TANF"))
+			{
+				IOperator valueOp = null;
+				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
+				IOperator nextValueOp = null;
+				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref nextValueOp);
+				op = new TanfOp(valueOp, nextValueOp);
+			}
 			else if (item.Equals("PARAM"))
 			{
 				ParamOp paramOp = new ParamOp(this);
@@ -433,6 +441,25 @@ namespace ExportModel
 		public override double Eval()
 		{
 			return LhsItem.Eval() / RhsItem.Eval();
+		}
+	}
+
+	class TanfOp : TwoObjOp
+	{
+		public TanfOp()
+		{
+
+		}
+
+		public TanfOp(IOperator lhs, IOperator rhs)
+			: base(lhs, rhs)
+		{
+
+		}
+
+		public override double Eval()
+		{
+			return LhsItem.Eval() * Math.Tan(RhsItem.Eval() * Math.PI / 180.0 / 2.0);
 		}
 	}
 

@@ -29,7 +29,7 @@ namespace ExportModel
 			}
 
 			SaveFileDialog fileDlg = new SaveFileDialog();
-			fileDlg.InitialDirectory = string.IsNullOrEmpty(dbPath) ? "c:\\" : dbPath;
+			fileDlg.InitialDirectory = string.IsNullOrEmpty(dbPath) ? "d:\\" : dbPath;
 			fileDlg.Filter = "sqlite db files (*.db)|*.db";
 			fileDlg.FilterIndex = 0;
 			fileDlg.RestoreDirectory = true;
@@ -169,16 +169,19 @@ namespace ExportModel
 
 			Aveva.Pdms.Geometry.Orientation ori = prevEle.GetOrientation(DbAttributeInstance.ORI);
 			Direction dir = ori.AbsoluteDirection(ptax.Dir);
-			Position pos = Position.Create();
-			double dist = ptax.Pos.Distance(pos);
-			if (dist > 0.00001)
-			{
-				pos.MoveBy(ori.AbsoluteDirection(Direction.Create(ptax.Pos)), dist);
-			}
+			//Position pos = Position.Create();
+			//double dist = ptax.Pos.Distance(pos);
+			//if (dist > 0.00001)
+			//{
+			//	pos.MoveBy(ori.AbsoluteDirection(Direction.Create(ptax.Pos)), dist);
+			//}
+
+			Position pos = tubeEle.GetPosition(DbAttributeInstance.ITPS);
+			pos.MoveBy(dir, -ltLength / 2);
 
 			Cylinder cyl = new Cylinder();
-			cyl.Org = new Point(pos)
-				.MoveBy(prevEle.GetPosition(DbAttributeInstance.POS));
+			cyl.Org = new Point(pos);
+				//.MoveBy(prevEle.GetPosition(DbAttributeInstance.POS));
 			cyl.Height = new Point(dir).Mul(ltLength);
 			cyl.Radius = lbore / 2.0;
 			session.Save(cyl);
@@ -344,6 +347,57 @@ namespace ExportModel
 							box.YLen = ylen;
 							box.ZLen = zlen;
 							session.Save(box);
+						}
+						else if (gEle.GetElementType() == DbElementTypeInstance.SCTORUS)
+						{
+							string expr = gEle.GetAsString(DbAttributeInstance.PAAX);
+							AddExpr(expr);
+							AxisDir paax = EvalDirection.Eval(ele, expr);
+
+							expr = gEle.GetAsString(DbAttributeInstance.PBAX);
+							AddExpr(expr);
+							AxisDir pbax = EvalDirection.Eval(ele, expr);
+
+							expr = gEle.GetAsString(DbAttributeInstance.PDIA);
+							AddExpr(expr);
+							double pdia = GetExper(gEle, DbAttributeInstance.PDIA).Eval(ele);
+
+							Aveva.Pdms.Geometry.Orientation ori = ele.GetOrientation(DbAttributeInstance.ORI);
+							CircularTorus ct = new CircularTorus();
+							Direction normal = null;
+							if (!paax.Dir.IsParallel(pbax.Dir))
+								normal = paax.Dir.Orthogonal(pbax.Dir);
+							else
+								normal = paax.Dir.Orthogonal(Direction.Create(paax.Pos, pbax.Pos));
+							ct.Normal = new Point(ori.AbsoluteDirection(normal));
+							Position pos = Position.Create();
+							double dist = pbax.Pos.Distance(pos);
+							if (dist > 0.00001)
+							{
+								pos.MoveBy(ori.AbsoluteDirection(Direction.Create(pbax.Pos)), dist);
+							}
+							ct.StartPnt = new Point(pos).MoveBy(ele.GetPosition(DbAttributeInstance.POS));
+							ct.Radius = pdia / 2.0;
+
+							double mRadius = 0.0;
+							if (!paax.Dir.IsParallel(pbax.Dir))
+							{
+								double ang = paax.Dir.Angle(pbax.Dir) * Math.PI / 180.0;
+								ct.Angle = Math.PI - ang;
+								ang /= 2.0;
+								double len = paax.Pos.Distance(pbax.Pos) / 2;
+								mRadius = len / Math.Sin(ang) * Math.Tan(ang);
+
+							}
+							else
+							{
+								ct.Angle = Math.PI;
+								mRadius = paax.Pos.Distance(pbax.Pos) / 2.0;
+							}
+							Direction radiusDir = ori.AbsoluteDirection(pbax.Dir.Orthogonal(normal));
+							ct.Center = new Point(ct.StartPnt).MoveBy(radiusDir, mRadius);
+
+							session.Save(ct);
 						}
 					}
 

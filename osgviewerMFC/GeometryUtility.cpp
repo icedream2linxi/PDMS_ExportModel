@@ -12,6 +12,7 @@
 #include <BRepMesh.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <BRepPrimAPI_MakeCylinder.hxx>
+#include <BRepPrimAPI_MakeTorus.hxx>
 
 osg::Geode* BuildMesh(const TopoDS_Face &face, double deflection)
 {
@@ -109,4 +110,18 @@ osg::Geode* BuildCylinder(DbModel::Cylinder^ cyl)
 
 	TopoDS_Face gpCyl = BRepPrimAPI_MakeCylinder(axis, cyl->Radius, h);
 	return BuildMesh(gpCyl);
+}
+
+osg::Geode* BuildCircularTorus(DbModel::CircularTorus^ ct)
+{
+	gp_Pnt center = ToGpPnt(ct->Center);
+	gp_Pnt startPnt = ToGpPnt(ct->StartPnt);
+	gp_Ax2 axis;
+	axis.SetLocation(center);
+	axis.SetDirection(ToGpVec(ct->Normal));
+	gp_Vec vec(center, startPnt);
+	axis.SetXDirection(vec);
+
+	TopoDS_Face gpCt = BRepPrimAPI_MakeTorus(axis, vec.Magnitude(), ct->Radius, ct->Angle);
+	return BuildMesh(gpCt);
 }

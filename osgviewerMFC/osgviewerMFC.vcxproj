@@ -112,7 +112,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>e:\OpenSourceCode\OpenSceneGraph\build\lib\;e:\OpenSourceCode\OpenCasCade\source\ros\build\out\lib\RelWithDebInfo\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>e:\OpenSourceCode\OpenSceneGraph\build\lib\;e:\OpenSourceCode\OpenCasCade\source\ros\win64\vc12\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>OpenThreadsrd.lib;osgDBrd.lib;osgGArd.lib;osgrd.lib;osgTextrd.lib;osgUtilrd.lib;osgViewerrd.lib;TKernel.lib;TKMath.lib;TKBrep.lib;TKMesh.lib;TKTopAlgo.lib;TKPrim.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

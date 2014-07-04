@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerEnvironment>path=e:\OpenSourceCode\OpenSceneGraph\build\bin\;e:\OpenSourceCode\OpenSceneGraph\source\3rdParty_x86_x64\x64\bin\
+    <LocalDebuggerEnvironment>path=e:\OpenSourceCode\OpenSceneGraph\build\bin;e:\OpenSourceCode\OpenSceneGraph\source\3rdParty_x86_x64\x64\bin;e:\OpenSourceCode\OpenCasCade\source\ros\win64\vc12\bin;e:\OpenSourceCode\OpenCasCade\source\3rdparty\tbb42_20140601oss\bin\intel64\vc12
 $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>

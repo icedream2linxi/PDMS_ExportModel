@@ -209,6 +209,7 @@ osg::Group *cOSG::InitOSGFromDb()
 				osg::Group* group = new osg::Group;
 				group->addChild(CreateCylinders(session));
 				group->addChild(CreateBoxs(session));
+				group->addChild(CreateCircularTorus(session));
 				tx->Commit();
 				return group;
 			}
@@ -295,6 +296,17 @@ osg::Geode * cOSG::CreateBoxs(NHibernate::ISession^ session)
 	}
 	
 	return pBoxs;
+}
+
+osg::Node* cOSG::CreateCircularTorus(NHibernate::ISession^ session)
+{
+	osg::Group *pCts = new osg::Group();
+	IList<CircularTorus^>^ ctList = session->CreateQuery("from CircularTorus")->List<CircularTorus^>();
+	for (int i = 0; i < ctList->Count; ++i) {
+		CircularTorus^ ct = ctList->default[i];
+		pCts->addChild(BuildCircularTorus(ct));
+	}
+	return pCts;
 }
 
 void cOSG::CreatePoint(const osg::Vec3 &pos, int idx)

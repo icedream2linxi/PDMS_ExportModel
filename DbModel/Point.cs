@@ -20,6 +20,13 @@ namespace DbModel
 			Z = z;
 		}
 
+		public Point(Point pnt)
+		{
+			X = pnt.X;
+			Y = pnt.Y;
+			Z = pnt.Z;
+		}
+
 		public Point(Direction dir)
 		{
 			X = dir.East;

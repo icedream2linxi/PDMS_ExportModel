@@ -85,6 +85,8 @@ namespace ExportModel
 			double x = EvalDouble(pnt.GetAsString(DbAttributeInstance.PX), modelEle);
 			double y = EvalDouble(pnt.GetAsString(DbAttributeInstance.PY), modelEle);
 			double z = EvalDouble(pnt.GetAsString(DbAttributeInstance.PZ), modelEle);
+			if (isNeg)
+				dir = dir.Opposite();
 			return new AxisDir(Position.Create(x, y, z), dir);
 		}
 
