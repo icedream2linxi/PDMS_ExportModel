@@ -5,6 +5,7 @@
 #include <osgGA/StateSetManipulator>
 #include <osg/MatrixTransform>
 #include <osgDB/WriteFile>
+#include <osg/Multisample>
 #include "GeometryUtility.h"
 
 using namespace System;
@@ -86,6 +87,10 @@ void cOSG::InitSceneGraph(void)
     // Init the main Root Node/Group
     mRoot  = new osg::Group;
 
+	osg::Multisample *ms = new osg::Multisample;
+	ms->setHint(osg::Multisample::NICEST);
+	mRoot->getOrCreateStateSet()->setAttributeAndModes(ms, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+
 	path modelFile(m_ModelName);
 	if (modelFile.extension() == ".db") {
 		mModel = InitOSGFromDb();
@@ -147,6 +152,10 @@ void cOSG::InitCameraConfig(void)
     traits->sharedContext = 0;
     traits->setInheritedWindowPixelFormat = true;
     traits->inheritedWindowData = windata;
+
+	osg::ref_ptr<osg::DisplaySettings> &ds = osg::DisplaySettings::instance();
+	traits->sampleBuffers = ds->getMultiSamples();
+	traits->samples = 4;
 
     // Create the Graphics Context
     osg::GraphicsContext* gc = osg::GraphicsContext::createGraphicsContext(traits.get());
