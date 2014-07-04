@@ -399,6 +399,57 @@ namespace ExportModel
 
 							session.Save(ct);
 						}
+						else if (gEle.GetElementType() == DbElementTypeInstance.LSNOUT)
+						{
+							string expr = gEle.GetAsString(DbAttributeInstance.PAAX);
+							AddExpr(expr);
+							AxisDir paax = EvalDirection.Eval(ele, expr);
+
+							expr = gEle.GetAsString(DbAttributeInstance.PBAX);
+							AddExpr(expr);
+							AxisDir pbax = EvalDirection.Eval(ele, expr);
+
+							expr = gEle.GetAsString(DbAttributeInstance.PTDI);
+							AddExpr(expr);
+							double ptdi = GetExper(gEle, DbAttributeInstance.PTDI).Eval(ele);
+
+							expr = gEle.GetAsString(DbAttributeInstance.PBDI);
+							AddExpr(expr);
+							double pbdi = GetExper(gEle, DbAttributeInstance.PBDI).Eval(ele);
+
+							expr = gEle.GetAsString(DbAttributeInstance.PTDM);
+							AddExpr(expr);
+							double ptdm = GetExper(gEle, DbAttributeInstance.PTDM).Eval(ele);
+
+							expr = gEle.GetAsString(DbAttributeInstance.PBDM);
+							AddExpr(expr);
+							double pbdm = GetExper(gEle, DbAttributeInstance.PBDM).Eval(ele);
+
+							expr = gEle.GetAsString(DbAttributeInstance.POFF);
+							AddExpr(expr);
+							double poff = GetExper(gEle, DbAttributeInstance.POFF).Eval(ele);
+
+							Snout snout = new Snout();
+							snout.ButtomRadius = pbdm / 2.0;
+							snout.TopRadius = ptdm / 2.0;
+
+							Aveva.Pdms.Geometry.Orientation ori = ele.GetOrientation(DbAttributeInstance.ORI);
+							Direction tdir = ori.AbsoluteDirection(paax.Dir);
+							Position pos = Position.Create();
+							double dist = paax.Pos.Distance(pos);
+							if (dist > 0.00001)
+							{
+								pos.MoveBy(ori.AbsoluteDirection(Direction.Create(paax.Pos)), dist);
+							}
+
+							Direction bdir = ori.AbsoluteDirection(pbax.Dir);
+
+							snout.Org = new Point(pos).MoveBy(ele.GetPosition(DbAttributeInstance.POS)).MoveBy(tdir, pbdi);
+							snout.Offset = new Point(bdir).Mul(poff);
+							snout.Height = new Point(tdir).Mul(ptdi - pbdi);
+
+							session.Save(snout);
+						}
 					}
 
 					gEle = gEle.Next();

@@ -5,14 +5,20 @@
 #include <osg/Geometry>
 
 #include <gp_Ax3.hxx>
+#include <gp_Circ.hxx>
 
 #include <Poly_Triangulation.hxx>
 
 #include <BRep_Tool.hxx>
 #include <BRepMesh.hxx>
+#include <BRepBuilderAPI_MakeEdge.hxx>
+#include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <BRepPrimAPI_MakeCylinder.hxx>
 #include <BRepPrimAPI_MakeTorus.hxx>
+#include <BRepOffsetAPI_ThruSections.hxx>
+#include <TopoDS.hxx>
+#include <TopExp_Explorer.hxx>
 
 osg::Geode* BuildMesh(const TopoDS_Face &face, double deflection)
 {
@@ -36,15 +42,12 @@ osg::Geode* BuildMesh(const TopoDS_Face &face, double deflection)
 	Standard_Integer nVertexIndex2 = 0;
 	Standard_Integer nVertexIndex3 = 0;
 
-	TColgp_Array1OfPnt nodes(1, triFace->NbNodes());
-	Poly_Array1OfTriangle triangles(1, triFace->NbTriangles());
-
-	nodes = triFace->Nodes();
-	triangles = triFace->Triangles();
+	const TColgp_Array1OfPnt &nodes = triFace->Nodes();
+	const Poly_Array1OfTriangle &triangles = triFace->Triangles();
 
 	for (Standard_Integer i = 1; i <= nTriangles; i++)
 	{
-		Poly_Triangle aTriangle = triangles.Value(i);
+		const Poly_Triangle &aTriangle = triangles.Value(i);
 
 		aTriangle.Get(nVertexIndex1, nVertexIndex2, nVertexIndex3);
 
@@ -124,4 +127,36 @@ osg::Geode* BuildCircularTorus(DbModel::CircularTorus^ ct)
 
 	TopoDS_Face gpCt = BRepPrimAPI_MakeTorus(axis, vec.Magnitude(), ct->Radius, ct->Angle);
 	return BuildMesh(gpCt);
+}
+
+osg::Group* BuildSnout(DbModel::Snout^ snout)
+{
+	gp_Pnt buttomPnt = ToGpPnt(snout->Org);
+	gp_Vec heightVec = ToGpVec(snout->Height);
+	gp_Vec offsetVec = ToGpVec(snout->Offset);
+
+	gp_Ax2 axis(buttomPnt, heightVec);
+	gp_Circ buttomCirc(axis, snout->ButtomRadius);
+	BRepBuilderAPI_MakeEdge buttomEdge(buttomCirc);
+	BRepBuilderAPI_MakeWire buttomWire(buttomEdge);
+
+	buttomPnt.Translate(heightVec);
+	buttomPnt.Translate(offsetVec);
+	axis.SetLocation(buttomPnt);
+	gp_Circ topCirc(axis, snout->TopRadius);
+	BRepBuilderAPI_MakeEdge topEdge(topCirc);
+	BRepBuilderAPI_MakeWire topWire(topEdge);
+
+	BRepOffsetAPI_ThruSections thruSection(Standard_True);
+	thruSection.AddWire(buttomWire);
+	thruSection.AddWire(topWire);
+
+	osg::Group *group = new osg::Group();
+	TopoDS_Shape shape = thruSection;
+	for (TopExp_Explorer aFaceExplorer(shape, TopAbs_FACE); aFaceExplorer.More(); aFaceExplorer.Next())
+	{
+		TopoDS_Face aFace = TopoDS::Face(aFaceExplorer.Current());
+		group->addChild(BuildMesh(aFace));
+	}
+	return group;
 }

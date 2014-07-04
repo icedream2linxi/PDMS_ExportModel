@@ -6,7 +6,7 @@ using System.Text;
 
 namespace DbModel
 {
-	[Class(Table = "Snout")]
+	[Class(Table = "snout")]
 	public class Snout
 	{
 		[Id(0, TypeType = typeof(int))]

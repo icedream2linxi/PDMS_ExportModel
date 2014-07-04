@@ -220,6 +220,7 @@ osg::Group *cOSG::InitOSGFromDb()
 				group->addChild(CreateCylinders(session));
 				group->addChild(CreateBoxs(session));
 				group->addChild(CreateCircularTorus(session));
+				group->addChild(CreateSnout(session));
 				tx->Commit();
 				return group;
 			}
@@ -317,6 +318,17 @@ osg::Node* cOSG::CreateCircularTorus(NHibernate::ISession^ session)
 		pCts->addChild(BuildCircularTorus(ct));
 	}
 	return pCts;
+}
+
+osg::Node* cOSG::CreateSnout(NHibernate::ISession^ session)
+{
+	osg::Group *pSnouts = new osg::Group();
+	IList<Snout^>^ snoutList = session->CreateQuery("from Snout")->List<Snout^>();
+	for (int i = 0; i < snoutList->Count; ++i) {
+		Snout^ snout = snoutList->default[i];
+		pSnouts->addChild(BuildSnout(snout));
+	}
+	return pSnouts;
 }
 
 void cOSG::CreatePoint(const osg::Vec3 &pos, int idx)
