@@ -18,6 +18,7 @@ BEGIN_MESSAGE_MAP(CMFC_OSG_MDIView, CView)
     ON_WM_DESTROY()
     ON_WM_KEYDOWN()
     ON_WM_ERASEBKGND()
+	ON_COMMAND(ID_FILE_SAVE_AS, &CMFC_OSG_MDIView::OnFileSaveAs)
 END_MESSAGE_MAP()
 
 CMFC_OSG_MDIView::CMFC_OSG_MDIView() :
@@ -116,4 +117,13 @@ BOOL CMFC_OSG_MDIView::OnEraseBkgnd(CDC* pDC)
 {
     /* Do nothing, to avoid flashing on MSW */
     return true;
+}
+
+
+void CMFC_OSG_MDIView::OnFileSaveAs()
+{
+	CFileDialog dlg(FALSE, _T(".ive"), _T("SAM"), OFN_OVERWRITEPROMPT, _T("所有文件(*.*)|*.*||"), this);
+	if (dlg.DoModal() != IDOK)
+		return;
+	mOSG->SaveAs(dlg.GetPathName());
 }

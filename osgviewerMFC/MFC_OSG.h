@@ -29,6 +29,7 @@ public:
     void Done(bool value) { mDone = value; }
     bool Done(void) { return mDone; }
     //static void Render(void* ptr);
+	void SaveAs(const TCHAR *filename);
 
     osgViewer::Viewer* getViewer() { return mViewer; }
 

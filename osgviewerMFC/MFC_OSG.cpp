@@ -4,6 +4,7 @@
 #include "MFC_OSG.h"
 #include <osgGA/StateSetManipulator>
 #include <osg/MatrixTransform>
+#include <osgDB/WriteFile>
 #include "GeometryUtility.h"
 
 using namespace System;
@@ -347,6 +348,11 @@ void cOSG::InitAxis(double width, double height)
 	osg::ref_ptr<osg::Node> axes = osgDB::readNodeFile(path);
 	Axescamera->addChild(axes);
 	mRoot->addChild(Axescamera);
+}
+
+void cOSG::SaveAs(const TCHAR *filename)
+{
+	osgDB::writeNodeFile(*mRoot, filename);
 }
 
 

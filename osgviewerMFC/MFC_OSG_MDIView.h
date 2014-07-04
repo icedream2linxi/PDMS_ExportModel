@@ -45,6 +45,8 @@ protected:
     afx_msg void OnDestroy();
     afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
     afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+public:
+	afx_msg void OnFileSaveAs();
 };
 
 #ifndef _DEBUG  // debug version in MFC_OSG_MDIView.cpp
