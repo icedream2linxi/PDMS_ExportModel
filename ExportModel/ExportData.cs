@@ -155,33 +155,28 @@ namespace ExportModel
 		{
 			double ltLength = tubeEle.GetDouble(DbAttributeInstance.ITLE);
 			double lbore = tubeEle.GetDoubleArray(DbAttributeInstance.PARA)[1];
+			Direction dir = null;
 
 			DbElement prevEle = tubeEle.Previous;
-			int leave = 1;
 			if (prevEle == null || !prevEle.IsValid)
 			{
-				prevEle = tubeEle.Next();
-				leave = prevEle.GetInteger(DbAttributeInstance.ARRI);
+				DbElement branchEle = tubeEle.Owner;
+				dir = branchEle.GetDirection(DbAttributeInstance.HDIR);
 			}
 			else
-				leave = prevEle.GetInteger(DbAttributeInstance.LEAV);
-			AxisDir ptax = EvalDirection.Eval(prevEle, "P" + leave);
+			{
+				int leave = prevEle.GetInteger(DbAttributeInstance.LEAV);
+				AxisDir ptax = EvalDirection.Eval(prevEle, "P" + leave);
 
-			Aveva.Pdms.Geometry.Orientation ori = prevEle.GetOrientation(DbAttributeInstance.ORI);
-			Direction dir = ori.AbsoluteDirection(ptax.Dir);
-			//Position pos = Position.Create();
-			//double dist = ptax.Pos.Distance(pos);
-			//if (dist > 0.00001)
-			//{
-			//	pos.MoveBy(ori.AbsoluteDirection(Direction.Create(ptax.Pos)), dist);
-			//}
+				Aveva.Pdms.Geometry.Orientation ori = prevEle.GetOrientation(DbAttributeInstance.ORI);
+				dir = ori.AbsoluteDirection(ptax.Dir);
+			}
 
 			Position pos = tubeEle.GetPosition(DbAttributeInstance.ITPS);
 			pos.MoveBy(dir, -ltLength / 2);
 
 			Cylinder cyl = new Cylinder();
 			cyl.Org = new Point(pos);
-				//.MoveBy(prevEle.GetPosition(DbAttributeInstance.POS));
 			cyl.Height = new Point(dir).Mul(ltLength);
 			cyl.Radius = lbore / 2.0;
 			session.Save(cyl);
