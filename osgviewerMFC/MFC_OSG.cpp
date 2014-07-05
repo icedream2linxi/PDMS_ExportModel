@@ -13,6 +13,8 @@ using namespace System::Collections::Generic;
 using namespace NHibernate;
 using namespace DbModel;
 
+#define MULTI_SAMPLES 0
+
 class AxesCallback : public osg::NodeCallback
 {
 public:
@@ -87,9 +89,11 @@ void cOSG::InitSceneGraph(void)
     // Init the main Root Node/Group
     mRoot  = new osg::Group;
 
+#if MULTI_SAMPLES > 0
 	osg::Multisample *ms = new osg::Multisample;
 	ms->setHint(osg::Multisample::NICEST);
 	mRoot->getOrCreateStateSet()->setAttributeAndModes(ms, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+#endif
 
 	path modelFile(m_ModelName);
 	if (modelFile.extension() == ".db") {
@@ -153,9 +157,11 @@ void cOSG::InitCameraConfig(void)
     traits->setInheritedWindowPixelFormat = true;
     traits->inheritedWindowData = windata;
 
+#if MULTI_SAMPLES > 0
 	osg::ref_ptr<osg::DisplaySettings> &ds = osg::DisplaySettings::instance();
 	traits->sampleBuffers = ds->getMultiSamples();
 	traits->samples = 4;
+#endif
 
     // Create the Graphics Context
     osg::GraphicsContext* gc = osg::GraphicsContext::createGraphicsContext(traits.get());

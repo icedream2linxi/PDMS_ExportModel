@@ -14,6 +14,7 @@
 
 #include <BRep_Tool.hxx>
 #include <BRepMesh.hxx>
+#include <BRepBuilderAPI_MakeVertex.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
@@ -163,24 +164,44 @@ osg::Node* BuildSnout(DbModel::Snout^ snout)
 	gp_Vec heightVec = ToGpVec(snout->Height);
 	gp_Vec offsetVec = ToGpVec(snout->Offset);
 
+	osg::ref_ptr<osg::Geode> geode = new osg::Geode();
+	BRepOffsetAPI_ThruSections thruSection(Standard_False, Standard_True);
+
 	gp_Ax2 axis(buttomPnt, heightVec);
-	gp_Circ buttomCirc(axis, snout->ButtomRadius);
-	BRepBuilderAPI_MakeEdge buttomEdge(buttomCirc);
-	BRepBuilderAPI_MakeWire buttomWire(buttomEdge);
+	if (snout->ButtomRadius <= Precision::Confusion())
+	{
+		BRepBuilderAPI_MakeVertex vertex(axis.Location());
+		thruSection.AddVertex(vertex);
+	}
+	else
+	{
+		gp_Circ buttomCirc(axis, snout->ButtomRadius);
+		BRepBuilderAPI_MakeEdge buttomEdge(buttomCirc);
+		BRepBuilderAPI_MakeWire buttomWire(buttomEdge);
+		thruSection.AddWire(buttomWire);
+		BuildMesh(geode, BRepBuilderAPI_MakeFace(buttomWire));
+	}
+
 
 	buttomPnt.Translate(heightVec);
 	buttomPnt.Translate(offsetVec);
 	axis.SetLocation(buttomPnt);
-	gp_Circ topCirc(axis, snout->TopRadius);
-	BRepBuilderAPI_MakeEdge topEdge(topCirc);
-	BRepBuilderAPI_MakeWire topWire(topEdge);
-
-	BRepOffsetAPI_ThruSections thruSection(Standard_True);
-	thruSection.AddWire(buttomWire);
-	thruSection.AddWire(topWire);
+	axis.SetDirection(-heightVec);
+	if (snout->TopRadius <= Precision::Confusion())
+	{
+		BRepBuilderAPI_MakeVertex vertex(axis.Location());
+		thruSection.AddVertex(vertex);
+	}
+	else
+	{
+		gp_Circ topCirc(axis, snout->TopRadius);
+		BRepBuilderAPI_MakeEdge topEdge(topCirc);
+		BRepBuilderAPI_MakeWire topWire(topEdge);
+		BuildMesh(geode, BRepBuilderAPI_MakeFace(topWire));
+		thruSection.AddWire(topWire);
+	}
 
 	TopoDS_Shape shape = thruSection;
-	osg::ref_ptr<osg::Geode> geode = new osg::Geode();
 	for (TopExp_Explorer aFaceExplorer(shape, TopAbs_FACE); aFaceExplorer.More(); aFaceExplorer.Next())
 	{
 		TopoDS_Face aFace = TopoDS::Face(aFaceExplorer.Current());
