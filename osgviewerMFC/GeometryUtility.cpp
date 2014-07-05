@@ -148,9 +148,10 @@ osg::Geode* BuildCircularTorus(DbModel::CircularTorus^ ct)
 {
 	gp_Pnt center = ToGpPnt(ct->Center);
 	gp_Pnt startPnt = ToGpPnt(ct->StartPnt);
+	gp_Vec normal = ToGpVec(ct->Normal);
 	gp_Ax2 axis;
 	axis.SetLocation(center);
-	axis.SetDirection(ToGpVec(ct->Normal));
+	axis.SetDirection(normal);
 	gp_Vec vec(center, startPnt);
 	axis.SetXDirection(vec);
 

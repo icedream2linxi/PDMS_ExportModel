@@ -6,6 +6,11 @@
 #include <osg/MatrixTransform>
 #include <osgDB/WriteFile>
 #include <osg/Multisample>
+
+#include <Standard_ErrorHandler.hxx>
+#include <Standard_Failure.hxx>
+#include <Standard_ConstructionError.hxx>
+
 #include "GeometryUtility.h"
 
 using namespace System;
@@ -257,28 +262,28 @@ inline void Point2Vec3(Point^ pnt, osg::Vec3 &vec)
 
 osg::Node* cOSG::CreateCylinders(NHibernate::ISession^ session)
 {
-	//osg::Geode *pCylinders = new osg::Geode();
-	osg::Group *pCylinders = new osg::Group();
+	osg::Geode *pCylinders = new osg::Geode();
+	//osg::Group *pCylinders = new osg::Group();
 	IList<Cylinder^>^ cylList = session->CreateQuery("from Cylinder")->List<Cylinder^>();
 	osg::Vec3 center, dir;
 	//for each (Cylinder^ cyl in cylList) {
 	for (int i = 0; i < cylList->Count; ++i) {
 		Cylinder^ cyl = cylList->default[i];
-		//Point2Vec3(cyl->Org, center);
-		//Point2Vec3(cyl->Height, dir);
-		//float height = dir.length();
+		Point2Vec3(cyl->Org, center);
+		Point2Vec3(cyl->Height, dir);
+		float height = dir.length();
 
-		//osg::Matrixf matrix = osg::Matrixf::rotate(osg::Z_AXIS, dir);
-		//osg::Quat quat;
-		//quat.set(matrix);
+		osg::Matrixf matrix = osg::Matrixf::rotate(osg::Z_AXIS, dir);
+		osg::Quat quat;
+		quat.set(matrix);
 
-		//osg::Cylinder *pOsgCyl = new osg::Cylinder(center + dir / 2.0, safe_cast<float>(cyl->Radius), height);
-		//pOsgCyl->setRotation(quat);
+		osg::Cylinder *pOsgCyl = new osg::Cylinder(center + dir / 2.0, safe_cast<float>(cyl->Radius), height);
+		pOsgCyl->setRotation(quat);
 
-		//osg::ShapeDrawable *pShape = new osg::ShapeDrawable(pOsgCyl, mHints);
-		//pCylinders->addDrawable(pShape);
+		osg::ShapeDrawable *pShape = new osg::ShapeDrawable(pOsgCyl, mHints);
+		pCylinders->addDrawable(pShape);
 
-		pCylinders->addChild(BuildCylinder(cyl));
+		//pCylinders->addChild(BuildCylinder(cyl));
 
 		//CreatePoint(center, 0);
 		//CreatePoint(center + osg::Z_AXIS * height, 1);
@@ -349,6 +354,14 @@ osg::Node* cOSG::CreateCircularTorus(NHibernate::ISession^ session)
 	for (int i = 0; i < ctList->Count; ++i) {
 		CircularTorus^ ct = ctList->default[i];
 		pCts->addChild(BuildCircularTorus(ct));
+		try
+		{
+			pCts->addChild(BuildCircularTorus(ct));
+		}
+		catch (Standard_ConstructionError &e)
+		{
+			AfxMessageBox(e.GetMessageString(), MB_OK | MB_ICONERROR);
+		}
 	}
 	return pCts;
 }
@@ -364,9 +377,6 @@ osg::Node* cOSG::CreateSnout(NHibernate::ISession^ session)
 	return pSnouts;
 }
 
-#include <Standard_ErrorHandler.hxx>
-#include <Standard_Failure.hxx>
-#include <Standard_ConstructionError.hxx>
 osg::Node* cOSG::CreateDish(NHibernate::ISession^ session)
 {
 	osg::Group *pDish = new osg::Group();
