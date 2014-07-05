@@ -27,6 +27,12 @@
 osg::Geode* BuildMesh(const TopoDS_Face &face, double deflection)
 {
 	osg::ref_ptr<osg::Geode> geode = new osg::Geode();
+	BuildMesh(geode, face, deflection);
+	return geode.release();
+}
+
+void BuildMesh(osg::Geode *geode, const TopoDS_Face &face, double deflection)
+{
 	osg::ref_ptr<deprecated_osg::Geometry> triGeom = new deprecated_osg::Geometry();
 	osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array();
 	osg::ref_ptr<osg::Vec3Array> normals = new osg::Vec3Array();
@@ -34,7 +40,7 @@ osg::Geode* BuildMesh(const TopoDS_Face &face, double deflection)
 	TopLoc_Location location;
 	BRepMesh::Mesh(face, deflection);
 
-	Handle_Poly_Triangulation triFace = BRep_Tool::Triangulation(face, location);
+	const Handle_Poly_Triangulation &triFace = BRep_Tool::Triangulation(face, location);
 
 	Standard_Integer nTriangles = triFace->NbTriangles();
 
@@ -92,8 +98,6 @@ osg::Geode* BuildMesh(const TopoDS_Face &face, double deflection)
 	triGeom->setNormalBinding(deprecated_osg::Geometry::BIND_PER_PRIMITIVE);
 
 	geode->addDrawable(triGeom);
-
-	return geode.release();
 }
 
 inline gp_Pnt && ToGpPnt(DbModel::Point^ pnt)
@@ -106,6 +110,13 @@ inline gp_Vec && ToGpVec(DbModel::Point^ pnt)
 	return move(gp_Vec(pnt->X, pnt->Y, pnt->Z));
 }
 
+TopoDS_Face MakeCircFace(const gp_Pnt &center, const gp_Vec &normal, double radius)
+{
+	TopoDS_Edge circEdge = BRepBuilderAPI_MakeEdge(gp_Circ(gp_Ax2(center, normal), radius));
+	TopoDS_Wire circWire = BRepBuilderAPI_MakeWire(circEdge);
+	return BRepBuilderAPI_MakeFace(circWire, Standard_True);
+}
+
 inline gp_Vec GetOrthoVec(gp_Vec &vec)
 {
 	static gp_Vec zAxis(0, 0, 1), yAxis(0, 1, 0);
@@ -114,17 +125,22 @@ inline gp_Vec GetOrthoVec(gp_Vec &vec)
 	return vec.Crossed(zAxis);
 }
 
-osg::Geode* BuildCylinder(DbModel::Cylinder^ cyl)
+osg::Node* BuildCylinder(DbModel::Cylinder^ cyl)
 {
 	gp_Ax2 axis;
-	axis.SetLocation(ToGpPnt(cyl->Org));
+	gp_Pnt org = ToGpPnt(cyl->Org);
+	axis.SetLocation(org);
 	gp_Vec vec = ToGpVec(cyl->Height);
 	Standard_Real h = vec.Magnitude();
-	vec.Normalize();
 	axis.SetDirection(vec);
 
 	TopoDS_Face gpCyl = BRepPrimAPI_MakeCylinder(axis, cyl->Radius, h);
-	return BuildMesh(gpCyl);
+	osg::ref_ptr<osg::Geode> geode = new osg::Geode();
+	BuildMesh(geode, gpCyl);
+	BuildMesh(geode, MakeCircFace(org, vec, cyl->Radius));
+	org.Translate(vec);
+	BuildMesh(geode, MakeCircFace(org, -vec, cyl->Radius));
+	return geode.release();
 }
 
 osg::Geode* BuildCircularTorus(DbModel::CircularTorus^ ct)
@@ -141,7 +157,7 @@ osg::Geode* BuildCircularTorus(DbModel::CircularTorus^ ct)
 	return BuildMesh(gpCt);
 }
 
-osg::Group* BuildSnout(DbModel::Snout^ snout)
+osg::Node* BuildSnout(DbModel::Snout^ snout)
 {
 	gp_Pnt buttomPnt = ToGpPnt(snout->Org);
 	gp_Vec heightVec = ToGpVec(snout->Height);
@@ -163,14 +179,14 @@ osg::Group* BuildSnout(DbModel::Snout^ snout)
 	thruSection.AddWire(buttomWire);
 	thruSection.AddWire(topWire);
 
-	osg::Group *group = new osg::Group();
 	TopoDS_Shape shape = thruSection;
+	osg::ref_ptr<osg::Geode> geode = new osg::Geode();
 	for (TopExp_Explorer aFaceExplorer(shape, TopAbs_FACE); aFaceExplorer.More(); aFaceExplorer.Next())
 	{
 		TopoDS_Face aFace = TopoDS::Face(aFaceExplorer.Current());
-		group->addChild(BuildMesh(aFace));
+		BuildMesh(geode, aFace);
 	}
-	return group;
+	return geode.release();
 }
 
 osg::Node* BuildDish(DbModel::Dish^ dish)
@@ -205,13 +221,15 @@ osg::Node* BuildDish(DbModel::Dish^ dish)
 		gp_Ax1 revolAxis(center, vec);
 		TopoDS_Shape shape = BRepPrimAPI_MakeRevol(edge, revolAxis);
 
-		osg::Group *group = new osg::Group();
+		osg::ref_ptr<osg::Geode> geode = new osg::Geode();
 		for (TopExp_Explorer aFaceExplorer(shape, TopAbs_FACE); aFaceExplorer.More(); aFaceExplorer.Next())
 		{
 			TopoDS_Face aFace = TopoDS::Face(aFaceExplorer.Current());
-			group->addChild(BuildMesh(aFace));
+			BuildMesh(geode, aFace);
 		}
-		return group;
+		
+		BuildMesh(geode, MakeCircFace(center, vec, dish->Radius));
+		return geode.release();
 	}
 	else
 	{
@@ -226,14 +244,14 @@ osg::Node* BuildDish(DbModel::Dish^ dish)
 		TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(circ, angle, M_PI / 2.0);
 
 		gp_Ax1 revolAxis(center, vec);
-		TopoDS_Shape shape = BRepPrimAPI_MakeRevol(edge, revolAxis, M_PI);
+		TopoDS_Shape shape = BRepPrimAPI_MakeRevol(edge, revolAxis);
 
-		osg::Group *group = new osg::Group();
+		osg::ref_ptr<osg::Geode> geode = new osg::Geode();
 		for (TopExp_Explorer aFaceExplorer(shape, TopAbs_FACE); aFaceExplorer.More(); aFaceExplorer.Next())
 		{
 			TopoDS_Face aFace = TopoDS::Face(aFaceExplorer.Current());
-			group->addChild(BuildMesh(aFace));
+			BuildMesh(geode, aFace);
 		}
-		return group;
+		return geode.release();
 	}
 }
