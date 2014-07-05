@@ -428,6 +428,16 @@ namespace ExportModel
 			{
 				if (IsReadableEle(ele))
 				{
+					if (ele.IsAttributeSetable(DbAttributeInstance.LEVE) && ele.IsAttributeValid(DbAttributeInstance.LEVE))
+					{
+						int[] level = ele.GetIntegerArray(DbAttributeInstance.LEVE);
+						if (level.Length >= 2 && level[1] < 6)
+						{
+							ele = ele.Next();
+							continue;
+						}
+					}
+
 					if (ele.GetElementType() == DbElementTypeInstance.NOZZLE)
 						ExportPipeItem(ele);
 					else if (ele.GetElementType() == DbElementTypeInstance.CYLINDER)
