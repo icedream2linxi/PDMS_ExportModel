@@ -21,6 +21,7 @@
 #include <BRepPrimAPI_MakeCylinder.hxx>
 #include <BRepPrimAPI_MakeTorus.hxx>
 #include <BRepPrimAPI_MakeRevol.hxx>
+#include <BRepPrimAPI_MakeCone.hxx>
 #include <BRepOffsetAPI_ThruSections.hxx>
 #include <TopoDS.hxx>
 #include <TopExp_Explorer.hxx>
@@ -80,16 +81,91 @@ void BuildMesh(osg::Geode *geode, const TopoDS_Face &face, double deflection)
 			normal.SetCoord(0., 0., 0.);
 		}
 
-		//if (face.Orientable() != TopAbs_FORWARD)
-		//{
-		//    normal.Reverse();
-		//}
+		if (face.Orientation() != TopAbs_FORWARD)
+		{
+		    normal.Reverse();
+		}
 
 		vertices->push_back(osg::Vec3(vertex1.X(), vertex1.Y(), vertex1.Z()));
 		vertices->push_back(osg::Vec3(vertex2.X(), vertex2.Y(), vertex2.Z()));
 		vertices->push_back(osg::Vec3(vertex3.X(), vertex3.Y(), vertex3.Z()));
 
 		normals->push_back(osg::Vec3(normal.X(), normal.Y(), normal.Z()));
+	}
+
+	triGeom->setVertexArray(vertices.get());
+	triGeom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::TRIANGLES, 0, vertices->size()));
+
+	triGeom->setNormalArray(normals);
+	triGeom->setNormalBinding(deprecated_osg::Geometry::BIND_PER_PRIMITIVE);
+
+	geode->addDrawable(triGeom);
+}
+
+void BuildShapeMesh(osg::Geode *geode, const TopoDS_Shape &shape, double deflection)
+{
+	osg::ref_ptr<deprecated_osg::Geometry> triGeom = new deprecated_osg::Geometry();
+	osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array();
+	osg::ref_ptr<osg::Vec3Array> normals = new osg::Vec3Array();
+
+	BRepMesh::Mesh(shape, deflection);
+
+	TopExp_Explorer faceExplorer;
+	for (faceExplorer.Init(shape, TopAbs_FACE); faceExplorer.More(); faceExplorer.Next())
+	{
+		TopLoc_Location location;
+		TopoDS_Face face = TopoDS::Face(faceExplorer.Current());
+	
+		const Handle_Poly_Triangulation &triFace = BRep_Tool::Triangulation(face, location);
+	
+		Standard_Integer nTriangles = triFace->NbTriangles();
+	
+		gp_Pnt vertex1;
+		gp_Pnt vertex2;
+		gp_Pnt vertex3;
+	
+		Standard_Integer nVertexIndex1 = 0;
+		Standard_Integer nVertexIndex2 = 0;
+		Standard_Integer nVertexIndex3 = 0;
+	
+		const TColgp_Array1OfPnt &nodes = triFace->Nodes();
+		const Poly_Array1OfTriangle &triangles = triFace->Triangles();
+	
+		for (Standard_Integer i = 1; i <= nTriangles; i++)
+		{
+			const Poly_Triangle &aTriangle = triangles.Value(i);
+	
+			aTriangle.Get(nVertexIndex1, nVertexIndex2, nVertexIndex3);
+	
+			vertex1 = nodes.Value(nVertexIndex1).Transformed(location.Transformation());
+			vertex2 = nodes.Value(nVertexIndex2).Transformed(location.Transformation());
+			vertex3 = nodes.Value(nVertexIndex3).Transformed(location.Transformation());
+	
+			gp_XYZ vector12(vertex2.XYZ() - vertex1.XYZ());
+			gp_XYZ vector13(vertex3.XYZ() - vertex1.XYZ());
+			gp_XYZ normal = vector12.Crossed(vector13);
+			Standard_Real rModulus = normal.Modulus();
+	
+			if (rModulus > gp::Resolution())
+			{
+				normal.Normalize();
+			}
+			else
+			{
+				normal.SetCoord(0., 0., 0.);
+			}
+	
+			if (face.Orientation() != TopAbs_FORWARD)
+			{
+			    normal.Reverse();
+			}
+	
+			vertices->push_back(osg::Vec3(vertex1.X(), vertex1.Y(), vertex1.Z()));
+			vertices->push_back(osg::Vec3(vertex2.X(), vertex2.Y(), vertex2.Z()));
+			vertices->push_back(osg::Vec3(vertex3.X(), vertex3.Y(), vertex3.Z()));
+	
+			normals->push_back(osg::Vec3(normal.X(), normal.Y(), normal.Z()));
+		}
 	}
 
 	triGeom->setVertexArray(vertices.get());
@@ -135,12 +211,19 @@ osg::Node* BuildCylinder(DbModel::Cylinder^ cyl)
 	Standard_Real h = vec.Magnitude();
 	axis.SetDirection(vec);
 
-	TopoDS_Face gpCyl = BRepPrimAPI_MakeCylinder(axis, cyl->Radius, h);
+	//TopoDS_Face gpCyl = BRepPrimAPI_MakeCylinder(axis, cyl->Radius, h);
 	osg::ref_ptr<osg::Geode> geode = new osg::Geode();
-	BuildMesh(geode, gpCyl);
-	BuildMesh(geode, MakeCircFace(org, vec, cyl->Radius));
-	org.Translate(vec);
-	BuildMesh(geode, MakeCircFace(org, -vec, cyl->Radius));
+	//BuildMesh(geode, gpCyl);
+	//BuildMesh(geode, MakeCircFace(org, vec, cyl->Radius));
+	//org.Translate(vec);
+	//BuildMesh(geode, MakeCircFace(org, -vec, cyl->Radius));
+	TopoDS_Shape shape = BRepPrimAPI_MakeCylinder(axis, cyl->Radius, h).Shape();
+	//for (TopExp_Explorer aFaceExplorer(shape, TopAbs_FACE); aFaceExplorer.More(); aFaceExplorer.Next())
+	//{
+	//	TopoDS_Face aFace = TopoDS::Face(aFaceExplorer.Current());
+	//	BuildMesh(geode, aFace);
+	//}
+	BuildShapeMesh(geode, shape);
 	return geode.release();
 }
 
@@ -276,4 +359,15 @@ osg::Node* BuildDish(DbModel::Dish^ dish)
 		}
 		return geode.release();
 	}
+}
+
+osg::Node* BuildCone(DbModel::Cone^ cone)
+{
+	gp_Pnt org = ToGpPnt(cone->Org);
+	gp_Vec vec = ToGpVec(cone->Height);
+	gp_Ax2 axis(org, vec);
+	osg::ref_ptr<osg::Geode> geode = new osg::Geode();
+	TopoDS_Shape shape = BRepPrimAPI_MakeCone(axis, cone->ButtomRadius, cone->TopRadius, vec.Magnitude()).Shape();
+	BuildShapeMesh(geode, shape);
+	return geode.release();
 }

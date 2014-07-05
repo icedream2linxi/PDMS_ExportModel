@@ -66,10 +66,10 @@ namespace ExportModel
 				exper = exper.Replace("DDANGLE", modelEle.GetAsString(DbAttributeInstance.ANGL));
 			Direction dir = Direction.Create(exper);
 			double offset = EvalDouble(pnt.GetAsString(DbAttributeInstance.PDIS), modelEle);
-			if (isNeg)
-				dir = dir.Opposite();
 			Position pos = Position.Create();
 			pos.MoveBy(dir, offset);
+			if (isNeg)
+				dir = dir.Opposite();
 			return new AxisDir(pos, dir);
 		}
 

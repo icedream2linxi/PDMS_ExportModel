@@ -482,12 +482,15 @@ namespace ExportModel
 					{
 						Aveva.Pdms.Geometry.Orientation ori = ele.GetOrientation(DbAttributeInstance.ORI);
 						Position pos = ele.GetPosition(DbAttributeInstance.POS);
+						Direction dir = ori.AbsoluteDirection(Direction.Create(Axis.UP));
+						double height = ele.GetDouble(DbAttributeInstance.HEIG);
 
 						Cone cone = new Cone();
-						cone.Org = new Point(pos);
-						cone.Height = new Point(ori.AbsoluteDirection(Direction.Create(Axis.UP)))
-							.Mul(ele.GetDouble(DbAttributeInstance.HEIG));
-						cone.Radius = ele.GetDouble(DbAttributeInstance.DTOP) / 2.0;
+						cone.Org = new Point(pos).MoveBy(dir, -height / 2.0);
+						cone.Height = new Point(dir)
+							.Mul(height);
+						cone.TopRadius = ele.GetDouble(DbAttributeInstance.DTOP) / 2.0;
+						cone.ButtomRadius = ele.GetDouble(DbAttributeInstance.DBOT) / 2.0;
 						session.Save(cone);
 					}
 				}
