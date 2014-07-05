@@ -428,7 +428,66 @@ namespace ExportModel
 
 		private void ExportEquip(DbElement equipEle)
 		{
+			DbElement ele = equipEle.FirstMember();
+			while (ele != null && ele.IsValid)
+			{
+				if (IsReadableEle(ele))
+				{
+					if (ele.GetElementType() == DbElementTypeInstance.NOZZLE)
+						ExportPipeItem(ele);
+					else if (ele.GetElementType() == DbElementTypeInstance.CYLINDER)
+					{
+						Aveva.Pdms.Geometry.Orientation ori = ele.GetOrientation(DbAttributeInstance.ORI);
+						Cylinder cyl = new Cylinder();
+						cyl.Height = new Point(ori.AbsoluteDirection(Direction.Create(Axis.UP)))
+							.Mul(ele.GetDouble(DbAttributeInstance.HEIG));
+						cyl.Org = new Point(ele.GetPosition(DbAttributeInstance.POS)).MoveBy(cyl.Height, -0.5);
+						cyl.Radius = ele.GetDouble(DbAttributeInstance.DIAM) / 2.0;
+						session.Save(cyl);
+					}
+					else if (ele.GetElementType() == DbElementTypeInstance.BOX)
+					{
+						Aveva.Pdms.Geometry.Orientation ori = ele.GetOrientation(DbAttributeInstance.ORI);
+						Position pos = ele.GetPosition(DbAttributeInstance.POS);
+						double xlen = ele.GetDouble(DbAttributeInstance.XLEN);
+						double ylen = ele.GetDouble(DbAttributeInstance.YLEN);
+						double zlen = ele.GetDouble(DbAttributeInstance.ZLEN);
 
+						Box box = new Box();
+						box.XLen = new Point(ori.AbsoluteDirection(Direction.Create(Axis.EAST))).Mul(xlen);
+						box.YLen = new Point(ori.AbsoluteDirection(Direction.Create(Axis.NORTH))).Mul(ylen);
+						box.ZLen = new Point(ori.AbsoluteDirection(Direction.Create(Axis.UP))).Mul(zlen);
+						box.Org = new Point(pos).MoveBy(box.XLen, -0.5).MoveBy(box.YLen, -0.5).MoveBy(box.ZLen, -0.5);
+						session.Save(box);
+					}
+					else if (ele.GetElementType() == DbElementTypeInstance.DISH)
+					{
+						Aveva.Pdms.Geometry.Orientation ori = ele.GetOrientation(DbAttributeInstance.ORI);
+						Position pos = ele.GetPosition(DbAttributeInstance.POS);
+
+						Dish dish = new Dish();
+						dish.Org = new Point(pos);
+						dish.Height = new Point(ori.AbsoluteDirection(Direction.Create(Axis.EAST)))
+							.Mul(ele.GetDouble(DbAttributeInstance.HEIG));
+						dish.Radius = ele.GetDouble(DbAttributeInstance.DIAM) / 2.0;
+						dish.IsEllipse = ele.GetDouble(DbAttributeInstance.RADI) > 0.0;
+						session.Save(dish);
+					}
+					else if (ele.GetElementType() == DbElementTypeInstance.CONE)
+					{
+						Aveva.Pdms.Geometry.Orientation ori = ele.GetOrientation(DbAttributeInstance.ORI);
+						Position pos = ele.GetPosition(DbAttributeInstance.POS);
+
+						Cone cone = new Cone();
+						cone.Org = new Point(pos);
+						cone.Height = new Point(ori.AbsoluteDirection(Direction.Create(Axis.UP)))
+							.Mul(ele.GetDouble(DbAttributeInstance.HEIG));
+						cone.Radius = ele.GetDouble(DbAttributeInstance.DTOP) / 2.0;
+						session.Save(cone);
+					}
+				}
+				ele = ele.Next();
+			}
 		}
 
 		private void AddExpr(string expr)

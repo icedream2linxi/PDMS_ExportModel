@@ -224,6 +224,7 @@ osg::Group *cOSG::InitOSGFromDb()
 			try {
 				osg::Group* group = new osg::Group;
 				group->addChild(CreateCylinders(session));
+				group->addChild(CreateCone(session));
 				group->addChild(CreateBoxs(session));
 				group->addChild(CreateCircularTorus(session));
 				group->addChild(CreateSnout(session));
@@ -285,6 +286,31 @@ osg::Node* cOSG::CreateCylinders(NHibernate::ISession^ session)
 	}
 
 	return pCylinders;
+}
+
+osg::Node* cOSG::CreateCone(NHibernate::ISession^ session)
+{
+	osg::Geode *pCones = new osg::Geode();
+	IList<Cone^>^ coneList = session->CreateQuery("from Cone")->List<Cone^>();
+	osg::Vec3 center, dir;
+	for (int i = 0; i < coneList->Count; ++i)
+	{
+		Cone^ cone = coneList->default[i];
+		Point2Vec3(cone->Org, center);
+		Point2Vec3(cone->Height, dir);
+		float height = dir.length();
+
+		osg::Matrixf matrix = osg::Matrixf::rotate(osg::Z_AXIS, dir);
+		osg::Quat quat;
+		quat.set(matrix);
+
+		osg::Cone *pOsgCyl = new osg::Cone(center + dir / 2.0, safe_cast<float>(cone->Radius), height);
+		pOsgCyl->setRotation(quat);
+
+		osg::ShapeDrawable *pShape = new osg::ShapeDrawable(pOsgCyl, mHints);
+		pCones->addDrawable(pShape);
+	}
+	return pCones;
 }
 
 osg::Geode * cOSG::CreateBoxs(NHibernate::ISession^ session)
