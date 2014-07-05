@@ -41,6 +41,7 @@ private:
 	osg::Node* CreateCircularTorus(NHibernate::ISession^ session);
 	void CreatePoint(const osg::Vec3 &pos, int idx = 0);
 	osg::Node* CreateSnout(NHibernate::ISession^ session);
+	osg::Node* CreateDish(NHibernate::ISession^ session);
 private:
     bool mDone;
     std::string m_ModelName;

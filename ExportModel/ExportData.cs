@@ -237,19 +237,10 @@ namespace ExportModel
 						if (gEle.GetElementType() == DbElementTypeInstance.SCYLINDER)
 						{
 							string expr = gEle.GetAsString(DbAttributeInstance.PAXI);
-							AddExpr(expr);
 							AxisDir paxi = EvalDirection.Eval(ele, expr);
 
-							expr = gEle.GetAsString(DbAttributeInstance.PHEI);
-							AddExpr(expr);
 							double phei = GetExper(gEle, DbAttributeInstance.PHEI).Eval(ele);
-
-							expr = gEle.GetAsString(DbAttributeInstance.PDIA);
-							AddExpr(expr);
 							double pdia = GetExper(gEle, DbAttributeInstance.PDIA).Eval(ele);
-
-							expr = gEle.GetAsString(DbAttributeInstance.PDIS);
-							AddExpr(expr);
 							double pdis = GetExper(gEle, DbAttributeInstance.PDIS).Eval(ele);
 
 							Aveva.Pdms.Geometry.Orientation ori = ele.GetOrientation(DbAttributeInstance.ORI);
@@ -272,19 +263,10 @@ namespace ExportModel
 						else if (gEle.GetElementType() == DbElementTypeInstance.LCYLINDER)
 						{
 							string expr = gEle.GetAsString(DbAttributeInstance.PAXI);
-							AddExpr(expr);
 							AxisDir paxi = EvalDirection.Eval(ele, expr);
 
-							expr = gEle.GetAsString(DbAttributeInstance.PDIA);
-							AddExpr(expr);
 							double pdia = GetExper(gEle, DbAttributeInstance.PDIA).Eval(ele);
-
-							expr = gEle.GetAsString(DbAttributeInstance.PBDI);
-							AddExpr(expr);
 							double pbdi = GetExper(gEle, DbAttributeInstance.PBDI).Eval(ele);
-
-							expr = gEle.GetAsString(DbAttributeInstance.PTDI);
-							AddExpr(expr);
 							double ptdi = GetExper(gEle, DbAttributeInstance.PTDI).Eval(ele);
 
 							Aveva.Pdms.Geometry.Orientation ori = ele.GetOrientation(DbAttributeInstance.ORI);
@@ -306,28 +288,11 @@ namespace ExportModel
 						}
 						else if (gEle.GetElementType() == DbElementTypeInstance.SBOX)
 						{
-							string exper = gEle.GetString(DbAttributeInstance.PXLE);
-							AddExpr(exper);
 							double pxlen = GetExper(gEle, DbAttributeInstance.PXLE).Eval(ele);
-
-							exper = gEle.GetString(DbAttributeInstance.PYLE);
-							AddExpr(exper);
 							double pylen = GetExper(gEle, DbAttributeInstance.PYLE).Eval(ele);
-
-							exper = gEle.GetString(DbAttributeInstance.PZLE);
-							AddExpr(exper);
 							double pzlen = GetExper(gEle, DbAttributeInstance.PZLE).Eval(ele);
-
-							exper = gEle.GetString(DbAttributeInstance.PX);
-							AddExpr(exper);
 							double px = GetExper(gEle, DbAttributeInstance.PX).Eval(ele);
-
-							exper = gEle.GetString(DbAttributeInstance.PY);
-							AddExpr(exper);
 							double py = GetExper(gEle, DbAttributeInstance.PY).Eval(ele);
-
-							exper = gEle.GetString(DbAttributeInstance.PZ);
-							AddExpr(exper);
 							double pz = GetExper(gEle, DbAttributeInstance.PZ).Eval(ele);
 							
 							Aveva.Pdms.Geometry.Orientation ori = ele.GetOrientation(DbAttributeInstance.ORI);
@@ -351,15 +316,11 @@ namespace ExportModel
 						else if (gEle.GetElementType() == DbElementTypeInstance.SCTORUS)
 						{
 							string expr = gEle.GetAsString(DbAttributeInstance.PAAX);
-							AddExpr(expr);
 							AxisDir paax = EvalDirection.Eval(ele, expr);
 
 							expr = gEle.GetAsString(DbAttributeInstance.PBAX);
-							AddExpr(expr);
 							AxisDir pbax = EvalDirection.Eval(ele, expr);
 
-							expr = gEle.GetAsString(DbAttributeInstance.PDIA);
-							AddExpr(expr);
 							double pdia = GetExper(gEle, DbAttributeInstance.PDIA).Eval(ele);
 
 							Aveva.Pdms.Geometry.Orientation ori = ele.GetOrientation(DbAttributeInstance.ORI);
@@ -402,31 +363,15 @@ namespace ExportModel
 						else if (gEle.GetElementType() == DbElementTypeInstance.LSNOUT)
 						{
 							string expr = gEle.GetAsString(DbAttributeInstance.PAAX);
-							AddExpr(expr);
 							AxisDir paax = EvalDirection.Eval(ele, expr);
 
 							expr = gEle.GetAsString(DbAttributeInstance.PBAX);
-							AddExpr(expr);
 							AxisDir pbax = EvalDirection.Eval(ele, expr);
 
-							expr = gEle.GetAsString(DbAttributeInstance.PTDI);
-							AddExpr(expr);
 							double ptdi = GetExper(gEle, DbAttributeInstance.PTDI).Eval(ele);
-
-							expr = gEle.GetAsString(DbAttributeInstance.PBDI);
-							AddExpr(expr);
 							double pbdi = GetExper(gEle, DbAttributeInstance.PBDI).Eval(ele);
-
-							expr = gEle.GetAsString(DbAttributeInstance.PTDM);
-							AddExpr(expr);
 							double ptdm = GetExper(gEle, DbAttributeInstance.PTDM).Eval(ele);
-
-							expr = gEle.GetAsString(DbAttributeInstance.PBDM);
-							AddExpr(expr);
 							double pbdm = GetExper(gEle, DbAttributeInstance.PBDM).Eval(ele);
-
-							expr = gEle.GetAsString(DbAttributeInstance.POFF);
-							AddExpr(expr);
 							double poff = GetExper(gEle, DbAttributeInstance.POFF).Eval(ele);
 
 							Snout snout = new Snout();
@@ -449,6 +394,34 @@ namespace ExportModel
 							snout.Height = new Point(tdir).Mul(ptdi - pbdi);
 
 							session.Save(snout);
+						}
+						else if (gEle.GetElementType() == DbElementTypeInstance.SDSH)
+						{
+							string expr = gEle.GetAsString(DbAttributeInstance.PAXI);
+							AxisDir paxi = EvalDirection.Eval(ele, expr);
+
+							double phei = GetExper(gEle, DbAttributeInstance.PHEI).Eval(ele);
+							double pdia = GetExper(gEle, DbAttributeInstance.PDIA).Eval(ele);
+							double pdis = GetExper(gEle, DbAttributeInstance.PDIS).Eval(ele);
+							double prad = GetExper(gEle, DbAttributeInstance.PRAD).Eval(ele);
+
+							Aveva.Pdms.Geometry.Orientation ori = ele.GetOrientation(DbAttributeInstance.ORI);
+							Direction dir = ori.AbsoluteDirection(paxi.Dir);
+							Position pos = Position.Create();
+							double dist = paxi.Pos.Distance(pos);
+							if (dist > 0.00001)
+							{
+								pos.MoveBy(ori.AbsoluteDirection(Direction.Create(paxi.Pos)), dist);
+							}
+
+							Dish dish = new Dish();
+							dish.Org = new Point(pos)
+								.MoveBy(ele.GetPosition(DbAttributeInstance.POS))
+								.MoveBy(dir, pdis);
+							dish.Height = new Point(dir).Mul(phei);
+							dish.Radius = pdia / 2.0;
+							dish.IsEllipse = prad > 0.0;
+							session.Save(dish);
 						}
 					}
 

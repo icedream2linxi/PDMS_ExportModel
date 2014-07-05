@@ -4,8 +4,11 @@
 #include <osg/ref_ptr>
 #include <osg/Geometry>
 
+#include <Precision.hxx>
+
 #include <gp_Ax3.hxx>
 #include <gp_Circ.hxx>
+#include <gp_Elips.hxx>
 
 #include <Poly_Triangulation.hxx>
 
@@ -16,6 +19,7 @@
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <BRepPrimAPI_MakeCylinder.hxx>
 #include <BRepPrimAPI_MakeTorus.hxx>
+#include <BRepPrimAPI_MakeRevol.hxx>
 #include <BRepOffsetAPI_ThruSections.hxx>
 #include <TopoDS.hxx>
 #include <TopExp_Explorer.hxx>
@@ -102,6 +106,14 @@ inline gp_Vec && ToGpVec(DbModel::Point^ pnt)
 	return move(gp_Vec(pnt->X, pnt->Y, pnt->Z));
 }
 
+inline gp_Vec GetOrthoVec(gp_Vec &vec)
+{
+	static gp_Vec zAxis(0, 0, 1), yAxis(0, 1, 0);
+	if (vec.IsParallel(zAxis, Precision::Intersection()))
+		return vec.Crossed(yAxis);
+	return vec.Crossed(zAxis);
+}
+
 osg::Geode* BuildCylinder(DbModel::Cylinder^ cyl)
 {
 	gp_Ax2 axis;
@@ -159,4 +171,69 @@ osg::Group* BuildSnout(DbModel::Snout^ snout)
 		group->addChild(BuildMesh(aFace));
 	}
 	return group;
+}
+
+osg::Node* BuildDish(DbModel::Dish^ dish)
+{
+	gp_Pnt center = ToGpPnt(dish->Org);
+	gp_Vec vec = ToGpVec(dish->Height);
+	double height = vec.Magnitude();
+
+	if (dish->IsEllipse)
+	{
+		Standard_Real majorRadius, minorRadius, p1, p2;
+		gp_Ax2 ellipseAxis(center, GetOrthoVec(vec));
+		if (dish->Radius > height)
+		{
+			ellipseAxis.SetYDirection(vec);
+			majorRadius = dish->Radius;
+			minorRadius = height;
+			p1 = 0.0;
+			p2 = M_PI / 2.0;
+		}
+		else
+		{
+			ellipseAxis.SetXDirection(vec);
+			majorRadius = height;
+			minorRadius = dish->Radius;
+			p1 = -M_PI / 2.0;
+			p2 = 0.0;
+		}
+		gp_Elips ellipse(ellipseAxis, majorRadius, minorRadius);
+		TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(ellipse, p1, p2);
+
+		gp_Ax1 revolAxis(center, vec);
+		TopoDS_Shape shape = BRepPrimAPI_MakeRevol(edge, revolAxis);
+
+		osg::Group *group = new osg::Group();
+		for (TopExp_Explorer aFaceExplorer(shape, TopAbs_FACE); aFaceExplorer.More(); aFaceExplorer.Next())
+		{
+			TopoDS_Face aFace = TopoDS::Face(aFaceExplorer.Current());
+			group->addChild(BuildMesh(aFace));
+		}
+		return group;
+	}
+	else
+	{
+		double angle = 0.0;
+		if (dish->Radius >= height)
+			angle = acos((dish->Radius - height) / dish->Radius);
+		else
+			angle = -asin((height - dish->Radius) / dish->Radius);
+		gp_Ax2 circAxis(center, GetOrthoVec(vec));
+		circAxis.SetYDirection(vec);
+		gp_Circ circ(circAxis, dish->Radius);
+		TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(circ, angle, M_PI / 2.0);
+
+		gp_Ax1 revolAxis(center, vec);
+		TopoDS_Shape shape = BRepPrimAPI_MakeRevol(edge, revolAxis, M_PI);
+
+		osg::Group *group = new osg::Group();
+		for (TopExp_Explorer aFaceExplorer(shape, TopAbs_FACE); aFaceExplorer.More(); aFaceExplorer.Next())
+		{
+			TopoDS_Face aFace = TopoDS::Face(aFaceExplorer.Current());
+			group->addChild(BuildMesh(aFace));
+		}
+		return group;
+	}
 }

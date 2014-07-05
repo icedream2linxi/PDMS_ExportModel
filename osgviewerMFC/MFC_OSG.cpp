@@ -221,6 +221,7 @@ osg::Group *cOSG::InitOSGFromDb()
 				group->addChild(CreateBoxs(session));
 				group->addChild(CreateCircularTorus(session));
 				group->addChild(CreateSnout(session));
+				group->addChild(CreateDish(session));
 				tx->Commit();
 				return group;
 			}
@@ -329,6 +330,27 @@ osg::Node* cOSG::CreateSnout(NHibernate::ISession^ session)
 		pSnouts->addChild(BuildSnout(snout));
 	}
 	return pSnouts;
+}
+
+#include <Standard_ErrorHandler.hxx>
+#include <Standard_Failure.hxx>
+#include <Standard_ConstructionError.hxx>
+osg::Node* cOSG::CreateDish(NHibernate::ISession^ session)
+{
+	osg::Group *pDish = new osg::Group();
+	IList<Dish^>^ dishList = session->CreateQuery("from Dish")->List<Dish^>();
+	for (int i = 0; i < dishList->Count; ++i) {
+		Dish^ dish = dishList->default[i];
+		try
+		{
+			pDish->addChild(BuildDish(dish));
+		}
+		catch (Standard_ConstructionError &e)
+		{
+			AfxMessageBox(e.GetMessageString(), MB_OK | MB_ICONERROR);
+		}
+	}
+	return pDish;
 }
 
 void cOSG::CreatePoint(const osg::Vec3 &pos, int idx)
