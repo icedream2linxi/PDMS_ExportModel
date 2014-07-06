@@ -1,4 +1,5 @@
 ﻿using Aveva.Pdms.Geometry;
+using Aveva.Pdms.Maths.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,6 +42,20 @@ namespace DbModel
 			Z = pos.Z;
 		}
 
+		public Point(D3Vector vec)
+		{
+			X = vec.X;
+			Y = vec.Y;
+			Z = vec.Z;
+		}
+
+		public Point(D3Point pnt)
+		{
+			X = pnt.X;
+			Y = pnt.Y;
+			Z = pnt.Z;
+		}
+
 		public double X { get; set; }
 		public double Y { get; set; }
 		public double Z { get; set; }
@@ -58,6 +73,14 @@ namespace DbModel
 			X += dir.East * val;
 			Y += dir.North * val;
 			Z += dir.Up * val;
+			return this;
+		}
+
+		public Point MoveBy(D3Vector dir, double val)
+		{
+			X += dir.X * val;
+			Y += dir.Y * val;
+			Z += dir.Z * val;
 			return this;
 		}
 

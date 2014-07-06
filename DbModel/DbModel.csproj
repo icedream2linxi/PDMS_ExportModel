@@ -34,6 +34,9 @@
     <Reference Include="Aveva.Pdms.Geometry">
       <HintPath>D:\AVEVA\plant\PDMS12.0.SP6\Aveva.Pdms.Geometry.dll</HintPath>
     </Reference>
+    <Reference Include="Aveva.Pdms.Maths.Geometry">
+      <HintPath>D:\AVEVA\plant\PDMS12.0.SP6\Aveva.Pdms.Maths.Geometry.dll</HintPath>
+    </Reference>
     <Reference Include="Iesi.Collections">
       <HintPath>..\packages\Iesi.Collections.3.2.0.1001\lib\Net35\Iesi.Collections.dll</HintPath>
     </Reference>

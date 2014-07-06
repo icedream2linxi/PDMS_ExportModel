@@ -1,5 +1,6 @@
 ﻿using Aveva.Pdms.Database;
 using Aveva.Pdms.Geometry;
+using Aveva.Pdms.Maths.Geometry;
 using Aveva.Pdms.Shared;
 using DbModel;
 using NHibernate;
@@ -61,6 +62,11 @@ namespace ExportModel
 			Console.WriteLine("Export model finish!!!");
 		}
 
+		private D3Transform GetTransform(DbElement ele)
+		{
+			return GeometryUtility.ToD3Transform(ele.GetOrientation(DbAttributeInstance.ORI), ele.GetPosition(DbAttributeInstance.POS));
+		}
+
 		private void Export(DbElement ele)
 		{
 			if (ele.GetElementType() == DbElementTypeInstance.WORLD)
@@ -68,13 +74,32 @@ namespace ExportModel
 			else if (ele.GetElementType() == DbElementTypeInstance.SITE)
 				ExportSite(ele);
 			else if (ele.GetElementType() == DbElementTypeInstance.ZONE)
-				ExportZone(ele);
+			{
+				D3Transform transform = GetTransform(ele.Owner);
+				ExportZone(ele, transform);
+			}
 			else if (ele.GetElementType() == DbElementTypeInstance.PIPE)
-				ExportPipe(ele);
+			{
+				DbElement zoneEle = ele.Owner;
+				DbElement siteEle = zoneEle.Owner;
+				D3Transform transform = GetTransform(siteEle).Multiply(GetTransform(zoneEle));
+				ExportPipe(ele, transform);
+			}
 			else if (ele.GetElementType() == DbElementTypeInstance.EQUIPMENT)
-				ExportEquip(ele);
+			{
+				DbElement zoneEle = ele.Owner;
+				DbElement siteEle = zoneEle.Owner;
+				D3Transform transform = GetTransform(siteEle).Multiply(GetTransform(zoneEle));
+				ExportEquip(ele, transform);
+			}
 			else if (ele.GetElementType() == DbElementTypeInstance.BRANCH)
-				ExportBranch(ele);
+			{
+				DbElement pipeEle = ele.Owner;
+				DbElement zoneEle = pipeEle.Owner;
+				DbElement siteEle = zoneEle.Owner;
+				D3Transform transform = GetTransform(siteEle).Multiply(GetTransform(zoneEle));
+				ExportBranch(ele, transform);
+			}
 			SaveExpr();
 		}
 
@@ -96,38 +121,40 @@ namespace ExportModel
 
 		private void ExportSite(DbElement siteEle)
 		{
+			D3Transform transform = GetTransform(siteEle);
 			DbElement ele = siteEle.FirstMember();
 			while (ele != null && ele.IsValid)
 			{
 				if (IsReadableEle(ele) && ele.GetElementType() == DbElementTypeInstance.ZONE)
-					ExportZone(ele);
+					ExportZone(ele, transform);
 				ele = ele.Next();
 			}
 		}
 
-		private void ExportZone(DbElement zoneEle)
+		private void ExportZone(DbElement zoneEle, D3Transform transform)
 		{
+			D3Transform currentTransform = transform.Multiply(GetTransform(zoneEle));
 			DbElement ele = zoneEle.FirstMember();
 			while (ele != null && ele.IsValid)
 			{
 				if (IsReadableEle(ele))
 				{
 					if (ele.GetElementType() == DbElementTypeInstance.PIPE)
-						ExportPipe(ele);
+						ExportPipe(ele, currentTransform);
 					else if (ele.GetElementType() == DbElementTypeInstance.EQUIPMENT)
-						ExportEquip(ele);
+						ExportEquip(ele, currentTransform);
 				}
 				ele = ele.Next();
 			}
 		}
 
-		private void ExportPipe(DbElement pipeEle)
+		private void ExportPipe(DbElement pipeEle, D3Transform transform)
 		{
 			DbElement ele = pipeEle.FirstMember();
 			while (ele != null && ele.IsValid)
 			{
 				if (IsReadableEle(ele) && ele.GetElementType() == DbElementTypeInstance.BRANCH)
-					ExportBranch(ele);
+					ExportBranch(ele, transform);
 				ele = ele.Next();
 			}
 		}
@@ -182,18 +209,18 @@ namespace ExportModel
 			session.Save(cyl);
 		}
 
-		private void ExportBranch(DbElement branchEle)
+		private void ExportBranch(DbElement branchEle, D3Transform transform)
 		{
 			DbElement ele = branchEle.FirstMember();
 			while (ele != null && ele.IsValid)
 			{
 				if (IsReadableEle(ele))
-					ExportPipeItem(ele);
+					ExportPipeItem(ele, transform);
 				ele = ele.Next();
 			}
 		}
 
-		private void ExportPipeItem(DbElement ele)
+		private void ExportPipeItem(DbElement ele, D3Transform transform)
 		{
 			if (ele.GetElementType() == DbElementTypeInstance.TUBING)
 			{
@@ -421,8 +448,9 @@ namespace ExportModel
 			}
 		}
 
-		private void ExportEquip(DbElement equipEle)
+		private void ExportEquip(DbElement equipEle, D3Transform transform)
 		{
+			D3Transform currTrans = transform.Multiply(GetTransform(equipEle));
 			DbElement ele = equipEle.FirstMember();
 			while (ele != null && ele.IsValid)
 			{
@@ -439,40 +467,39 @@ namespace ExportModel
 					}
 
 					if (ele.GetElementType() == DbElementTypeInstance.NOZZLE)
-						ExportPipeItem(ele);
+						ExportPipeItem(ele, currTrans);
 					else if (ele.GetElementType() == DbElementTypeInstance.CYLINDER)
 					{
-						Aveva.Pdms.Geometry.Orientation ori = ele.GetOrientation(DbAttributeInstance.ORI);
+						D3Transform eleTrans = currTrans.Multiply(GetTransform(ele));
 						Cylinder cyl = new Cylinder();
-						cyl.Height = new Point(ori.AbsoluteDirection(Direction.Create(Axis.UP)))
+						cyl.Height = new Point(eleTrans.Multiply(D3Vector.D3UP))
 							.Mul(ele.GetDouble(DbAttributeInstance.HEIG));
-						cyl.Org = new Point(ele.GetPosition(DbAttributeInstance.POS)).MoveBy(cyl.Height, -0.5);
+						cyl.Org = new Point(eleTrans.Multiply(GeometryUtility.Org)).MoveBy(cyl.Height, -0.5);
 						cyl.Radius = ele.GetDouble(DbAttributeInstance.DIAM) / 2.0;
 						session.Save(cyl);
 					}
 					else if (ele.GetElementType() == DbElementTypeInstance.BOX)
 					{
-						Aveva.Pdms.Geometry.Orientation ori = ele.GetOrientation(DbAttributeInstance.ORI);
-						Position pos = ele.GetPosition(DbAttributeInstance.POS);
+						D3Transform eleTrans = currTrans.Multiply(GetTransform(ele));
 						double xlen = ele.GetDouble(DbAttributeInstance.XLEN);
 						double ylen = ele.GetDouble(DbAttributeInstance.YLEN);
 						double zlen = ele.GetDouble(DbAttributeInstance.ZLEN);
 
 						Box box = new Box();
-						box.XLen = new Point(ori.AbsoluteDirection(Direction.Create(Axis.EAST))).Mul(xlen);
-						box.YLen = new Point(ori.AbsoluteDirection(Direction.Create(Axis.NORTH))).Mul(ylen);
-						box.ZLen = new Point(ori.AbsoluteDirection(Direction.Create(Axis.UP))).Mul(zlen);
-						box.Org = new Point(pos).MoveBy(box.XLen, -0.5).MoveBy(box.YLen, -0.5).MoveBy(box.ZLen, -0.5);
+						box.XLen = new Point(eleTrans.Multiply(D3Vector.D3EAST)).Mul(xlen);
+						box.YLen = new Point(eleTrans.Multiply(D3Vector.D3NORTH)).Mul(ylen);
+						box.ZLen = new Point(eleTrans.Multiply(D3Vector.D3UP)).Mul(zlen);
+						box.Org = new Point(eleTrans.Multiply(GeometryUtility.Org))
+							.MoveBy(box.XLen, -0.5).MoveBy(box.YLen, -0.5).MoveBy(box.ZLen, -0.5);
 						session.Save(box);
 					}
 					else if (ele.GetElementType() == DbElementTypeInstance.DISH)
 					{
-						Aveva.Pdms.Geometry.Orientation ori = ele.GetOrientation(DbAttributeInstance.ORI);
-						Position pos = ele.GetPosition(DbAttributeInstance.POS);
+						D3Transform eleTrans = currTrans.Multiply(GetTransform(ele));
 
 						Dish dish = new Dish();
-						dish.Org = new Point(pos);
-						dish.Height = new Point(ori.AbsoluteDirection(Direction.Create(Axis.UP)))
+						dish.Org = new Point(eleTrans.Multiply(GeometryUtility.Org));
+						dish.Height = new Point(eleTrans.Multiply(D3Vector.D3UP))
 							.Mul(ele.GetDouble(DbAttributeInstance.HEIG));
 						dish.Radius = ele.GetDouble(DbAttributeInstance.DIAM) / 2.0;
 						dish.IsEllipse = ele.GetDouble(DbAttributeInstance.RADI) > 0.0;
@@ -480,9 +507,9 @@ namespace ExportModel
 					}
 					else if (ele.GetElementType() == DbElementTypeInstance.CONE)
 					{
-						Aveva.Pdms.Geometry.Orientation ori = ele.GetOrientation(DbAttributeInstance.ORI);
-						Position pos = ele.GetPosition(DbAttributeInstance.POS);
-						Direction dir = ori.AbsoluteDirection(Direction.Create(Axis.UP));
+						D3Transform eleTrans = currTrans.Multiply(GetTransform(ele));
+						D3Point pos = eleTrans.Multiply(GeometryUtility.Org);
+						D3Vector dir = eleTrans.Multiply(D3Vector.D3UP);
 						double height = ele.GetDouble(DbAttributeInstance.HEIG);
 
 						Cone cone = new Cone();
@@ -495,11 +522,11 @@ namespace ExportModel
 					}
 					else if (ele.GetElementType() == DbElementTypeInstance.PYRAMID)
 					{
-						Aveva.Pdms.Geometry.Orientation ori = ele.GetOrientation(DbAttributeInstance.ORI);
-						Position pos = ele.GetPosition(DbAttributeInstance.POS);
-						Direction zDir = ori.AbsoluteDirection(Direction.Create(Axis.UP));
-						Direction xDir = ori.AbsoluteDirection(Direction.Create(Axis.EAST));
-						Direction yDir = ori.AbsoluteDirection(Direction.Create(Axis.NORTH));
+						D3Transform eleTrans = currTrans.Multiply(GetTransform(ele));
+						D3Point pos = eleTrans.Multiply(GeometryUtility.Org);
+						D3Vector zDir = eleTrans.Multiply(D3Vector.D3UP);
+						D3Vector xDir = eleTrans.Multiply(D3Vector.D3EAST);
+						D3Vector yDir = eleTrans.Multiply(D3Vector.D3NORTH);
 						double height = ele.GetDouble(DbAttributeInstance.HEIG);
 						double xBottom = ele.GetDouble(DbAttributeInstance.XBOT);
 						double yBottom = ele.GetDouble(DbAttributeInstance.YBOT);
