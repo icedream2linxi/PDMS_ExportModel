@@ -493,6 +493,32 @@ namespace ExportModel
 						cone.ButtomRadius = ele.GetDouble(DbAttributeInstance.DBOT) / 2.0;
 						session.Save(cone);
 					}
+					else if (ele.GetElementType() == DbElementTypeInstance.PYRAMID)
+					{
+						Aveva.Pdms.Geometry.Orientation ori = ele.GetOrientation(DbAttributeInstance.ORI);
+						Position pos = ele.GetPosition(DbAttributeInstance.POS);
+						Direction zDir = ori.AbsoluteDirection(Direction.Create(Axis.UP));
+						Direction xDir = ori.AbsoluteDirection(Direction.Create(Axis.EAST));
+						Direction yDir = ori.AbsoluteDirection(Direction.Create(Axis.NORTH));
+						double height = ele.GetDouble(DbAttributeInstance.HEIG);
+						double xBottom = ele.GetDouble(DbAttributeInstance.XBOT);
+						double yBottom = ele.GetDouble(DbAttributeInstance.YBOT);
+						double xTop = ele.GetDouble(DbAttributeInstance.XTOP);
+						double yTop = ele.GetDouble(DbAttributeInstance.YTOP);
+						double xOffset = ele.GetDouble(DbAttributeInstance.XOFF);
+						double yOffset = ele.GetDouble(DbAttributeInstance.YOFF);
+
+						Pyramid pyramid = new Pyramid();
+						pyramid.Org = new Point(pos).MoveBy(zDir, -height / 2.0);
+						pyramid.Height = new Point(zDir).Mul(height);
+						pyramid.XAxis = new Point(xDir);
+						pyramid.Offset = new Point().MoveBy(xDir, xOffset).MoveBy(yDir, yOffset);
+						pyramid.BottomXLen = xBottom;
+						pyramid.BottomYLen = yBottom;
+						pyramid.TopXLen = xTop;
+						pyramid.TopYLen = yTop;
+						session.Save(pyramid);
+					}
 				}
 				ele = ele.Next();
 			}

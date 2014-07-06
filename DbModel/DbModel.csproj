@@ -62,6 +62,7 @@
   <ItemGroup>
     <Compile Include="Box.cs" />
     <Compile Include="Dish.cs" />
+    <Compile Include="Pyramid.cs" />
     <Compile Include="RectangularTorus.cs" />
     <Compile Include="CircularTorus.cs" />
     <Compile Include="Cone.cs" />

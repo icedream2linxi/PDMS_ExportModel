@@ -88,7 +88,6 @@ void cOSG::InitManipulators(void)
     keyswitchManipulator->selectMatrixManipulator(0);  // Zero based index Value
 }
 
-
 void cOSG::InitSceneGraph(void)
 {
     // Init the main Root Node/Group
@@ -234,6 +233,7 @@ osg::Group *cOSG::InitOSGFromDb()
 				group->addChild(CreateCircularTorus(session));
 				group->addChild(CreateSnout(session));
 				group->addChild(CreateDish(session));
+				group->addChild(CreatePyramid(session));
 				tx->Commit();
 				return group;
 			}
@@ -380,6 +380,91 @@ osg::Node* cOSG::CreateDish(NHibernate::ISession^ session)
 		}
 	}
 	return pDish;
+}
+
+inline osg::Vec3 ToOsgVec3(Point^ pnt)
+{
+	return osg::Vec3(pnt->X, pnt->Y, pnt->Z);
+}
+
+osg::Node* cOSG::CreatePyramid(NHibernate::ISession^ session)
+{
+	osg::ref_ptr<osg::Geode> pPyramids = new osg::Geode();
+	IList<Pyramid^>^ pyramidList = session->CreateQuery("from Pyramid")->List<Pyramid^>();
+	for each (Pyramid^ pyramid in pyramidList)
+	{
+		osg::ref_ptr<deprecated_osg::Geometry> pGemetry = new deprecated_osg::Geometry();
+		osg::ref_ptr<osg::Vec3Array> pVertices = new osg::Vec3Array();
+		osg::ref_ptr<osg::Vec3Array> pNormals = new osg::Vec3Array();
+
+		osg::Vec3 org = ToOsgVec3(pyramid->Org);
+		osg::Vec3 height = ToOsgVec3(pyramid->Height);
+		osg::Vec3 xAxis = ToOsgVec3(pyramid->XAxis);
+		osg::Vec3 yAxis = height ^ xAxis;
+		yAxis.normalize();
+		osg::Vec3 zAxis = height / height.length();
+		osg::Vec3 offset = ToOsgVec3(pyramid->Offset);
+		osg::Vec3 topOrg = org + height + offset;
+
+		osg::Vec3 p1 = org - xAxis * pyramid->BottomXLen / 2.0 - yAxis * pyramid->BottomYLen / 2.0;
+		osg::Vec3 p2 = org + xAxis * pyramid->BottomXLen / 2.0 - yAxis * pyramid->BottomYLen / 2.0;
+		osg::Vec3 p3 = org + xAxis * pyramid->BottomXLen / 2.0 + yAxis * pyramid->BottomYLen / 2.0;
+		osg::Vec3 p4 = org - xAxis * pyramid->BottomXLen / 2.0 + yAxis * pyramid->BottomYLen / 2.0;
+
+		osg::Vec3 p5 = topOrg - xAxis * pyramid->TopXLen / 2.0 - yAxis * pyramid->TopYLen / 2.0;
+		osg::Vec3 p6 = topOrg + xAxis * pyramid->TopXLen / 2.0 - yAxis * pyramid->TopYLen / 2.0;
+		osg::Vec3 p7 = topOrg + xAxis * pyramid->TopXLen / 2.0 + yAxis * pyramid->TopYLen / 2.0;
+		osg::Vec3 p8 = topOrg - xAxis * pyramid->TopXLen / 2.0 + yAxis * pyramid->TopYLen / 2.0;
+
+		pVertices->push_back(p1);
+		pVertices->push_back(p2);
+		pVertices->push_back(p3);
+		pVertices->push_back(p4);
+		pNormals->push_back(-zAxis);
+
+		pVertices->push_back(p5);
+		pVertices->push_back(p6);
+		pVertices->push_back(p7);
+		pVertices->push_back(p8);
+		pNormals->push_back(zAxis);
+
+		pVertices->push_back(p1);
+		pVertices->push_back(p2);
+		pVertices->push_back(p6);
+		pVertices->push_back(p5);
+		pNormals->push_back((p6 - p1) ^ (p5 - p2));
+		pNormals->back().normalize();
+
+		pVertices->push_back(p2);
+		pVertices->push_back(p3);
+		pVertices->push_back(p7);
+		pVertices->push_back(p6);
+		pNormals->push_back((p7 - p2) ^ (p6 - p3));
+		pNormals->back().normalize();
+
+		pVertices->push_back(p3);
+		pVertices->push_back(p4);
+		pVertices->push_back(p8);
+		pVertices->push_back(p7);
+		pNormals->push_back((p8 - p3) ^ (p7 - p4));
+		pNormals->back().normalize();
+
+		pVertices->push_back(p4);
+		pVertices->push_back(p1);
+		pVertices->push_back(p5);
+		pVertices->push_back(p8);
+		pNormals->push_back((p5 - p4) ^ (p8 - p1));
+		pNormals->back().normalize();
+
+		pGemetry->setVertexArray(pVertices);
+		pGemetry->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, pVertices->size()));
+
+		pGemetry->setNormalArray(pNormals);
+		pGemetry->setNormalBinding(deprecated_osg::Geometry::BIND_PER_PRIMITIVE);
+
+		pPyramids->addDrawable(pGemetry);
+	}
+	return pPyramids.release();
 }
 
 void cOSG::CreatePoint(const osg::Vec3 &pos, int idx)

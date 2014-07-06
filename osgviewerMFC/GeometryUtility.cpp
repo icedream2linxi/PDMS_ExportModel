@@ -371,3 +371,10 @@ osg::Node* BuildCone(DbModel::Cone^ cone)
 	BuildShapeMesh(geode, shape);
 	return geode.release();
 }
+
+//osg::Node* BuildPyramid(DbModel::Pyramid^ pyramid)
+//{
+//	gp_Pnt org = ToGpPnt(pyramid->Org);
+//	gp_Vec height = ToGpVec(pyramid->Height);
+//	gp_Vec xAxis = ToGpVec(pyramid->XAxis);
+//}
