@@ -178,29 +178,29 @@ namespace ExportModel
 			return exper;
 		}
 
-		private void ExportTube(DbElement tubeEle)
+		private void ExportTube(DbElement tubeEle, D3Transform transform)
 		{
 			double ltLength = tubeEle.GetDouble(DbAttributeInstance.ITLE);
 			double lbore = tubeEle.GetDoubleArray(DbAttributeInstance.PARA)[1];
-			Direction dir = null;
+			D3Vector dir = null;
 
 			DbElement prevEle = tubeEle.Previous;
 			if (prevEle == null || !prevEle.IsValid)
 			{
 				DbElement branchEle = tubeEle.Owner;
-				dir = branchEle.GetDirection(DbAttributeInstance.HDIR);
+				dir = transform.Multiply(GeometryUtility.ToD3VectorRef(tubeEle.GetDirection(DbAttributeInstance.HDIR)));
 			}
 			else
 			{
 				int leave = prevEle.GetInteger(DbAttributeInstance.LEAV);
 				AxisDir ptax = EvalDirection.Eval(prevEle, "P" + leave);
 
-				Aveva.Pdms.Geometry.Orientation ori = prevEle.GetOrientation(DbAttributeInstance.ORI);
-				dir = ori.AbsoluteDirection(ptax.Dir);
+				D3Transform eleTrans = transform.Multiply(GetTransform(prevEle));
+				dir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(ptax.Dir));
 			}
 
-			Position pos = tubeEle.GetPosition(DbAttributeInstance.ITPS);
-			pos.MoveBy(dir, -ltLength / 2);
+			D3Point pos = transform.Multiply(GeometryUtility.ToD3Point(tubeEle.GetPosition(DbAttributeInstance.ITPS)));
+			pos.MoveBy(dir * (-ltLength / 2));
 
 			Cylinder cyl = new Cylinder();
 			cyl.Org = new Point(pos);
@@ -224,7 +224,7 @@ namespace ExportModel
 		{
 			if (ele.GetElementType() == DbElementTypeInstance.TUBING)
 			{
-				ExportTube(ele);
+				ExportTube(ele, transform);
 				return;
 			}
 
@@ -249,6 +249,8 @@ namespace ExportModel
 				return;
 			}
 
+			D3Transform eleTrans = transform.Multiply(GetTransform(ele));
+
 			DbElement gEle = gmEle.FirstMember();
 			while (gEle != null && gEle.IsValid)
 			{
@@ -263,18 +265,11 @@ namespace ExportModel
 						double pdia = GetExper(gEle, DbAttributeInstance.PDIA).Eval(ele);
 						double pdis = GetExper(gEle, DbAttributeInstance.PDIS).Eval(ele);
 
-						Aveva.Pdms.Geometry.Orientation ori = ele.GetOrientation(DbAttributeInstance.ORI);
-						Direction dir = ori.AbsoluteDirection(paxi.Dir);
-						Position pos = Position.Create();
-						double dist = paxi.Pos.Distance(pos);
-						if (dist > 0.00001)
-						{
-							pos.MoveBy(ori.AbsoluteDirection(Direction.Create(paxi.Pos)), dist);
-						}
+						D3Vector dir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(paxi.Dir));
+						D3Point pos = eleTrans.Multiply(GeometryUtility.ToD3Point(paxi.Pos));
 
 						Cylinder cyl = new Cylinder();
 						cyl.Org = new Point(pos)
-							.MoveBy(ele.GetPosition(DbAttributeInstance.POS))
 							.MoveBy(dir, pdis);
 						cyl.Height = new Point(dir).Mul(phei);
 						cyl.Radius = pdia / 2.0;
@@ -289,18 +284,11 @@ namespace ExportModel
 						double pbdi = GetExper(gEle, DbAttributeInstance.PBDI).Eval(ele);
 						double ptdi = GetExper(gEle, DbAttributeInstance.PTDI).Eval(ele);
 
-						Aveva.Pdms.Geometry.Orientation ori = ele.GetOrientation(DbAttributeInstance.ORI);
-						Direction dir = ori.AbsoluteDirection(paxi.Dir);
-						Position pos = Position.Create();
-						double dist = paxi.Pos.Distance(pos);
-						if (dist > 0.00001)
-						{
-							pos.MoveBy(ori.AbsoluteDirection(Direction.Create(paxi.Pos)), dist);
-						}
-
+						D3Vector dir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(paxi.Dir));
+						D3Point pos = eleTrans.Multiply(GeometryUtility.ToD3Point(paxi.Pos));
+		
 						Cylinder cyl = new Cylinder();
 						cyl.Org = new Point(pos)
-							.MoveBy(ele.GetPosition(DbAttributeInstance.POS))
 							.MoveBy(dir, pbdi);
 						cyl.Height = new Point(dir).Mul(ptdi - pbdi);
 						cyl.Radius = pdia / 2.0;
@@ -315,12 +303,11 @@ namespace ExportModel
 						double py = GetExper(gEle, DbAttributeInstance.PY).Eval(ele);
 						double pz = GetExper(gEle, DbAttributeInstance.PZ).Eval(ele);
 
-						Aveva.Pdms.Geometry.Orientation ori = ele.GetOrientation(DbAttributeInstance.ORI);
-						Point xlen = new Point(ori.AbsoluteDirection(Direction.Create(Axis.EAST)));
-						Point ylen = new Point(ori.AbsoluteDirection(Direction.Create(Axis.NORTH)));
-						Point zlen = new Point(ori.AbsoluteDirection(Direction.Create(Axis.UP)));
+						Point xlen = new Point(eleTrans.Multiply(D3Vector.D3EAST));
+						Point ylen = new Point(eleTrans.Multiply(D3Vector.D3NORTH));
+						Point zlen = new Point(eleTrans.Multiply(D3Vector.D3UP));
 
-						Point pos = new Point(ele.GetPosition(DbAttributeInstance.POS));
+						Point pos = new Point(eleTrans.Multiply(GeometryUtility.Org));
 						pos.MoveBy(xlen, px - pxlen / 2.0).MoveBy(ylen, py - pylen / 2.0).MoveBy(zlen, pz - pzlen / 2.0);
 						xlen.Mul(pxlen);
 						ylen.Mul(pylen);
@@ -343,21 +330,15 @@ namespace ExportModel
 
 						double pdia = GetExper(gEle, DbAttributeInstance.PDIA).Eval(ele);
 
-						Aveva.Pdms.Geometry.Orientation ori = ele.GetOrientation(DbAttributeInstance.ORI);
 						CircularTorus ct = new CircularTorus();
 						Direction normal = null;
 						if (!paax.Dir.IsParallel(pbax.Dir))
 							normal = paax.Dir.Orthogonal(pbax.Dir);
 						else
 							normal = paax.Dir.Orthogonal(Direction.Create(paax.Pos, pbax.Pos));
-						ct.Normal = new Point(ori.AbsoluteDirection(normal));
-						Position pos = Position.Create();
-						double dist = pbax.Pos.Distance(pos);
-						if (dist > 0.00001)
-						{
-							pos.MoveBy(ori.AbsoluteDirection(Direction.Create(pbax.Pos)), dist);
-						}
-						ct.StartPnt = new Point(pos).MoveBy(ele.GetPosition(DbAttributeInstance.POS));
+						ct.Normal = new Point(eleTrans.Multiply(GeometryUtility.ToD3VectorRef(normal)));
+
+						ct.StartPnt = new Point(eleTrans.Multiply(GeometryUtility.ToD3Point(pbax.Pos)));
 						ct.Radius = pdia / 2.0;
 
 						double mRadius = 0.0;
@@ -375,7 +356,7 @@ namespace ExportModel
 							ct.Angle = Math.PI;
 							mRadius = paax.Pos.Distance(pbax.Pos) / 2.0;
 						}
-						Direction radiusDir = ori.AbsoluteDirection(pbax.Dir.Orthogonal(normal));
+						D3Vector radiusDir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(pbax.Dir.Orthogonal(normal)));
 						ct.Center = new Point(ct.StartPnt).MoveBy(radiusDir, mRadius);
 
 						session.Save(ct);
@@ -398,18 +379,11 @@ namespace ExportModel
 						snout.ButtomRadius = pbdm / 2.0;
 						snout.TopRadius = ptdm / 2.0;
 
-						Aveva.Pdms.Geometry.Orientation ori = ele.GetOrientation(DbAttributeInstance.ORI);
-						Direction tdir = ori.AbsoluteDirection(paax.Dir);
-						Position pos = Position.Create();
-						double dist = paax.Pos.Distance(pos);
-						if (dist > 0.00001)
-						{
-							pos.MoveBy(ori.AbsoluteDirection(Direction.Create(paax.Pos)), dist);
-						}
+						D3Vector tdir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(paax.Dir));
+						D3Point pos = eleTrans.Multiply(GeometryUtility.ToD3Point(paax.Pos));
+						D3Vector bdir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(pbax.Dir));
 
-						Direction bdir = ori.AbsoluteDirection(pbax.Dir);
-
-						snout.Org = new Point(pos).MoveBy(ele.GetPosition(DbAttributeInstance.POS)).MoveBy(tdir, pbdi);
+						snout.Org = new Point(pos).MoveBy(tdir, pbdi);
 						snout.Offset = new Point(bdir).Mul(poff);
 						snout.Height = new Point(tdir).Mul(ptdi - pbdi);
 
@@ -425,18 +399,9 @@ namespace ExportModel
 						double pdis = GetExper(gEle, DbAttributeInstance.PDIS).Eval(ele);
 						double prad = GetExper(gEle, DbAttributeInstance.PRAD).Eval(ele);
 
-						Aveva.Pdms.Geometry.Orientation ori = ele.GetOrientation(DbAttributeInstance.ORI);
-						Direction dir = ori.AbsoluteDirection(paxi.Dir);
-						Position pos = Position.Create();
-						double dist = paxi.Pos.Distance(pos);
-						if (dist > 0.00001)
-						{
-							pos.MoveBy(ori.AbsoluteDirection(Direction.Create(paxi.Pos)), dist);
-						}
-
+						D3Vector dir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(paxi.Dir));
 						Dish dish = new Dish();
-						dish.Org = new Point(pos)
-							.MoveBy(ele.GetPosition(DbAttributeInstance.POS))
+						dish.Org = new Point(eleTrans.Multiply(GeometryUtility.ToD3Point(paxi.Pos)))
 							.MoveBy(dir, pdis);
 						dish.Height = new Point(dir).Mul(phei);
 						dish.Radius = pdia / 2.0;
