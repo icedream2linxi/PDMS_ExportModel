@@ -374,7 +374,7 @@ osg::Node* cOSG::CreateDish(NHibernate::ISession^ session)
 		{
 			pDish->addChild(BuildDish(dish));
 		}
-		catch (Standard_ConstructionError &e)
+		catch (Standard_Failure &e)
 		{
 			AfxMessageBox(e.GetMessageString(), MB_OK | MB_ICONERROR);
 		}

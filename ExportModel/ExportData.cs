@@ -472,7 +472,7 @@ namespace ExportModel
 
 						Dish dish = new Dish();
 						dish.Org = new Point(pos);
-						dish.Height = new Point(ori.AbsoluteDirection(Direction.Create(Axis.EAST)))
+						dish.Height = new Point(ori.AbsoluteDirection(Direction.Create(Axis.UP)))
 							.Mul(ele.GetDouble(DbAttributeInstance.HEIG));
 						dish.Radius = ele.GetDouble(DbAttributeInstance.DIAM) / 2.0;
 						dish.IsEllipse = ele.GetDouble(DbAttributeInstance.RADI) > 0.0;

@@ -27,6 +27,8 @@
 #include <TopExp_Explorer.hxx>
 #include <BRepLProp_SLProps.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
+#include <Geom_TrimmedCurve.hxx>
+#include <GC_MakeArcOfCircle.hxx>
 
 osg::Geode* BuildMesh(const TopoDS_Face &face, double deflection)
 {
@@ -119,6 +121,9 @@ void BuildShapeMesh(osg::Geode *geode, const TopoDS_Shape &shape, double deflect
 		TopLoc_Location theLocation;
 		TopoDS_Face theFace = TopoDS::Face(faceExplorer.Current());
 	
+		if (theFace.IsNull())
+			continue;
+
 		const Handle_Poly_Triangulation &theTriangulation = BRep_Tool::Triangulation(theFace, theLocation);
 		BRepLProp_SLProps theProp(BRepAdaptor_Surface(theFace), 1, Precision::Confusion());
 	
@@ -331,6 +336,7 @@ osg::Node* BuildDish(DbModel::Dish^ dish)
 	gp_Pnt center = ToGpPnt(dish->Org);
 	gp_Vec vec = ToGpVec(dish->Height);
 	double height = vec.Magnitude();
+	vec.Normalize();
 
 	if (dish->IsEllipse)
 	{
@@ -366,14 +372,20 @@ osg::Node* BuildDish(DbModel::Dish^ dish)
 	}
 	else
 	{
-		double angle = 0.0;
+		double radius = (dish->Radius * dish->Radius + height * height) / 2.0 / height;
+		double angle = M_PI / 2.0 - asin(2.0 * dish->Radius * height / (dish->Radius * dish->Radius + height * height));
 		if (dish->Radius >= height)
-			angle = acos((dish->Radius - height) / dish->Radius);
+		{
+			center.Translate(-vec * (radius - height));
+		}
 		else
-			angle = -asin((height - dish->Radius) / dish->Radius);
+		{
+			angle = -angle;
+			center.Translate(vec * (height - radius));
+		}
 		gp_Ax2 circAxis(center, GetOrthoVec(vec));
 		circAxis.SetYDirection(vec);
-		gp_Circ circ(circAxis, dish->Radius);
+		gp_Circ circ(circAxis, radius);
 		TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(circ, angle, M_PI / 2.0);
 
 		gp_Ax1 revolAxis(center, vec);
