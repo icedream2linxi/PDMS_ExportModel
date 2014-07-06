@@ -181,6 +181,9 @@ namespace ExportModel
 		private void ExportTube(DbElement tubeEle, D3Transform transform)
 		{
 			double ltLength = tubeEle.GetDouble(DbAttributeInstance.ITLE);
+			if (ltLength <= 0)
+				return;
+
 			double lbore = tubeEle.GetDoubleArray(DbAttributeInstance.PARA)[1];
 			D3Vector dir = null;
 
@@ -256,6 +259,12 @@ namespace ExportModel
 			{
 				if (IsReadableEle(gEle) && gEle.GetBool(DbAttributeInstance.TUFL))
 				{
+					if (!IsVisible(gEle))
+					{
+						gEle = gEle.Next();
+						continue;
+					}
+
 					if (gEle.GetElementType() == DbElementTypeInstance.SCYLINDER)
 					{
 						string expr = gEle.GetAsString(DbAttributeInstance.PAXI);
@@ -413,6 +422,19 @@ namespace ExportModel
 			}
 		}
 
+		private bool IsVisible(DbElement ele)
+		{
+			if (ele.IsAttributeValid(DbAttributeInstance.LEVE))
+			{
+				int[] level = ele.GetIntegerArray(DbAttributeInstance.LEVE);
+				if (level.Length >= 2 && level[1] < 6)
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
 		private void ExportEquip(DbElement equipEle, D3Transform transform)
 		{
 			D3Transform currTrans = transform.Multiply(GetTransform(equipEle));
@@ -421,14 +443,10 @@ namespace ExportModel
 			{
 				if (IsReadableEle(ele))
 				{
-					if (ele.IsAttributeSetable(DbAttributeInstance.LEVE) && ele.IsAttributeValid(DbAttributeInstance.LEVE))
+					if (!IsVisible(ele))
 					{
-						int[] level = ele.GetIntegerArray(DbAttributeInstance.LEVE);
-						if (level.Length >= 2 && level[1] < 6)
-						{
-							ele = ele.Next();
-							continue;
-						}
+						ele = ele.Next();
+						continue;
 					}
 
 					if (ele.GetElementType() == DbElementTypeInstance.NOZZLE)
