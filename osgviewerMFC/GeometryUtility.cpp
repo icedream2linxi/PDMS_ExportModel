@@ -408,6 +408,34 @@ osg::Node* BuildCone(DbModel::Cone^ cone)
 	return geode.release();
 }
 
+osg::Node* BuildRectangularTorus(DbModel::RectangularTorus^ rt)
+{
+	gp_Pnt center = ToGpPnt(rt->Center);
+	gp_Pnt startPnt = ToGpPnt(rt->StartPnt);
+	gp_Vec normal = ToGpVec(rt->Normal);
+	gp_Vec xDir(center, startPnt);
+	double radius = xDir.Magnitude();
+	xDir.Normalize();
+
+	gp_Pnt p1 = startPnt.Translated(- xDir * rt->Width / 2.0 - normal * rt->Height / 2.0);
+	gp_Pnt p2 = startPnt.Translated(xDir * rt->Width / 2.0 - normal * rt->Height / 2.0);
+	gp_Pnt p3 = startPnt.Translated(xDir * rt->Width / 2.0 + normal * rt->Height / 2.0);
+	gp_Pnt p4 = startPnt.Translated(- xDir * rt->Width / 2.0 + normal * rt->Height / 2.0);
+
+	TopoDS_Edge edge1 = BRepBuilderAPI_MakeEdge(p1, p2);
+	TopoDS_Edge edge2 = BRepBuilderAPI_MakeEdge(p2, p3);
+	TopoDS_Edge edge3 = BRepBuilderAPI_MakeEdge(p3, p4);
+	TopoDS_Edge edge4 = BRepBuilderAPI_MakeEdge(p4, p1);
+
+	TopoDS_Wire wire = BRepBuilderAPI_MakeWire(edge1, edge2, edge3, edge4);
+	gp_Ax1 revolAxis(center, normal);
+	TopoDS_Shape shape = BRepPrimAPI_MakeRevol(wire, revolAxis, rt->Angle);
+
+	osg::ref_ptr<osg::Geode> geode = new osg::Geode();
+	BuildShapeMesh(geode, shape);
+	return geode.release();
+}
+
 //osg::Node* BuildPyramid(DbModel::Pyramid^ pyramid)
 //{
 //	gp_Pnt org = ToGpPnt(pyramid->Org);

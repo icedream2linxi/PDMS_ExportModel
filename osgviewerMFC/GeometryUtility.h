@@ -11,3 +11,4 @@ osg::Geode* BuildCircularTorus(DbModel::CircularTorus^ ct);
 osg::Node* BuildSnout(DbModel::Snout^ snout);
 osg::Node* BuildDish(DbModel::Dish^ dish);
 osg::Node* BuildCone(DbModel::Cone^ cone);
+osg::Node* BuildRectangularTorus(DbModel::RectangularTorus^ rt);

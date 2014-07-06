@@ -234,6 +234,7 @@ osg::Group *cOSG::InitOSGFromDb()
 				group->addChild(CreateSnout(session));
 				group->addChild(CreateDish(session));
 				group->addChild(CreatePyramid(session));
+				group->addChild(CreateRectangularTorus(session));
 				tx->Commit();
 				return group;
 			}
@@ -465,6 +466,16 @@ osg::Node* cOSG::CreatePyramid(NHibernate::ISession^ session)
 		pPyramids->addDrawable(pGemetry);
 	}
 	return pPyramids.release();
+}
+
+osg::Node* cOSG::CreateRectangularTorus(NHibernate::ISession^ session)
+{
+	osg::Group *pRt = new osg::Group();
+	IList<RectangularTorus^>^ rtList = session->CreateQuery("from RectangularTorus")->List<RectangularTorus^>();
+	for each (RectangularTorus^ rt in rtList) {
+		pRt->addChild(BuildRectangularTorus(rt));
+	}
+	return pRt;
 }
 
 void cOSG::CreatePoint(const osg::Vec3 &pos, int idx)

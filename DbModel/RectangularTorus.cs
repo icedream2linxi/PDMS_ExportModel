@@ -6,6 +6,7 @@ using System.Text;
 
 namespace DbModel
 {
+	[Class(Table = "rectangular_torus")]
 	public class RectangularTorus
 	{
 		[Id(0, TypeType = typeof(int))]

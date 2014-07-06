@@ -370,6 +370,49 @@ namespace ExportModel
 
 						session.Save(ct);
 					}
+					else if (gEle.GetElementType() == DbElementTypeInstance.SRTORUS)
+					{
+						string expr = gEle.GetAsString(DbAttributeInstance.PAAX);
+						AxisDir paax = EvalDirection.Eval(ele, expr);
+
+						expr = gEle.GetAsString(DbAttributeInstance.PBAX);
+						AxisDir pbax = EvalDirection.Eval(ele, expr);
+
+						double pdia = GetExper(gEle, DbAttributeInstance.PDIA).Eval(ele);
+						double phei = GetExper(gEle, DbAttributeInstance.PHEI).Eval(ele);
+
+						RectangularTorus rt = new RectangularTorus();
+						Direction normal = null;
+						if (!paax.Dir.IsParallel(pbax.Dir))
+							normal = paax.Dir.Orthogonal(pbax.Dir);
+						else
+							normal = paax.Dir.Orthogonal(Direction.Create(paax.Pos, pbax.Pos));
+						rt.Normal = new Point(eleTrans.Multiply(GeometryUtility.ToD3VectorRef(normal)));
+
+						rt.StartPnt = new Point(eleTrans.Multiply(GeometryUtility.ToD3Point(pbax.Pos)));
+						rt.Width = pdia;
+						rt.Height = phei;
+
+						double mRadius = 0.0;
+						if (!paax.Dir.IsParallel(pbax.Dir))
+						{
+							double ang = paax.Dir.Angle(pbax.Dir) * Math.PI / 180.0;
+							rt.Angle = Math.PI - ang;
+							ang /= 2.0;
+							double len = paax.Pos.Distance(pbax.Pos) / 2;
+							mRadius = len / Math.Sin(ang) * Math.Tan(ang);
+
+						}
+						else
+						{
+							rt.Angle = Math.PI;
+							mRadius = paax.Pos.Distance(pbax.Pos) / 2.0;
+						}
+						D3Vector radiusDir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(pbax.Dir.Orthogonal(normal)));
+						rt.Center = new Point(rt.StartPnt).MoveBy(radiusDir, mRadius);
+
+						session.Save(rt);
+					}
 					else if (gEle.GetElementType() == DbElementTypeInstance.LSNOUT)
 					{
 						string expr = gEle.GetAsString(DbAttributeInstance.PAAX);
