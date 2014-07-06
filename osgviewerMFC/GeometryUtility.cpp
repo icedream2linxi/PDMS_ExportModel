@@ -25,6 +25,8 @@
 #include <BRepOffsetAPI_ThruSections.hxx>
 #include <TopoDS.hxx>
 #include <TopExp_Explorer.hxx>
+#include <BRepLProp_SLProps.hxx>
+#include <TColgp_Array1OfPnt2d.hxx>
 
 osg::Geode* BuildMesh(const TopoDS_Face &face, double deflection)
 {
@@ -104,75 +106,105 @@ void BuildMesh(osg::Geode *geode, const TopoDS_Face &face, double deflection)
 
 void BuildShapeMesh(osg::Geode *geode, const TopoDS_Shape &shape, double deflection)
 {
+	bool bSetNormal = true;
 	osg::ref_ptr<deprecated_osg::Geometry> triGeom = new deprecated_osg::Geometry();
-	osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array();
-	osg::ref_ptr<osg::Vec3Array> normals = new osg::Vec3Array();
+	osg::ref_ptr<osg::Vec3Array> theVertices = new osg::Vec3Array();
+	osg::ref_ptr<osg::Vec3Array> theNormals = new osg::Vec3Array();
 
 	BRepMesh::Mesh(shape, deflection);
 
 	TopExp_Explorer faceExplorer;
 	for (faceExplorer.Init(shape, TopAbs_FACE); faceExplorer.More(); faceExplorer.Next())
 	{
-		TopLoc_Location location;
-		TopoDS_Face face = TopoDS::Face(faceExplorer.Current());
+		TopLoc_Location theLocation;
+		TopoDS_Face theFace = TopoDS::Face(faceExplorer.Current());
 	
-		const Handle_Poly_Triangulation &triFace = BRep_Tool::Triangulation(face, location);
+		const Handle_Poly_Triangulation &theTriangulation = BRep_Tool::Triangulation(theFace, theLocation);
+		BRepLProp_SLProps theProp(BRepAdaptor_Surface(theFace), 1, Precision::Confusion());
 	
-		Standard_Integer nTriangles = triFace->NbTriangles();
-	
-		gp_Pnt vertex1;
-		gp_Pnt vertex2;
-		gp_Pnt vertex3;
-	
-		Standard_Integer nVertexIndex1 = 0;
-		Standard_Integer nVertexIndex2 = 0;
-		Standard_Integer nVertexIndex3 = 0;
-	
-		const TColgp_Array1OfPnt &nodes = triFace->Nodes();
-		const Poly_Array1OfTriangle &triangles = triFace->Triangles();
+		Standard_Integer nTriangles = theTriangulation->NbTriangles();
 	
 		for (Standard_Integer i = 1; i <= nTriangles; i++)
 		{
-			const Poly_Triangle &aTriangle = triangles.Value(i);
-	
-			aTriangle.Get(nVertexIndex1, nVertexIndex2, nVertexIndex3);
-	
-			vertex1 = nodes.Value(nVertexIndex1).Transformed(location.Transformation());
-			vertex2 = nodes.Value(nVertexIndex2).Transformed(location.Transformation());
-			vertex3 = nodes.Value(nVertexIndex3).Transformed(location.Transformation());
-	
-			gp_XYZ vector12(vertex2.XYZ() - vertex1.XYZ());
-			gp_XYZ vector13(vertex3.XYZ() - vertex1.XYZ());
-			gp_XYZ normal = vector12.Crossed(vector13);
-			Standard_Real rModulus = normal.Modulus();
-	
-			if (rModulus > gp::Resolution())
+			const Poly_Triangle& theTriangle = theTriangulation->Triangles().Value(i);
+			gp_Pnt theVertex1 = theTriangulation->Nodes().Value(theTriangle(1));
+			gp_Pnt theVertex2 = theTriangulation->Nodes().Value(theTriangle(2));
+			gp_Pnt theVertex3 = theTriangulation->Nodes().Value(theTriangle(3));
+
+			const gp_Pnt2d &theUV1 = theTriangulation->UVNodes().Value(theTriangle(1));
+			const gp_Pnt2d &theUV2 = theTriangulation->UVNodes().Value(theTriangle(2));
+			const gp_Pnt2d &theUV3 = theTriangulation->UVNodes().Value(theTriangle(3));
+
+			theVertex1.Transform(theLocation.Transformation());
+			theVertex2.Transform(theLocation.Transformation());
+			theVertex3.Transform(theLocation.Transformation());
+
+			// find the normal for the triangle mesh.
+			gp_Vec V12(theVertex1, theVertex2);
+			gp_Vec V13(theVertex1, theVertex3);
+			gp_Vec theNormal = V12 ^ V13;
+			gp_Vec theNormal1 = theNormal;
+			gp_Vec theNormal2 = theNormal;
+			gp_Vec theNormal3 = theNormal;
+
+			if (theNormal.Magnitude() > Precision::Confusion())
 			{
-				normal.Normalize();
+				theNormal.Normalize();
+				theNormal1.Normalize();
+				theNormal2.Normalize();
+				theNormal3.Normalize();
+			}
+
+			theProp.SetParameters(theUV1.X(), theUV1.Y());
+			if (theProp.IsNormalDefined())
+			{
+				theNormal1 = theProp.Normal();
+			}
+
+			theProp.SetParameters(theUV2.X(), theUV2.Y());
+			if (theProp.IsNormalDefined())
+			{
+				theNormal2 = theProp.Normal();
+			}
+
+			theProp.SetParameters(theUV3.X(), theUV3.Y());
+			if (theProp.IsNormalDefined())
+			{
+				theNormal3 = theProp.Normal();
+			}
+
+			if (theFace.Orientation() == TopAbs_REVERSED)
+			{
+				theNormal.Reverse();
+				theNormal1.Reverse();
+				theNormal2.Reverse();
+				theNormal3.Reverse();
+			}
+
+			theVertices->push_back(osg::Vec3(theVertex1.X(), theVertex1.Y(), theVertex1.Z()));
+			theVertices->push_back(osg::Vec3(theVertex2.X(), theVertex2.Y(), theVertex2.Z()));
+			theVertices->push_back(osg::Vec3(theVertex3.X(), theVertex3.Y(), theVertex3.Z()));
+
+			if (bSetNormal)
+			{
+				theNormals->push_back(osg::Vec3(theNormal1.X(), theNormal1.Y(), theNormal1.Z()));
+				theNormals->push_back(osg::Vec3(theNormal2.X(), theNormal2.Y(), theNormal2.Z()));
+				theNormals->push_back(osg::Vec3(theNormal3.X(), theNormal3.Y(), theNormal3.Z()));
 			}
 			else
 			{
-				normal.SetCoord(0., 0., 0.);
+				theNormals->push_back(osg::Vec3(theNormal.X(), theNormal.Y(), theNormal.Z()));
+				theNormals->push_back(osg::Vec3(theNormal.X(), theNormal.Y(), theNormal.Z()));
+				theNormals->push_back(osg::Vec3(theNormal.X(), theNormal.Y(), theNormal.Z()));
 			}
-	
-			if (face.Orientation() != TopAbs_FORWARD)
-			{
-			    normal.Reverse();
-			}
-	
-			vertices->push_back(osg::Vec3(vertex1.X(), vertex1.Y(), vertex1.Z()));
-			vertices->push_back(osg::Vec3(vertex2.X(), vertex2.Y(), vertex2.Z()));
-			vertices->push_back(osg::Vec3(vertex3.X(), vertex3.Y(), vertex3.Z()));
-	
-			normals->push_back(osg::Vec3(normal.X(), normal.Y(), normal.Z()));
 		}
 	}
 
-	triGeom->setVertexArray(vertices.get());
-	triGeom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::TRIANGLES, 0, vertices->size()));
+	triGeom->setVertexArray(theVertices.get());
+	triGeom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::TRIANGLES, 0, theVertices->size()));
 
-	triGeom->setNormalArray(normals);
-	triGeom->setNormalBinding(deprecated_osg::Geometry::BIND_PER_PRIMITIVE);
+	triGeom->setNormalArray(theNormals);
+	triGeom->setNormalBinding(deprecated_osg::Geometry::BIND_PER_VERTEX);
 
 	geode->addDrawable(triGeom);
 }
@@ -236,10 +268,14 @@ osg::Geode* BuildCircularTorus(DbModel::CircularTorus^ ct)
 	axis.SetLocation(center);
 	axis.SetDirection(normal);
 	gp_Vec vec(center, startPnt);
+	double mainRadius = vec.Magnitude();
+	vec.Normalize();
 	axis.SetXDirection(vec);
 
-	TopoDS_Face gpCt = BRepPrimAPI_MakeTorus(axis, vec.Magnitude(), ct->Radius, ct->Angle);
-	return BuildMesh(gpCt);
+	TopoDS_Shape shape = BRepPrimAPI_MakeTorus(axis, mainRadius, ct->Radius, ct->Angle).Shape();
+	osg::ref_ptr<osg::Geode> geode = new osg::Geode();
+	BuildShapeMesh(geode, shape);
+	return geode.release();
 }
 
 osg::Node* BuildSnout(DbModel::Snout^ snout)
@@ -286,11 +322,7 @@ osg::Node* BuildSnout(DbModel::Snout^ snout)
 	}
 
 	TopoDS_Shape shape = thruSection;
-	for (TopExp_Explorer aFaceExplorer(shape, TopAbs_FACE); aFaceExplorer.More(); aFaceExplorer.Next())
-	{
-		TopoDS_Face aFace = TopoDS::Face(aFaceExplorer.Current());
-		BuildMesh(geode, aFace);
-	}
+	BuildShapeMesh(geode, shape);
 	return geode.release();
 }
 
@@ -327,11 +359,7 @@ osg::Node* BuildDish(DbModel::Dish^ dish)
 		TopoDS_Shape shape = BRepPrimAPI_MakeRevol(edge, revolAxis);
 
 		osg::ref_ptr<osg::Geode> geode = new osg::Geode();
-		for (TopExp_Explorer aFaceExplorer(shape, TopAbs_FACE); aFaceExplorer.More(); aFaceExplorer.Next())
-		{
-			TopoDS_Face aFace = TopoDS::Face(aFaceExplorer.Current());
-			BuildMesh(geode, aFace);
-		}
+		BuildShapeMesh(geode, shape);
 		
 		BuildMesh(geode, MakeCircFace(center, vec, dish->Radius));
 		return geode.release();
@@ -352,11 +380,7 @@ osg::Node* BuildDish(DbModel::Dish^ dish)
 		TopoDS_Shape shape = BRepPrimAPI_MakeRevol(edge, revolAxis);
 
 		osg::ref_ptr<osg::Geode> geode = new osg::Geode();
-		for (TopExp_Explorer aFaceExplorer(shape, TopAbs_FACE); aFaceExplorer.More(); aFaceExplorer.Next())
-		{
-			TopoDS_Face aFace = TopoDS::Face(aFaceExplorer.Current());
-			BuildMesh(geode, aFace);
-		}
+		BuildShapeMesh(geode, shape);
 		return geode.release();
 	}
 }

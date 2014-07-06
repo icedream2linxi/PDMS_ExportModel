@@ -113,7 +113,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>e:\OpenSourceCode\OpenSceneGraph\build\lib\;e:\OpenSourceCode\OpenCasCade\source\ros\win64\vc12\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>OpenThreadsrd.lib;osgDBrd.lib;osgGArd.lib;osgrd.lib;osgTextrd.lib;osgUtilrd.lib;osgViewerrd.lib;TKernel.lib;TKMath.lib;TKBrep.lib;TKMesh.lib;TKTopAlgo.lib;TKPrim.lib;TKOffset.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OpenThreadsrd.lib;osgDBrd.lib;osgGArd.lib;osgrd.lib;osgTextrd.lib;osgUtilrd.lib;osgViewerrd.lib;TKernel.lib;TKMath.lib;TKBrep.lib;TKMesh.lib;TKTopAlgo.lib;TKPrim.lib;TKOffset.lib;TKG3d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
