@@ -188,7 +188,7 @@ namespace ExportModel
 			if (prevEle == null || !prevEle.IsValid)
 			{
 				DbElement branchEle = tubeEle.Owner;
-				dir = transform.Multiply(GeometryUtility.ToD3VectorRef(tubeEle.GetDirection(DbAttributeInstance.HDIR)));
+				dir = transform.Multiply(GeometryUtility.ToD3VectorRef(branchEle.GetDirection(DbAttributeInstance.HDIR)));
 			}
 			else
 			{
