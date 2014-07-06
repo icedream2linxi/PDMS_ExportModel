@@ -48,11 +48,19 @@ namespace ExportModel
 
 		public void Parse()
 		{
-			CharEnumerator experIter = Exper.GetEnumerator();
-			if (experIter.MoveNext())
-				Parse(experIter, OperatorOrder.NONE, ref op);
-			else
-				op = new ValOp(0.0);
+			try
+			{
+				CharEnumerator experIter = Exper.GetEnumerator();
+				if (experIter.MoveNext())
+					Parse(experIter, OperatorOrder.NONE, ref op);
+				else
+					op = new ValOp(0.0);
+			}
+			catch (System.Exception ex)
+			{
+				System.Console.WriteLine("Exper = " + Exper);
+				throw;
+			}
 		}
 
 		public double Eval(DbElement ele)
@@ -296,6 +304,11 @@ namespace ExportModel
 			}
 			else if (item.Equals("DESIGN"))
 			{
+				isEof = !SkipSpace(experIter);
+				if (isEof)
+					throw new FormatException();
+
+				sb = new StringBuilder();
 				while (!IsSplit(experIter.Current) && !IsOp(experIter.Current) && experIter.Current != '(' && experIter.Current != ')')
 				{
 					sb.Append(experIter.Current);
@@ -309,6 +322,7 @@ namespace ExportModel
 				if (isEof)
 					throw new FormatException();
 
+				item = sb.ToString();
 				if (item.Equals("PARAM"))
 				{
 					DParamOp paramOp = new DParamOp(this);
@@ -321,6 +335,14 @@ namespace ExportModel
 				else
 					throw new FormatException();
 			}
+			else if (item.Equals("TWICE"))
+			{
+				IOperator valueOp = null;
+				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
+				op = new TwiceOp(valueOp);
+			}
+			else
+				throw new FormatException();
 
 			return isEof;
 		}
@@ -481,6 +503,25 @@ namespace ExportModel
 		}
 	}
 
+	class TwiceOp : OneObjOp
+	{
+		public TwiceOp()
+		{
+
+		}
+
+		public TwiceOp(IOperator item)
+			: base(item)
+		{
+
+		}
+
+		public override double Eval()
+		{
+			return Item.Eval() * 2.0;
+		}
+	}
+
 	class ValOp : IOperator
 	{
 		public double Val { get; set; }
@@ -528,7 +569,7 @@ namespace ExportModel
 
 		public override double Eval()
 		{
-			return Exper.ModelElement.GetDoubleArray(DbAttributeInstance.PARA)[(int)Item.Eval() - 1];
+			return Exper.ModelElement.GetDoubleArray(DbAttributeInstance.DESP)[(int)Item.Eval() - 1];
 		}
 	}
 
