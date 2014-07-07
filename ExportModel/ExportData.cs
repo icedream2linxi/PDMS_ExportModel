@@ -67,30 +67,58 @@ namespace ExportModel
 			return GeometryUtility.ToD3Transform(ele.GetOrientation(DbAttributeInstance.ORI), ele.GetPosition(DbAttributeInstance.POS));
 		}
 
+		private int GetColor(DbElement ele, int parentColor)
+		{
+			DbElementType eleType = ele.GetElementType();
+			if (eleType == DbElementTypeInstance.BRANCH)
+				return System.Drawing.Color.Gold.ToArgb();
+			else if (eleType == DbElementTypeInstance.EQUIPMENT)
+				return System.Drawing.Color.Tan.ToArgb();
+			else
+				return parentColor;
+		}
+
+		private int GetColor(DbElement ele)
+		{
+			List<DbElement> eleArr = new List<DbElement>();
+			do
+			{
+				eleArr.Add(ele);
+			}
+			while (IsReadableEle(ele = ele.Owner));
+
+			int color = System.Drawing.Color.White.ToArgb();
+			for (int i = eleArr.Count-1; i >= 0; --i)
+			{
+				color = GetColor(eleArr[i], color);
+			}
+			return color;
+		}
+
 		private void Export(DbElement ele)
 		{
 			if (ele.GetElementType() == DbElementTypeInstance.WORLD)
 				ExportWorld(ele);
 			else if (ele.GetElementType() == DbElementTypeInstance.SITE)
-				ExportSite(ele);
+				ExportSite(ele, GetColor(ele.Owner));
 			else if (ele.GetElementType() == DbElementTypeInstance.ZONE)
 			{
 				D3Transform transform = GetTransform(ele.Owner);
-				ExportZone(ele, transform);
+				ExportZone(ele, transform, GetColor(ele.Owner));
 			}
 			else if (ele.GetElementType() == DbElementTypeInstance.PIPE)
 			{
 				DbElement zoneEle = ele.Owner;
 				DbElement siteEle = zoneEle.Owner;
 				D3Transform transform = GetTransform(siteEle).Multiply(GetTransform(zoneEle));
-				ExportPipe(ele, transform);
+				ExportPipe(ele, transform, GetColor(ele.Owner));
 			}
 			else if (ele.GetElementType() == DbElementTypeInstance.EQUIPMENT)
 			{
 				DbElement zoneEle = ele.Owner;
 				DbElement siteEle = zoneEle.Owner;
 				D3Transform transform = GetTransform(siteEle).Multiply(GetTransform(zoneEle));
-				ExportEquip(ele, transform);
+				ExportEquip(ele, transform, GetColor(ele.Owner));
 			}
 			else if (ele.GetElementType() == DbElementTypeInstance.BRANCH)
 			{
@@ -98,7 +126,7 @@ namespace ExportModel
 				DbElement zoneEle = pipeEle.Owner;
 				DbElement siteEle = zoneEle.Owner;
 				D3Transform transform = GetTransform(siteEle).Multiply(GetTransform(zoneEle));
-				ExportBranch(ele, transform);
+				ExportBranch(ele, transform, GetColor(ele.Owner));
 			}
 			SaveExpr();
 		}
@@ -110,29 +138,32 @@ namespace ExportModel
 
 		private void ExportWorld(DbElement worldEle)
 		{
+			int color = GetColor(worldEle, System.Drawing.Color.White.ToArgb());
 			DbElement ele = worldEle.FirstMember();
 			while (ele != null && ele.IsValid)
 			{
 				if (IsReadableEle(ele) && ele.GetElementType() == DbElementTypeInstance.SITE)
-					ExportSite(ele);
+					ExportSite(ele, color);
 				ele = ele.Next();
 			}
 		}
 
-		private void ExportSite(DbElement siteEle)
+		private void ExportSite(DbElement siteEle, int color)
 		{
+			int curCol = GetColor(siteEle, color);
 			D3Transform transform = GetTransform(siteEle);
 			DbElement ele = siteEle.FirstMember();
 			while (ele != null && ele.IsValid)
 			{
 				if (IsReadableEle(ele) && ele.GetElementType() == DbElementTypeInstance.ZONE)
-					ExportZone(ele, transform);
+					ExportZone(ele, transform, curCol);
 				ele = ele.Next();
 			}
 		}
 
-		private void ExportZone(DbElement zoneEle, D3Transform transform)
+		private void ExportZone(DbElement zoneEle, D3Transform transform, int color)
 		{
+			int curCol = GetColor(zoneEle, color);
 			D3Transform currentTransform = transform.Multiply(GetTransform(zoneEle));
 			DbElement ele = zoneEle.FirstMember();
 			while (ele != null && ele.IsValid)
@@ -140,21 +171,22 @@ namespace ExportModel
 				if (IsReadableEle(ele))
 				{
 					if (ele.GetElementType() == DbElementTypeInstance.PIPE)
-						ExportPipe(ele, currentTransform);
+						ExportPipe(ele, currentTransform, curCol);
 					else if (ele.GetElementType() == DbElementTypeInstance.EQUIPMENT)
-						ExportEquip(ele, currentTransform);
+						ExportEquip(ele, currentTransform, curCol);
 				}
 				ele = ele.Next();
 			}
 		}
 
-		private void ExportPipe(DbElement pipeEle, D3Transform transform)
+		private void ExportPipe(DbElement pipeEle, D3Transform transform, int color)
 		{
+			int curCol = GetColor(pipeEle, color);
 			DbElement ele = pipeEle.FirstMember();
 			while (ele != null && ele.IsValid)
 			{
 				if (IsReadableEle(ele) && ele.GetElementType() == DbElementTypeInstance.BRANCH)
-					ExportBranch(ele, transform);
+					ExportBranch(ele, transform, curCol);
 				ele = ele.Next();
 			}
 		}
@@ -178,7 +210,7 @@ namespace ExportModel
 			return exper;
 		}
 
-		private void ExportTube(DbElement tubeEle, D3Transform transform)
+		private void ExportTube(DbElement tubeEle, D3Transform transform, int color)
 		{
 			double ltLength = tubeEle.GetDouble(DbAttributeInstance.ITLE);
 			if (ltLength <= 0.001)
@@ -209,25 +241,27 @@ namespace ExportModel
 			cyl.Org = new Point(pos);
 			cyl.Height = new Point(dir).Mul(ltLength);
 			cyl.Radius = lbore / 2.0;
+			cyl.Color = color;
 			session.Save(cyl);
 		}
 
-		private void ExportBranch(DbElement branchEle, D3Transform transform)
+		private void ExportBranch(DbElement branchEle, D3Transform transform, int color)
 		{
+			int curCol = GetColor(branchEle, color);
 			DbElement ele = branchEle.FirstMember();
 			while (ele != null && ele.IsValid)
 			{
 				if (IsReadableEle(ele))
-					ExportPipeItem(ele, transform);
+					ExportPipeItem(ele, transform, curCol);
 				ele = ele.Next();
 			}
 		}
 
-		private void ExportPipeItem(DbElement ele, D3Transform transform)
+		private void ExportPipeItem(DbElement ele, D3Transform transform, int color)
 		{
 			if (ele.GetElementType() == DbElementTypeInstance.TUBING)
 			{
-				ExportTube(ele, transform);
+				ExportTube(ele, transform, color);
 				return;
 			}
 
@@ -282,6 +316,7 @@ namespace ExportModel
 							.MoveBy(dir, pdis);
 						cyl.Height = new Point(dir).Mul(phei);
 						cyl.Radius = pdia / 2.0;
+						cyl.Color = color;
 						session.Save(cyl);
 					}
 					else if (gEle.GetElementType() == DbElementTypeInstance.LCYLINDER)
@@ -301,6 +336,7 @@ namespace ExportModel
 							.MoveBy(dir, pbdi);
 						cyl.Height = new Point(dir).Mul(ptdi - pbdi);
 						cyl.Radius = pdia / 2.0;
+						cyl.Color = color;
 						session.Save(cyl);
 					}
 					else if (gEle.GetElementType() == DbElementTypeInstance.SBOX)
@@ -327,6 +363,7 @@ namespace ExportModel
 						box.XLen = xlen;
 						box.YLen = ylen;
 						box.ZLen = zlen;
+						box.Color = color;
 						session.Save(box);
 					}
 					else if (gEle.GetElementType() == DbElementTypeInstance.SCTORUS)
@@ -367,6 +404,7 @@ namespace ExportModel
 						}
 						D3Vector radiusDir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(pbax.Dir.Orthogonal(normal)));
 						ct.Center = new Point(ct.StartPnt).MoveBy(radiusDir, mRadius);
+						ct.Color = color;
 
 						session.Save(ct);
 					}
@@ -410,6 +448,7 @@ namespace ExportModel
 						}
 						D3Vector radiusDir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(pbax.Dir.Orthogonal(normal)));
 						rt.Center = new Point(rt.StartPnt).MoveBy(radiusDir, mRadius);
+						rt.Color = color;
 
 						session.Save(rt);
 					}
@@ -438,6 +477,7 @@ namespace ExportModel
 						snout.Org = new Point(pos).MoveBy(tdir, pbdi);
 						snout.Offset = new Point(bdir).Mul(poff);
 						snout.Height = new Point(tdir).Mul(ptdi - pbdi);
+						snout.Color = color;
 
 						session.Save(snout);
 					}
@@ -458,6 +498,7 @@ namespace ExportModel
 						dish.Height = new Point(dir).Mul(phei);
 						dish.Radius = pdia / 2.0;
 						dish.IsEllipse = prad > 0.0;
+						dish.Color = color;
 						session.Save(dish);
 					}
 					else if (gEle.GetElementType() == DbElementTypeInstance.LPYRAMID)
@@ -495,6 +536,7 @@ namespace ExportModel
 						pyramid.TopXLen = pbtp;
 						pyramid.TopYLen = pctp;
 						pyramid.Offset = new Point(xDir * pbof + yDir * pcof);
+						pyramid.Color = color;
 						session.Save(pyramid);
 					}
 				}
@@ -515,8 +557,9 @@ namespace ExportModel
 			return true;
 		}
 
-		private void ExportEquip(DbElement equipEle, D3Transform transform)
+		private void ExportEquip(DbElement equipEle, D3Transform transform, int parentColor)
 		{
+			int color = GetColor(equipEle, parentColor);
 			D3Transform currTrans = transform.Multiply(GetTransform(equipEle));
 			DbElement ele = equipEle.FirstMember();
 			while (ele != null && ele.IsValid)
@@ -531,7 +574,7 @@ namespace ExportModel
 
 					DbElementType eleType = ele.GetElementType();
 					if (eleType == DbElementTypeInstance.NOZZLE)
-						ExportPipeItem(ele, currTrans);
+						ExportPipeItem(ele, currTrans, parentColor);
 					else if (eleType == DbElementTypeInstance.TMPLATE)
 					{
 						DbElement[] lcnfArray = null;
@@ -546,7 +589,7 @@ namespace ExportModel
 							while (tmplEle != null && tmplEle.IsValid)
 							{
 								if (IsReadableEle(tmplEle) && IsVisible(tmplEle))
-									ExportDesignGeomotry(tmplEle, currTrans);
+									ExportDesignGeomotry(tmplEle, currTrans, color);
 								tmplEle = tmplEle.Next();
 							}
 						}
@@ -555,16 +598,16 @@ namespace ExportModel
 							foreach (DbElement lcnfEle in lcnfArray)
 							{
 								if (IsReadableEle(lcnfEle) && IsVisible(lcnfEle))
-									ExportDesignGeomotry(lcnfEle, currTrans);
+									ExportDesignGeomotry(lcnfEle, currTrans, color);
 							}
 						}
 					}
 					else if (eleType == DbElementTypeInstance.SUBEQUIPMENT)
 					{
-						ExportEquip(ele, currTrans);
+						ExportEquip(ele, currTrans, color);
 					}
 					else
-						ExportDesignGeomotry(ele, currTrans);
+						ExportDesignGeomotry(ele, currTrans, color);
 					
 				}
 				ele = ele.Next();
@@ -582,7 +625,7 @@ namespace ExportModel
 				;
 		}
 
-		private void ExportDesignGeomotry(DbElement ele, D3Transform currTrans)
+		private void ExportDesignGeomotry(DbElement ele, D3Transform currTrans, int color)
 		{
 			if (ele.GetElementType() == DbElementTypeInstance.CYLINDER)
 			{
@@ -592,6 +635,7 @@ namespace ExportModel
 					.Mul(ele.GetDouble(DbAttributeInstance.HEIG));
 				cyl.Org = new Point(eleTrans.Multiply(GeometryUtility.Org)).MoveBy(cyl.Height, -0.5);
 				cyl.Radius = ele.GetDouble(DbAttributeInstance.DIAM) / 2.0;
+				cyl.Color = color;
 				session.Save(cyl);
 			}
 			else if (ele.GetElementType() == DbElementTypeInstance.BOX)
@@ -607,6 +651,7 @@ namespace ExportModel
 				box.ZLen = new Point(eleTrans.Multiply(D3Vector.D3UP)).Mul(zlen);
 				box.Org = new Point(eleTrans.Multiply(GeometryUtility.Org))
 					.MoveBy(box.XLen, -0.5).MoveBy(box.YLen, -0.5).MoveBy(box.ZLen, -0.5);
+				box.Color = color;
 				session.Save(box);
 			}
 			else if (ele.GetElementType() == DbElementTypeInstance.DISH)
@@ -619,6 +664,7 @@ namespace ExportModel
 					.Mul(ele.GetDouble(DbAttributeInstance.HEIG));
 				dish.Radius = ele.GetDouble(DbAttributeInstance.DIAM) / 2.0;
 				dish.IsEllipse = ele.GetDouble(DbAttributeInstance.RADI) > 0.0;
+				dish.Color = color;
 				session.Save(dish);
 			}
 			else if (ele.GetElementType() == DbElementTypeInstance.CONE)
@@ -634,6 +680,7 @@ namespace ExportModel
 					.Mul(height);
 				cone.TopRadius = ele.GetDouble(DbAttributeInstance.DTOP) / 2.0;
 				cone.ButtomRadius = ele.GetDouble(DbAttributeInstance.DBOT) / 2.0;
+				cone.Color = color;
 				session.Save(cone);
 			}
 			else if (ele.GetElementType() == DbElementTypeInstance.PYRAMID)
@@ -660,6 +707,7 @@ namespace ExportModel
 				pyramid.BottomYLen = yBottom;
 				pyramid.TopXLen = xTop;
 				pyramid.TopYLen = yTop;
+				pyramid.Color = color;
 				session.Save(pyramid);
 			}
 		}

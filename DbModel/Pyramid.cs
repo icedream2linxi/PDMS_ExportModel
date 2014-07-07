@@ -38,5 +38,8 @@ namespace DbModel
 		[Property(Column = "top_ylen")]
 		public virtual double TopYLen { get; set; }
 
+		[Property(Column = "color")]
+		public virtual int Color { get; set; }
+
 	}
 }

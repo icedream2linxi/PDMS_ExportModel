@@ -31,5 +31,8 @@ namespace DbModel
 
 		[Property(Column = "angle")]
 		public virtual double Angle { get; set; }
+
+		[Property(Column = "color")]
+		public virtual int Color { get; set; }
 	}
 }

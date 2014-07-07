@@ -25,5 +25,8 @@ namespace DbModel
 
 		[Point(After = typeof(IdAttribute), Name = "ZLen")]
 		public virtual Point ZLen { get; set; }
+
+		[Property(Column = "color")]
+		public virtual int Color { get; set; }
 	}
 }

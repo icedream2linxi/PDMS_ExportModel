@@ -25,5 +25,8 @@ namespace DbModel
 
 		[Property(Column = "buttom_radius")]
 		public virtual double ButtomRadius { get; set; }
+
+		[Property(Column = "color")]
+		public virtual int Color { get; set; }
 	}
 }

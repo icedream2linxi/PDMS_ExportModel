@@ -28,5 +28,8 @@ namespace DbModel
 
 		[Property(Column = "top_radius")]
 		public virtual double TopRadius { get; set; }
+
+		[Property(Column = "color")]
+		public virtual int Color { get; set; }
 	}
 }

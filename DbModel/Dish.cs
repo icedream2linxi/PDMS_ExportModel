@@ -25,5 +25,8 @@ namespace DbModel
 
 		[Property(Column = "is_ellipse")]
 		public virtual bool IsEllipse { get; set; }
+
+		[Property(Column = "color")]
+		public virtual int Color { get; set; }
 	}
 }

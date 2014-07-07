@@ -22,5 +22,8 @@ namespace DbModel
 
 		[Property(Column = "radius")]
 		public virtual double Radius { get; set; }
+
+		[Property(Column = "color")]
+		public virtual int Color { get; set; }
 	}
 }

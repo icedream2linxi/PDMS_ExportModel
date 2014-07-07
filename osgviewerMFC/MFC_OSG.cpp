@@ -329,6 +329,7 @@ osg::Geode * cOSG::CreateBoxs(NHibernate::ISession^ session)
 		pOsgBox->setRotation(quat);
 
 		osg::ShapeDrawable *pShape = new osg::ShapeDrawable(pOsgBox, mHints);
+		pShape->setColor(CvtColor(box->Color));
 		pBoxs->addDrawable(pShape);
 	}
 	
@@ -462,6 +463,10 @@ osg::Node* cOSG::CreatePyramid(NHibernate::ISession^ session)
 
 		pGemetry->setNormalArray(pNormals);
 		pGemetry->setNormalBinding(deprecated_osg::Geometry::BIND_PER_PRIMITIVE);
+
+		osg::ref_ptr<osg::Vec4Array> colArr = new osg::Vec4Array();
+		colArr->push_back(CvtColor(pyramid->Color));
+		pGemetry->setColorArray(colArr, osg::Array::BIND_OVERALL);
 
 		pPyramids->addDrawable(pGemetry);
 	}

@@ -30,14 +30,14 @@
 #include <Geom_TrimmedCurve.hxx>
 #include <GC_MakeArcOfCircle.hxx>
 
-osg::Geode* BuildMesh(const TopoDS_Face &face, double deflection)
+osg::Geode* BuildMesh(const TopoDS_Face &face, const osg::Vec4 &color, double deflection)
 {
 	osg::ref_ptr<osg::Geode> geode = new osg::Geode();
-	BuildMesh(geode, face, deflection);
+	BuildMesh(geode, face, color, deflection);
 	return geode.release();
 }
 
-void BuildMesh(osg::Geode *geode, const TopoDS_Face &face, double deflection)
+void BuildMesh(osg::Geode *geode, const TopoDS_Face &face, const osg::Vec4 &color, double deflection)
 {
 	osg::ref_ptr<deprecated_osg::Geometry> triGeom = new deprecated_osg::Geometry();
 	osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array();
@@ -97,16 +97,20 @@ void BuildMesh(osg::Geode *geode, const TopoDS_Face &face, double deflection)
 		normals->push_back(osg::Vec3(normal.X(), normal.Y(), normal.Z()));
 	}
 
-	triGeom->setVertexArray(vertices.get());
+	triGeom->setVertexArray(vertices);
 	triGeom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::TRIANGLES, 0, vertices->size()));
 
 	triGeom->setNormalArray(normals);
 	triGeom->setNormalBinding(deprecated_osg::Geometry::BIND_PER_PRIMITIVE);
 
+	osg::ref_ptr<osg::Vec4Array> colArr = new osg::Vec4Array();
+	colArr->push_back(color);
+	triGeom->setColorArray(colArr, osg::Array::BIND_OVERALL);
+
 	geode->addDrawable(triGeom);
 }
 
-void BuildShapeMesh(osg::Geode *geode, const TopoDS_Shape &shape, double deflection)
+void BuildShapeMesh(osg::Geode *geode, const TopoDS_Shape &shape, const osg::Vec4 &color, double deflection)
 {
 	bool bSetNormal = true;
 	osg::ref_ptr<deprecated_osg::Geometry> triGeom = new deprecated_osg::Geometry();
@@ -211,6 +215,10 @@ void BuildShapeMesh(osg::Geode *geode, const TopoDS_Shape &shape, double deflect
 	triGeom->setNormalArray(theNormals);
 	triGeom->setNormalBinding(deprecated_osg::Geometry::BIND_PER_VERTEX);
 
+	osg::ref_ptr<osg::Vec4Array> colArr = new osg::Vec4Array();
+	colArr->push_back(color);
+	triGeom->setColorArray(colArr, osg::Array::BIND_OVERALL);
+
 	geode->addDrawable(triGeom);
 }
 
@@ -239,6 +247,12 @@ inline gp_Vec GetOrthoVec(gp_Vec &vec)
 	return vec.Crossed(zAxis);
 }
 
+inline osg::Vec4 CvtColor(int color)
+{
+	System::Drawing::Color col = System::Drawing::Color::FromArgb(color);
+	return osg::Vec4(col.R / 256.0, col.G / 256.0, col.B / 256.0, col.A / 256.0);
+}
+
 osg::Node* BuildCylinder(DbModel::Cylinder^ cyl)
 {
 	gp_Ax2 axis;
@@ -260,7 +274,7 @@ osg::Node* BuildCylinder(DbModel::Cylinder^ cyl)
 	//	TopoDS_Face aFace = TopoDS::Face(aFaceExplorer.Current());
 	//	BuildMesh(geode, aFace);
 	//}
-	BuildShapeMesh(geode, shape);
+	BuildShapeMesh(geode, shape, CvtColor(cyl->Color));
 	return geode.release();
 }
 
@@ -279,7 +293,7 @@ osg::Geode* BuildCircularTorus(DbModel::CircularTorus^ ct)
 
 	TopoDS_Shape shape = BRepPrimAPI_MakeTorus(axis, mainRadius, ct->Radius, ct->Angle).Shape();
 	osg::ref_ptr<osg::Geode> geode = new osg::Geode();
-	BuildShapeMesh(geode, shape);
+	BuildShapeMesh(geode, shape, CvtColor(ct->Color));
 	return geode.release();
 }
 
@@ -304,7 +318,7 @@ osg::Node* BuildSnout(DbModel::Snout^ snout)
 		BRepBuilderAPI_MakeEdge buttomEdge(buttomCirc);
 		BRepBuilderAPI_MakeWire buttomWire(buttomEdge);
 		thruSection.AddWire(buttomWire);
-		BuildMesh(geode, BRepBuilderAPI_MakeFace(buttomWire));
+		BuildMesh(geode, BRepBuilderAPI_MakeFace(buttomWire), CvtColor(snout->Color));
 	}
 
 
@@ -322,12 +336,12 @@ osg::Node* BuildSnout(DbModel::Snout^ snout)
 		gp_Circ topCirc(axis, snout->TopRadius);
 		BRepBuilderAPI_MakeEdge topEdge(topCirc);
 		BRepBuilderAPI_MakeWire topWire(topEdge);
-		BuildMesh(geode, BRepBuilderAPI_MakeFace(topWire));
+		BuildMesh(geode, BRepBuilderAPI_MakeFace(topWire), CvtColor(snout->Color));
 		thruSection.AddWire(topWire);
 	}
 
 	TopoDS_Shape shape = thruSection;
-	BuildShapeMesh(geode, shape);
+	BuildShapeMesh(geode, shape, CvtColor(snout->Color));
 	return geode.release();
 }
 
@@ -365,9 +379,9 @@ osg::Node* BuildDish(DbModel::Dish^ dish)
 		TopoDS_Shape shape = BRepPrimAPI_MakeRevol(edge, revolAxis);
 
 		osg::ref_ptr<osg::Geode> geode = new osg::Geode();
-		BuildShapeMesh(geode, shape);
+		BuildShapeMesh(geode, shape, CvtColor(dish->Color));
 		
-		BuildMesh(geode, MakeCircFace(center, vec, dish->Radius));
+		BuildMesh(geode, MakeCircFace(center, vec, dish->Radius), CvtColor(dish->Color));
 		return geode.release();
 	}
 	else
@@ -392,7 +406,7 @@ osg::Node* BuildDish(DbModel::Dish^ dish)
 		TopoDS_Shape shape = BRepPrimAPI_MakeRevol(edge, revolAxis);
 
 		osg::ref_ptr<osg::Geode> geode = new osg::Geode();
-		BuildShapeMesh(geode, shape);
+		BuildShapeMesh(geode, shape, CvtColor(dish->Color));
 		return geode.release();
 	}
 }
@@ -404,7 +418,7 @@ osg::Node* BuildCone(DbModel::Cone^ cone)
 	gp_Ax2 axis(org, vec);
 	osg::ref_ptr<osg::Geode> geode = new osg::Geode();
 	TopoDS_Shape shape = BRepPrimAPI_MakeCone(axis, cone->ButtomRadius, cone->TopRadius, vec.Magnitude()).Shape();
-	BuildShapeMesh(geode, shape);
+	BuildShapeMesh(geode, shape, CvtColor(cone->Color));
 	return geode.release();
 }
 
@@ -432,7 +446,7 @@ osg::Node* BuildRectangularTorus(DbModel::RectangularTorus^ rt)
 	TopoDS_Shape shape = BRepPrimAPI_MakeRevol(wire, revolAxis, rt->Angle);
 
 	osg::ref_ptr<osg::Geode> geode = new osg::Geode();
-	BuildShapeMesh(geode, shape);
+	BuildShapeMesh(geode, shape, CvtColor(rt->Color));
 	return geode.release();
 }
 
