@@ -460,6 +460,43 @@ namespace ExportModel
 						dish.IsEllipse = prad > 0.0;
 						session.Save(dish);
 					}
+					else if (gEle.GetElementType() == DbElementTypeInstance.LPYRAMID)
+					{
+						string exper = gEle.GetAsString(DbAttributeInstance.PAAX);
+						AxisDir paax = EvalDirection.Eval(ele, exper);
+						exper = gEle.GetAsString(DbAttributeInstance.PBAX);
+						AxisDir pbax = EvalDirection.Eval(ele, exper);
+						exper = gEle.GetAsString(DbAttributeInstance.PCAX);
+						AxisDir pcax = EvalDirection.Eval(ele, exper);
+
+						double pbtp = GetExper(gEle, DbAttributeInstance.PBTP).Eval(ele);
+						double pctp = GetExper(gEle, DbAttributeInstance.PCTP).Eval(ele);
+						double pbbt = GetExper(gEle, DbAttributeInstance.PBBT).Eval(ele);
+						double pcbt = GetExper(gEle, DbAttributeInstance.PCBT).Eval(ele);
+						double pbof = GetExper(gEle, DbAttributeInstance.PBOF).Eval(ele);
+						double pcof = GetExper(gEle, DbAttributeInstance.PCOF).Eval(ele);
+						double ptdi = GetExper(gEle, DbAttributeInstance.PTDI).Eval(ele);
+						double pbdi = GetExper(gEle, DbAttributeInstance.PBDI).Eval(ele);
+
+						D3Vector zDir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(paax.Dir));
+						D3Vector xDir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(pbax.Dir));
+						D3Vector yDir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(pcax.Dir));
+						D3Point org = eleTrans.Multiply(GeometryUtility.ToD3Point(paax.Pos));
+						org.MoveBy(zDir * pbdi);
+
+						double height = ptdi - pbdi;
+
+						Pyramid pyramid = new Pyramid();
+						pyramid.Org = new Point(org);
+						pyramid.Height = new Point(zDir).Mul(height);
+						pyramid.XAxis = new Point(xDir);
+						pyramid.BottomXLen = pbbt;
+						pyramid.BottomYLen = pcbt;
+						pyramid.TopXLen = pbtp;
+						pyramid.TopYLen = pctp;
+						pyramid.Offset = new Point(xDir * pbof + yDir * pcof);
+						session.Save(pyramid);
+					}
 				}
 				gEle = gEle.Next();
 			}
