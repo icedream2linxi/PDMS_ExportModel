@@ -9,10 +9,15 @@ namespace ExportModel
 {
 	class EvalDirection
 	{
+		private static char[] flags = new char[] { 'X', 'Y', 'Z' };
 		public static AxisDir Eval(DbElement modelEle, string exper)
 		{
 			exper = exper.Trim().ToUpper();
-			if (exper.Contains('P'))
+			if (exper.IndexOfAny(flags) >= 0)
+			{
+				return new AxisDir(Position.Create(), ParseExperDir(exper, modelEle));
+			}
+			else if (exper.Contains('P'))
 			{
 				bool isNeg = false;
 				if (exper[0] == '-')
@@ -61,10 +66,7 @@ namespace ExportModel
 
 		private static AxisDir MakeAxialDirection(int num, bool isNeg, DbElement pnt, DbElement modelEle)
 		{
-			string exper = pnt.GetAsString(DbAttributeInstance.PAXI);
-			if (exper.Contains("DDANGLE"))
-				exper = exper.Replace("DDANGLE", modelEle.GetAsString(DbAttributeInstance.ANGL));
-			Direction dir = Direction.Create(exper);
+			Direction dir = ParseExperDir(pnt.GetAsString(DbAttributeInstance.PAXI), modelEle);
 			double offset = EvalDouble(pnt.GetAsString(DbAttributeInstance.PDIS), modelEle);
 			Position pos = Position.Create();
 			pos.MoveBy(dir, offset);
@@ -81,7 +83,7 @@ namespace ExportModel
 
 		private static AxisDir MakeCartesianDirection(int num, bool isNeg, DbElement pnt, DbElement modelEle)
 		{
-			Direction dir = Direction.Create(pnt.GetAsString(DbAttributeInstance.PTCD));
+			Direction dir = ParseExperDir(pnt.GetAsString(DbAttributeInstance.PTCD), modelEle);
 			double x = EvalDouble(pnt.GetAsString(DbAttributeInstance.PX), modelEle);
 			double y = EvalDouble(pnt.GetAsString(DbAttributeInstance.PY), modelEle);
 			double z = EvalDouble(pnt.GetAsString(DbAttributeInstance.PZ), modelEle);
@@ -92,12 +94,46 @@ namespace ExportModel
 
 		private static AxisDir MakeMixedDirection(int num, bool isNeg, DbElement pnt, DbElement modelEle)
 		{
-			return MakeCartesianDirection(num, isNeg, pnt, modelEle);
+			Direction dir = ParseExperDir(pnt.GetAsString(DbAttributeInstance.PAXI), modelEle);
+			double x = EvalDouble(pnt.GetAsString(DbAttributeInstance.PX), modelEle);
+			double y = EvalDouble(pnt.GetAsString(DbAttributeInstance.PY), modelEle);
+			double z = EvalDouble(pnt.GetAsString(DbAttributeInstance.PZ), modelEle);
+			if (isNeg)
+				dir = dir.Opposite();
+			return new AxisDir(Position.Create(x, y, z), dir);
 		}
 
 		private static AxisDir MakePositionTypeDirection(int num, bool isNeg, DbElement cate)
 		{
-			return null;
+			throw new NotImplementedException();
+		}
+
+		private static Direction ParseExperDir(string exper, DbElement modelEle)
+		{
+			StringBuilder sb = new StringBuilder();
+			int preIdx = 0, nextIdx;
+			while ((nextIdx = exper.IndexOfAny(flags, preIdx)) >= 0)
+			{
+				string item = exper.Substring(preIdx, nextIdx - preIdx).Trim();
+				if (item.Length > 0)
+				{
+					if (item[item.Length-1] == '-')
+					{
+						item = item.Substring(0, item.Length-1).Trim();
+						if (item.Length > 0)
+							sb.Append(EvalDouble(item, modelEle).ToString());
+						sb.Append('-');
+					}
+					else
+						sb.Append(EvalDouble(item, modelEle).ToString());
+				}
+				sb.Append(exper[nextIdx]);
+				preIdx = nextIdx + 1;
+			}
+
+			if (sb.Length <= 0)
+				sb.Append(exper);
+			return Direction.Create(sb.ToString());
 		}
 	}
 }

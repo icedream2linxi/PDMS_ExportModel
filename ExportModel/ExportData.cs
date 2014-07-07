@@ -181,7 +181,7 @@ namespace ExportModel
 		private void ExportTube(DbElement tubeEle, D3Transform transform)
 		{
 			double ltLength = tubeEle.GetDouble(DbAttributeInstance.ITLE);
-			if (ltLength <= 0)
+			if (ltLength <= 0.001)
 				return;
 
 			double lbore = tubeEle.GetDoubleArray(DbAttributeInstance.PARA)[1];

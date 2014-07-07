@@ -139,10 +139,14 @@ namespace ExportModel
 
 				return isEof;
 			}
-			else if (curCh == '('
-				|| curCh == ')')
+			else if (curCh == '(')
 			{
 				throw new FormatException();
+			}
+			else if (curCh == ')')
+			{
+				isEof = !experIter.MoveNext();
+				return isEof;
 			}
 			else
 			{
@@ -340,6 +344,38 @@ namespace ExportModel
 				IOperator valueOp = null;
 				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
 				op = new TwiceOp(valueOp);
+			}
+			else if (item.Equals("ATTRIB"))
+			{
+				isEof = !SkipSpace(experIter);
+				if (isEof)
+					throw new FormatException();
+
+				sb = new StringBuilder();
+				while (!IsSplit(experIter.Current) && !IsOp(experIter.Current) && experIter.Current != '(' && experIter.Current != ')')
+				{
+					sb.Append(experIter.Current);
+					if (!experIter.MoveNext())
+					{
+						isEof = true;
+						break;
+					}
+				}
+
+				if (isEof)
+					throw new FormatException();
+
+				item = sb.ToString();
+				DbAttribute attr = DbAttribute.GetDbAttribute(item);
+				if (attr == null)
+					throw new FormatException();
+
+				AttribOp paramOp = new AttribOp(this);
+				paramOp.Attr = attr;
+				IOperator valueOp = null;
+				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
+				paramOp.Item = valueOp;
+				op = paramOp;
 			}
 			else
 				throw new FormatException();
@@ -570,6 +606,25 @@ namespace ExportModel
 		public override double Eval()
 		{
 			return Exper.ModelElement.GetDoubleArray(DbAttributeInstance.DESP)[(int)Item.Eval() - 1];
+		}
+	}
+	class AttribOp : EleOp
+	{
+		public DbAttribute Attr { get; set; }
+
+		public AttribOp(Experssion exper)
+			: base(exper)
+		{
+		}
+
+		public void SetAttr(string name)
+		{
+			Attr = DbAttribute.GetDbAttribute(name);
+		}
+
+		public override double Eval()
+		{
+			return Exper.ModelElement.GetDoubleArray(Attr)[(int)Item.Eval() - 1];
 		}
 	}
 
