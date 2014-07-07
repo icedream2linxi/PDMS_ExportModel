@@ -222,14 +222,14 @@ void BuildShapeMesh(osg::Geode *geode, const TopoDS_Shape &shape, const osg::Vec
 	geode->addDrawable(triGeom);
 }
 
-inline gp_Pnt && ToGpPnt(DbModel::Point^ pnt)
+inline gp_Pnt ToGpPnt(DbModel::Point^ pnt)
 {
-	return move(gp_Pnt(pnt->X, pnt->Y, pnt->Z));
+	return gp_Pnt(pnt->X, pnt->Y, pnt->Z);
 }
 
-inline gp_Vec && ToGpVec(DbModel::Point^ pnt)
+inline gp_Vec ToGpVec(DbModel::Point^ pnt)
 {
-	return move(gp_Vec(pnt->X, pnt->Y, pnt->Z));
+	return gp_Vec(pnt->X, pnt->Y, pnt->Z);
 }
 
 TopoDS_Face MakeCircFace(const gp_Pnt &center, const gp_Vec &normal, double radius)

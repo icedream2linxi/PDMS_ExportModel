@@ -5,4 +5,9 @@
 $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LocalDebuggerEnvironment>path=e:\OpenSourceCode\OpenSceneGraph\build\bin;e:\OpenSourceCode\OpenSceneGraph\source\3rdParty_x86_x64\x64\bin;e:\OpenSourceCode\OpenCasCade\source\ros\win64\vc12\bin;e:\OpenSourceCode\OpenCasCade\source\3rdparty\tbb42_20140601oss\bin\intel64\vc12
+$(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
 </Project>
