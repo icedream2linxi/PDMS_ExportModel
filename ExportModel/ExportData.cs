@@ -529,91 +529,140 @@ namespace ExportModel
 						continue;
 					}
 
-					if (ele.GetElementType() == DbElementTypeInstance.NOZZLE)
+					DbElementType eleType = ele.GetElementType();
+					if (eleType == DbElementTypeInstance.NOZZLE)
 						ExportPipeItem(ele, currTrans);
-					else if (ele.GetElementType() == DbElementTypeInstance.CYLINDER)
+					else if (eleType == DbElementTypeInstance.TMPLATE)
 					{
-						D3Transform eleTrans = currTrans.Multiply(GetTransform(ele));
-						Cylinder cyl = new Cylinder();
-						cyl.Height = new Point(eleTrans.Multiply(D3Vector.D3UP))
-							.Mul(ele.GetDouble(DbAttributeInstance.HEIG));
-						cyl.Org = new Point(eleTrans.Multiply(GeometryUtility.Org)).MoveBy(cyl.Height, -0.5);
-						cyl.Radius = ele.GetDouble(DbAttributeInstance.DIAM) / 2.0;
-						session.Save(cyl);
-					}
-					else if (ele.GetElementType() == DbElementTypeInstance.BOX)
-					{
-						D3Transform eleTrans = currTrans.Multiply(GetTransform(ele));
-						double xlen = ele.GetDouble(DbAttributeInstance.XLEN);
-						double ylen = ele.GetDouble(DbAttributeInstance.YLEN);
-						double zlen = ele.GetDouble(DbAttributeInstance.ZLEN);
+						DbElement[] lcnfArray = null;
+						if (ele.IsAttributeValid(DbAttributeInstance.LCNFA))
+						{
+							lcnfArray = ele.GetElementArray(DbAttributeInstance.LCNFA);
+						}
 
-						Box box = new Box();
-						box.XLen = new Point(eleTrans.Multiply(D3Vector.D3EAST)).Mul(xlen);
-						box.YLen = new Point(eleTrans.Multiply(D3Vector.D3NORTH)).Mul(ylen);
-						box.ZLen = new Point(eleTrans.Multiply(D3Vector.D3UP)).Mul(zlen);
-						box.Org = new Point(eleTrans.Multiply(GeometryUtility.Org))
-							.MoveBy(box.XLen, -0.5).MoveBy(box.YLen, -0.5).MoveBy(box.ZLen, -0.5);
-						session.Save(box);
+						if (lcnfArray == null || lcnfArray.Length <= 0)
+						{
+							DbElement tmplEle = ele.FirstMember();
+							while (tmplEle != null && tmplEle.IsValid)
+							{
+								if (IsReadableEle(tmplEle) && IsVisible(tmplEle))
+									ExportDesignGeomotry(tmplEle, currTrans);
+								tmplEle = tmplEle.Next();
+							}
+						}
+						else
+						{
+							foreach (DbElement lcnfEle in lcnfArray)
+							{
+								if (IsReadableEle(lcnfEle) && IsVisible(lcnfEle))
+									ExportDesignGeomotry(lcnfEle, currTrans);
+							}
+						}
 					}
-					else if (ele.GetElementType() == DbElementTypeInstance.DISH)
+					else if (eleType == DbElementTypeInstance.SUBEQUIPMENT)
 					{
-						D3Transform eleTrans = currTrans.Multiply(GetTransform(ele));
-
-						Dish dish = new Dish();
-						dish.Org = new Point(eleTrans.Multiply(GeometryUtility.Org));
-						dish.Height = new Point(eleTrans.Multiply(D3Vector.D3UP))
-							.Mul(ele.GetDouble(DbAttributeInstance.HEIG));
-						dish.Radius = ele.GetDouble(DbAttributeInstance.DIAM) / 2.0;
-						dish.IsEllipse = ele.GetDouble(DbAttributeInstance.RADI) > 0.0;
-						session.Save(dish);
+						ExportEquip(ele, currTrans);
 					}
-					else if (ele.GetElementType() == DbElementTypeInstance.CONE)
-					{
-						D3Transform eleTrans = currTrans.Multiply(GetTransform(ele));
-						D3Point pos = eleTrans.Multiply(GeometryUtility.Org);
-						D3Vector dir = eleTrans.Multiply(D3Vector.D3UP);
-						double height = ele.GetDouble(DbAttributeInstance.HEIG);
-
-						Cone cone = new Cone();
-						cone.Org = new Point(pos).MoveBy(dir, -height / 2.0);
-						cone.Height = new Point(dir)
-							.Mul(height);
-						cone.TopRadius = ele.GetDouble(DbAttributeInstance.DTOP) / 2.0;
-						cone.ButtomRadius = ele.GetDouble(DbAttributeInstance.DBOT) / 2.0;
-						session.Save(cone);
-					}
-					else if (ele.GetElementType() == DbElementTypeInstance.PYRAMID)
-					{
-						D3Transform eleTrans = currTrans.Multiply(GetTransform(ele));
-						D3Point pos = eleTrans.Multiply(GeometryUtility.Org);
-						D3Vector zDir = eleTrans.Multiply(D3Vector.D3UP);
-						D3Vector xDir = eleTrans.Multiply(D3Vector.D3EAST);
-						D3Vector yDir = eleTrans.Multiply(D3Vector.D3NORTH);
-						double height = ele.GetDouble(DbAttributeInstance.HEIG);
-						double xBottom = ele.GetDouble(DbAttributeInstance.XBOT);
-						double yBottom = ele.GetDouble(DbAttributeInstance.YBOT);
-						double xTop = ele.GetDouble(DbAttributeInstance.XTOP);
-						double yTop = ele.GetDouble(DbAttributeInstance.YTOP);
-						double xOffset = ele.GetDouble(DbAttributeInstance.XOFF);
-						double yOffset = ele.GetDouble(DbAttributeInstance.YOFF);
-
-						Pyramid pyramid = new Pyramid();
-						pyramid.Org = new Point(pos).MoveBy(zDir, -height / 2.0);
-						pyramid.Height = new Point(zDir).Mul(height);
-						pyramid.XAxis = new Point(xDir);
-						pyramid.Offset = new Point().MoveBy(xDir, xOffset).MoveBy(yDir, yOffset);
-						pyramid.BottomXLen = xBottom;
-						pyramid.BottomYLen = yBottom;
-						pyramid.TopXLen = xTop;
-						pyramid.TopYLen = yTop;
-						session.Save(pyramid);
-					}
+					else
+						ExportDesignGeomotry(ele, currTrans);
+					
 				}
 				ele = ele.Next();
 			}
 		}
 
+		private bool IsSupportedDesignGeometryEle(DbElement ele)
+		{
+			DbElementType type = ele.GetElementType();
+			return type == DbElementTypeInstance.CYLINDER
+				|| type == DbElementTypeInstance.BOX
+				|| type == DbElementTypeInstance.DISH
+				|| type == DbElementTypeInstance.CONE
+				|| type == DbElementTypeInstance.PYRAMID
+				;
+		}
+
+		private void ExportDesignGeomotry(DbElement ele, D3Transform currTrans)
+		{
+			if (ele.GetElementType() == DbElementTypeInstance.CYLINDER)
+			{
+				D3Transform eleTrans = currTrans.Multiply(GetTransform(ele));
+				Cylinder cyl = new Cylinder();
+				cyl.Height = new Point(eleTrans.Multiply(D3Vector.D3UP))
+					.Mul(ele.GetDouble(DbAttributeInstance.HEIG));
+				cyl.Org = new Point(eleTrans.Multiply(GeometryUtility.Org)).MoveBy(cyl.Height, -0.5);
+				cyl.Radius = ele.GetDouble(DbAttributeInstance.DIAM) / 2.0;
+				session.Save(cyl);
+			}
+			else if (ele.GetElementType() == DbElementTypeInstance.BOX)
+			{
+				D3Transform eleTrans = currTrans.Multiply(GetTransform(ele));
+				double xlen = ele.GetDouble(DbAttributeInstance.XLEN);
+				double ylen = ele.GetDouble(DbAttributeInstance.YLEN);
+				double zlen = ele.GetDouble(DbAttributeInstance.ZLEN);
+
+				Box box = new Box();
+				box.XLen = new Point(eleTrans.Multiply(D3Vector.D3EAST)).Mul(xlen);
+				box.YLen = new Point(eleTrans.Multiply(D3Vector.D3NORTH)).Mul(ylen);
+				box.ZLen = new Point(eleTrans.Multiply(D3Vector.D3UP)).Mul(zlen);
+				box.Org = new Point(eleTrans.Multiply(GeometryUtility.Org))
+					.MoveBy(box.XLen, -0.5).MoveBy(box.YLen, -0.5).MoveBy(box.ZLen, -0.5);
+				session.Save(box);
+			}
+			else if (ele.GetElementType() == DbElementTypeInstance.DISH)
+			{
+				D3Transform eleTrans = currTrans.Multiply(GetTransform(ele));
+
+				Dish dish = new Dish();
+				dish.Org = new Point(eleTrans.Multiply(GeometryUtility.Org));
+				dish.Height = new Point(eleTrans.Multiply(D3Vector.D3UP))
+					.Mul(ele.GetDouble(DbAttributeInstance.HEIG));
+				dish.Radius = ele.GetDouble(DbAttributeInstance.DIAM) / 2.0;
+				dish.IsEllipse = ele.GetDouble(DbAttributeInstance.RADI) > 0.0;
+				session.Save(dish);
+			}
+			else if (ele.GetElementType() == DbElementTypeInstance.CONE)
+			{
+				D3Transform eleTrans = currTrans.Multiply(GetTransform(ele));
+				D3Point pos = eleTrans.Multiply(GeometryUtility.Org);
+				D3Vector dir = eleTrans.Multiply(D3Vector.D3UP);
+				double height = ele.GetDouble(DbAttributeInstance.HEIG);
+
+				Cone cone = new Cone();
+				cone.Org = new Point(pos).MoveBy(dir, -height / 2.0);
+				cone.Height = new Point(dir)
+					.Mul(height);
+				cone.TopRadius = ele.GetDouble(DbAttributeInstance.DTOP) / 2.0;
+				cone.ButtomRadius = ele.GetDouble(DbAttributeInstance.DBOT) / 2.0;
+				session.Save(cone);
+			}
+			else if (ele.GetElementType() == DbElementTypeInstance.PYRAMID)
+			{
+				D3Transform eleTrans = currTrans.Multiply(GetTransform(ele));
+				D3Point pos = eleTrans.Multiply(GeometryUtility.Org);
+				D3Vector zDir = eleTrans.Multiply(D3Vector.D3UP);
+				D3Vector xDir = eleTrans.Multiply(D3Vector.D3EAST);
+				D3Vector yDir = eleTrans.Multiply(D3Vector.D3NORTH);
+				double height = ele.GetDouble(DbAttributeInstance.HEIG);
+				double xBottom = ele.GetDouble(DbAttributeInstance.XBOT);
+				double yBottom = ele.GetDouble(DbAttributeInstance.YBOT);
+				double xTop = ele.GetDouble(DbAttributeInstance.XTOP);
+				double yTop = ele.GetDouble(DbAttributeInstance.YTOP);
+				double xOffset = ele.GetDouble(DbAttributeInstance.XOFF);
+				double yOffset = ele.GetDouble(DbAttributeInstance.YOFF);
+
+				Pyramid pyramid = new Pyramid();
+				pyramid.Org = new Point(pos).MoveBy(zDir, -height / 2.0);
+				pyramid.Height = new Point(zDir).Mul(height);
+				pyramid.XAxis = new Point(xDir);
+				pyramid.Offset = new Point().MoveBy(xDir, xOffset).MoveBy(yDir, yOffset);
+				pyramid.BottomXLen = xBottom;
+				pyramid.BottomYLen = yBottom;
+				pyramid.TopXLen = xTop;
+				pyramid.TopYLen = yTop;
+				session.Save(pyramid);
+			}
+		}
 		private void AddExpr(string expr)
 		{
 			double db;
