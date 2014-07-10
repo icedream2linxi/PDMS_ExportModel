@@ -342,7 +342,6 @@ osg::Node* cOSG::CreateCircularTorus(NHibernate::ISession^ session)
 	IList<CircularTorus^>^ ctList = session->CreateQuery("from CircularTorus")->List<CircularTorus^>();
 	for (int i = 0; i < ctList->Count; ++i) {
 		CircularTorus^ ct = ctList->default[i];
-		pCts->addChild(BuildCircularTorus(ct));
 		try
 		{
 			pCts->addChild(BuildCircularTorus(ct));
