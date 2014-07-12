@@ -184,13 +184,18 @@ namespace Geometry
 		colArr->push_back(color);
 		geometry->setColorArray(colArr, osg::Array::BIND_OVERALL);
 
+		bool isFull = equivalent(angle, 2 * M_PI);
+		if (isFull)
+		{
+			angle = 2 * M_PI;
+		}
+
 		Vec3 mainVec = startPnt - center;
 		double mainRadius = mainVec.length() + width / 2.0;
 		double mainIncAng = 2 * acos((mainRadius - g_deflection) / mainRadius);
 		int mainCount = (int)ceil(angle / mainIncAng);
 		mainIncAng = angle / mainCount;
 		Quat mainQuat(mainIncAng, normal);
-
 
 		Vec3 subVec = mainVec;
 		subVec.normalize();
@@ -200,7 +205,24 @@ namespace Geometry
 		prevPntArr[2] = startPnt + subVec * width / 2.0 + normal * height / 2.0;
 		prevPntArr[3] = startPnt - subVec * width / 2.0 + normal * height / 2.0;
 
-		if (bottomVis)
+		Vec3 postOutNormal = subVec, postInNormal = -subVec;
+		Vec3 topNormal;
+		if (isFull)
+		{
+			for (int i = 0; i < 4; ++i)
+				postPntArr[i] = prevPntArr[i];
+		}
+		else
+		{
+			Quat fullQuat(angle, normal);
+			for (int i = 0; i < 4; ++i)
+				postPntArr[i] = center + fullQuat * (prevPntArr[i] - center);
+			postOutNormal = fullQuat * subVec;
+			postInNormal = fullQuat * (-subVec);
+			topNormal = normal ^ (fullQuat * subVec);
+		}
+
+		if (!isFull && bottomVis)
 		{
 			const GLint first = vertexArr->size();
 			Vec3 bottomNormal = subVec ^ normal;
@@ -227,11 +249,9 @@ namespace Geometry
 			normalArr->push_back(subNormal);
 			vec2 = mainQuat * vec2;
 		}
-		postPntArr[0] = center + vec1;
 		vertexArr->push_back(postPntArr[0]);
 		normalArr->push_back(subNormal);
 
-		postPntArr[1] = center + vec2;
 		vertexArr->push_back(postPntArr[1]);
 		normalArr->push_back(subNormal);
 		geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::QUAD_STRIP, first, vertexArr->size() - first));
@@ -253,12 +273,11 @@ namespace Geometry
 
 			subNormal = mainQuat * subNormal;
 		}
-		vertexArr->push_back(center + vec1);
-		normalArr->push_back(subNormal);
+		vertexArr->push_back(postPntArr[1]);
+		normalArr->push_back(postOutNormal);
 
-		postPntArr[2] = center + vec2;
 		vertexArr->push_back(postPntArr[2]);
-		normalArr->push_back(subNormal);
+		normalArr->push_back(postOutNormal);
 		geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::QUAD_STRIP, first, vertexArr->size() - first));
 
 		// ¶©
@@ -276,7 +295,7 @@ namespace Geometry
 			normalArr->push_back(subNormal);
 			vec2 = mainQuat * vec2;
 		}
-		vertexArr->push_back(center + vec1);
+		vertexArr->push_back(postPntArr[2]);
 		normalArr->push_back(subNormal);
 
 		postPntArr[3] = center + vec2;
@@ -301,17 +320,16 @@ namespace Geometry
 
 			subNormal = mainQuat * subNormal;
 		}
-		vertexArr->push_back(center + vec1);
-		normalArr->push_back(subNormal);
+		vertexArr->push_back(postPntArr[3]);
+		normalArr->push_back(postInNormal);
 
-		vertexArr->push_back(center + vec2);
-		normalArr->push_back(subNormal);
+		vertexArr->push_back(postPntArr[0]);
+		normalArr->push_back(postInNormal);
 		geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::QUAD_STRIP, first, vertexArr->size() - first));
 
-		if (topVis)
+		if (!isFull && topVis)
 		{
 			const GLint first = vertexArr->size();
-			Vec3 topNormal = subNormal ^ normal;
 			for (int i = 0; i < 4; ++i)
 			{
 				vertexArr->push_back(postPntArr[i]);
