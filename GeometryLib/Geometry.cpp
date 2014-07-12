@@ -55,11 +55,15 @@ namespace Geometry
 		{
 			Vec3 bottomNormal = -subNormal;
 			const GLint first = vertexArr->size();
+			vertexArr->push_back(startPnt);
+			normalArr->push_back(bottomNormal);
 			for (int i = 0; i < subCount; ++i)
 			{
 				vertexArr->push_back(prevCircArr[i]);
 				normalArr->push_back(bottomNormal);
 			}
+			vertexArr->push_back(prevCircArr[0]);
+			normalArr->push_back(bottomNormal);
 			geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::TRIANGLE_FAN, first, vertexArr->size() - first));
 		}
 
@@ -153,11 +157,15 @@ namespace Geometry
 		{
 			topNormal.normalize();
 			const GLint first = vertexArr->size();
+			vertexArr->push_back(postSubCenterPnt);
+			normalArr->push_back(topNormal);
 			for (int i = 0; i < subCount; ++i)
 			{
 				vertexArr->push_back(postCircArr[i]);
 				normalArr->push_back(topNormal);
 			}
+			vertexArr->push_back(postCircArr[0]);
+			normalArr->push_back(topNormal);
 			geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::TRIANGLE_FAN, first, vertexArr->size() - first));
 		}
 
