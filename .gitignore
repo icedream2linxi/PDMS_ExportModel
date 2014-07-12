@@ -27,3 +27,8 @@ x64/
 *.exe
 *.out
 *.app
+*.opensdf
+*.sdf
+/ipch
+/osgviewerMFC/Debug
+*.APS

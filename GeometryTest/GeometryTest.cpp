@@ -4,15 +4,27 @@
 #include "stdafx.h"
 #include <Geometry.hpp>
 
-osg::ref_ptr<osg::Geode> TestTorus()
+osg::ref_ptr<osg::Geode> TestCircularTorus()
 {
 	osg::Vec3 center(0, 0, 0);
 	osg::Vec3 startPnt(300, 0, 0);
 	osg::Vec3 normal(0, 0, 1);
-	double radius = 50.0, angle = M_PI / 2;
+	double radius = 50.0, angle = M_PI * 2;
 
 	osg::ref_ptr<osg::Geode> geode = new osg::Geode;
-	geode->addDrawable(Geometry::BuildTorus(center, startPnt, normal, radius, angle, osg::Vec4(1, 1, 1, 0)));
+	geode->addDrawable(Geometry::BuildCircularTorus(center, startPnt, normal, radius, angle, osg::Vec4(1, 1, 1, 0)));
+	return geode;
+}
+
+osg::ref_ptr<osg::Geode> TestRectangularTorus()
+{
+	osg::Vec3 center(0, 0, 0);
+	osg::Vec3 startPnt(300, 0, 0);
+	osg::Vec3 normal(0, 0, 1);
+	double width = 100.0, height = 50.0, angle = M_PI * 2;
+
+	osg::ref_ptr<osg::Geode> geode = new osg::Geode;
+	geode->addDrawable(Geometry::BuildRectangularTorus(center, startPnt, normal, width, height, angle, osg::Vec4(1, 1, 1, 0)));
 	return geode;
 }
 
@@ -55,7 +67,8 @@ int main(int argc, char* argv[])
 
 	//root->addChild(TestCasCadeByMakeRevol());
 	//root->addChild(TestCasCadeByMakeTorus());
-	root->addChild(TestTorus());
+	root->addChild(TestCircularTorus());
+	//root->addChild(TestRectangularTorus());
 
 	myViewer.setSceneData(root);
 

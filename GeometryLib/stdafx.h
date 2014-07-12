@@ -20,3 +20,4 @@ using namespace std;
 #include <osg/Matrix>
 #include <osg/Quat>
 #include <osg/Geometry>
+#include <osg/Math>
