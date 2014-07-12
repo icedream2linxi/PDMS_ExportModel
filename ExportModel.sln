@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
+VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExportModel", "ExportModel\ExportModel.csproj", "{3EE582D9-7382-4B5D-80C8-FA561B49C62C}"
 EndProject
@@ -11,11 +11,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DbModelTest", "DbModelTest\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "osgviewerMFC", "osgviewerMFC\osgviewerMFC.vcxproj", "{1182C2E4-79B2-443F-AB02-D27B30ED2C2F}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B1C9EC41-1EDA-4A90-BCB5-7D0CF0534DF8}"
-	ProjectSection(SolutionItems) = preProject
-		Performance1.psess = Performance1.psess
-		Performance2.psess = Performance2.psess
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GeometryLib", "GeometryLib\GeometryLib.vcxproj", "{D5470C15-A5F6-4ADF-949F-05AC9ADEA7AC}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GeometryTest", "GeometryTest\GeometryTest.vcxproj", "{B786BAA8-6054-4ACC-9530-F3A60224105B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -78,6 +76,30 @@ Global
 		{1182C2E4-79B2-443F-AB02-D27B30ED2C2F}.Release|Win32.Build.0 = Release|Win32
 		{1182C2E4-79B2-443F-AB02-D27B30ED2C2F}.Release|x64.ActiveCfg = Release|x64
 		{1182C2E4-79B2-443F-AB02-D27B30ED2C2F}.Release|x64.Build.0 = Release|x64
+		{D5470C15-A5F6-4ADF-949F-05AC9ADEA7AC}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{D5470C15-A5F6-4ADF-949F-05AC9ADEA7AC}.Debug|Mixed Platforms.ActiveCfg = Debug|x64
+		{D5470C15-A5F6-4ADF-949F-05AC9ADEA7AC}.Debug|Mixed Platforms.Build.0 = Debug|x64
+		{D5470C15-A5F6-4ADF-949F-05AC9ADEA7AC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D5470C15-A5F6-4ADF-949F-05AC9ADEA7AC}.Debug|Win32.Build.0 = Debug|Win32
+		{D5470C15-A5F6-4ADF-949F-05AC9ADEA7AC}.Debug|x64.ActiveCfg = Debug|Win32
+		{D5470C15-A5F6-4ADF-949F-05AC9ADEA7AC}.Release|Any CPU.ActiveCfg = Release|Win32
+		{D5470C15-A5F6-4ADF-949F-05AC9ADEA7AC}.Release|Mixed Platforms.ActiveCfg = Release|x64
+		{D5470C15-A5F6-4ADF-949F-05AC9ADEA7AC}.Release|Mixed Platforms.Build.0 = Release|x64
+		{D5470C15-A5F6-4ADF-949F-05AC9ADEA7AC}.Release|Win32.ActiveCfg = Release|Win32
+		{D5470C15-A5F6-4ADF-949F-05AC9ADEA7AC}.Release|Win32.Build.0 = Release|Win32
+		{D5470C15-A5F6-4ADF-949F-05AC9ADEA7AC}.Release|x64.ActiveCfg = Release|Win32
+		{B786BAA8-6054-4ACC-9530-F3A60224105B}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{B786BAA8-6054-4ACC-9530-F3A60224105B}.Debug|Mixed Platforms.ActiveCfg = Debug|x64
+		{B786BAA8-6054-4ACC-9530-F3A60224105B}.Debug|Mixed Platforms.Build.0 = Debug|x64
+		{B786BAA8-6054-4ACC-9530-F3A60224105B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B786BAA8-6054-4ACC-9530-F3A60224105B}.Debug|Win32.Build.0 = Debug|Win32
+		{B786BAA8-6054-4ACC-9530-F3A60224105B}.Debug|x64.ActiveCfg = Debug|Win32
+		{B786BAA8-6054-4ACC-9530-F3A60224105B}.Release|Any CPU.ActiveCfg = Release|Win32
+		{B786BAA8-6054-4ACC-9530-F3A60224105B}.Release|Mixed Platforms.ActiveCfg = Release|x64
+		{B786BAA8-6054-4ACC-9530-F3A60224105B}.Release|Mixed Platforms.Build.0 = Release|x64
+		{B786BAA8-6054-4ACC-9530-F3A60224105B}.Release|Win32.ActiveCfg = Release|Win32
+		{B786BAA8-6054-4ACC-9530-F3A60224105B}.Release|Win32.Build.0 = Release|Win32
+		{B786BAA8-6054-4ACC-9530-F3A60224105B}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
