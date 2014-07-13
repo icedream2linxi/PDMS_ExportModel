@@ -28,6 +28,18 @@ osg::ref_ptr<osg::Geode> TestRectangularTorus()
 	return geode;
 }
 
+osg::ref_ptr<osg::Geode> TestCone()
+{
+	osg::Vec3 center(0, 0, 0);
+	osg::Vec3 normal(0, 0, -1);
+	osg::Vec3 top(200, 0, 500);
+	double radius = 200;
+
+	osg::ref_ptr<osg::Geode> geode = new osg::Geode;
+	geode->addDrawable(Geometry::BuildCone(center, normal, top - center, radius, osg::Vec4(1, 1, 1, 0)));
+	return geode;
+}
+
 void InitWnd(osgViewer::Viewer &viewer)
 {
 	int xoffset = 40;
@@ -68,7 +80,8 @@ int main(int argc, char* argv[])
 	//root->addChild(TestCasCadeByMakeRevol());
 	//root->addChild(TestCasCadeByMakeTorus());
 	//root->addChild(TestCircularTorus());
-	root->addChild(TestRectangularTorus());
+	//root->addChild(TestRectangularTorus());
+	root->addChild(TestCone());
 
 	myViewer.setSceneData(root);
 

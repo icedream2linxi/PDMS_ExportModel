@@ -20,7 +20,7 @@ namespace Geometry
 		colArr->push_back(color);
 		geometry->setColorArray(colArr, osg::Array::BIND_OVERALL);
 
-		bool isFull = equivalent(angle, 2 * M_PI);
+		bool isFull = equivalent(angle, 2 * M_PI, g_epsilon);
 		if (isFull)
 		{
 			angle = 2 * M_PI;
@@ -184,7 +184,7 @@ namespace Geometry
 		colArr->push_back(color);
 		geometry->setColorArray(colArr, osg::Array::BIND_OVERALL);
 
-		bool isFull = equivalent(angle, 2 * M_PI);
+		bool isFull = equivalent(angle, 2 * M_PI, g_epsilon);
 		if (isFull)
 		{
 			angle = 2 * M_PI;
@@ -337,6 +337,124 @@ namespace Geometry
 			}
 			geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::QUADS, first, vertexArr->size() - first));
 		}
+
+		return geometry;
+	}
+
+	osg::ref_ptr<osg::Geometry> BuildCone(const osg::Vec3 &center, const osg::Vec3 &height, double radius, const Vec4 &color, bool bottomVis /*= true*/)
+	{
+		osg::Vec3 bottomNormal = -height;
+		bottomNormal.normalize();
+		return BuildCone(center, bottomNormal, height, radius, color, bottomVis);
+	}
+
+	osg::ref_ptr<osg::Geometry> BuildCone(const osg::Vec3 &center, const osg::Vec3 &bottomNormal, const osg::Vec3 &height, double radius, const Vec4 &color, bool bottomVis /*= true*/)
+	{
+		ref_ptr<osg::Geometry> geometry = new osg::Geometry();
+		ref_ptr<Vec3Array> vertexArr = new Vec3Array;
+		ref_ptr<Vec3Array> normalArr = new Vec3Array;
+		geometry->setVertexArray(vertexArr);
+		geometry->setNormalArray(normalArr, osg::Array::BIND_PER_VERTEX);
+		osg::ref_ptr<osg::Vec4Array> colArr = new osg::Vec4Array();
+		colArr->push_back(color);
+		geometry->setColorArray(colArr, osg::Array::BIND_OVERALL);
+
+		Vec3 xVec = bottomNormal ^ osg::Z_AXIS;
+		if (xVec.length2() < g_epsilon)
+			xVec = osg::X_AXIS;
+		double incAng = 2 * acos((radius - g_deflection) / radius);
+		int count = (int)ceil(2 * M_PI / incAng);
+		incAng = 2 * M_PI / count;
+		Quat quat(incAng, bottomNormal);
+
+		vector<Vec3> pntArr;
+		xVec *= radius;
+		for (int i = 0; i < count; ++i)
+		{
+			pntArr.push_back(center + xVec);
+			xVec = quat * xVec;
+		}
+		size_t pntCount = pntArr.size();
+
+		if (bottomVis)
+		{
+			const GLint first = vertexArr->size();
+			vertexArr->push_back(center);
+			normalArr->push_back(bottomNormal);
+			for (size_t i = 0; i < pntCount; ++i)
+			{
+				vertexArr->push_back(pntArr[i]);
+				normalArr->push_back(bottomNormal);
+			}
+			vertexArr->push_back(pntArr[0]);
+			normalArr->push_back(bottomNormal);
+			geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::TRIANGLE_FAN, first, vertexArr->size() - first));
+		}
+
+		const GLint first = vertexArr->size();
+		Vec3 topPnt = center + height;
+		Vec3 prevPnt = pntArr[pntCount - 1];
+		Vec3 prevVec = topPnt - prevPnt;
+		prevVec.normalize();
+		Vec3 topNormal;
+		vector<Vec3> normals;
+		size_t testCount = pntCount;
+		for (size_t i = 0; i < pntCount; ++i)
+		{
+			if (i < testCount)
+			{
+				vertexArr->push_back(pntArr[i]);
+				vertexArr->push_back(prevPnt);
+				vertexArr->push_back(topPnt);
+			}
+
+			Vec3 vec = topPnt - pntArr[i];
+			vec.normalize();
+
+			normals.push_back(vec ^ prevVec);
+			normals.back().normalize();
+			topNormal += normals.back();
+
+			prevPnt = pntArr[i];
+			prevVec = vec;
+		}
+
+		topNormal /= pntCount / 2.0;
+		//topNormal.normalize();
+		for (size_t i = 0; i < testCount; ++i)
+		{
+			if (i == 0)
+			{
+				normalArr->push_back(normals[i] + normals[i + 1]);
+				normalArr->back().normalize();
+				normalArr->push_back(normals[i] + normals[normals.size() - 1]);
+				normalArr->back().normalize();
+				//normalArr->push_back((*normalArr)[normalArr->size() - 1] + (*normalArr)[normalArr->size() - 2]);
+				//normalArr->back().normalize();
+				normalArr->push_back(topNormal);
+			}
+			else if (i == normals.size() - 1)
+			{
+				normalArr->push_back(normals[i] + normals[0]);
+				normalArr->back().normalize();
+				normalArr->push_back(normals[i] + normals[i - 1]);
+				normalArr->back().normalize();
+				//normalArr->push_back((*normalArr)[normalArr->size() - 1] + (*normalArr)[normalArr->size() - 2]);
+				//normalArr->back().normalize();
+				normalArr->push_back(topNormal);
+			}
+			else
+			{
+				normalArr->push_back(normals[i] + normals[i + 1]);
+				normalArr->back().normalize();
+				normalArr->push_back(normals[i] + normals[i - 1]);
+				normalArr->back().normalize();
+				//normalArr->push_back((*normalArr)[normalArr->size() - 1] + (*normalArr)[normalArr->size() - 2]);
+				//normalArr->back().normalize();
+				normalArr->push_back(topNormal);
+			}
+		}
+		geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::TRIANGLES, first, vertexArr->size() - first));
 
 		return geometry;
 	}
