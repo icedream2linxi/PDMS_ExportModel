@@ -482,6 +482,21 @@ namespace Geometry
 		colArr->push_back(color);
 		geometry->setColorArray(colArr, osg::Array::BIND_OVERALL);
 
+		Vec3 bottomNormal = -height;
+		bottomNormal.normalize();
+		Vec3 xVec = bottomNormal ^ osg::Z_AXIS;
+		if (xVec.length2() < g_epsilon)
+			xVec = osg::X_AXIS;
+		double mainRadius = 0.0;
+		if (bottomRadius > topRadius)
+			mainRadius = bottomRadius;
+		else
+			mainRadius = topRadius;
+		double incAng = 2 * acos((mainRadius - g_deflection) / mainRadius);
+		int count = (int)ceil(2 * M_PI / incAng);
+		incAng = 2 * M_PI / count;
+		Quat quat(incAng, bottomNormal);
+
 		return geometry;
 	}
 
