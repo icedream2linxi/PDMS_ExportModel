@@ -31,12 +31,12 @@ osg::ref_ptr<osg::Geode> TestRectangularTorus()
 osg::ref_ptr<osg::Geode> TestCone()
 {
 	osg::Vec3 center(0, 0, 0);
-	osg::Vec3 normal(0, 0, -1);
-	osg::Vec3 top(200, 0, 500);
+	osg::Vec3 height(0, 0, 500);
+	osg::Vec3 top(200, 0, 0);
 	double radius = 200;
 
 	osg::ref_ptr<osg::Geode> geode = new osg::Geode;
-	geode->addDrawable(Geometry::BuildCone(center, normal, top - center, radius, osg::Vec4(1, 1, 1, 0)));
+	geode->addDrawable(Geometry::BuildCone(center, height, top - center, radius, osg::Vec4(1, 1, 1, 0)));
 	return geode;
 }
 

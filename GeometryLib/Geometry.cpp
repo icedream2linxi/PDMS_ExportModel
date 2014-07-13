@@ -348,7 +348,7 @@ namespace Geometry
 		return BuildCone(center, bottomNormal, height, radius, color, bottomVis);
 	}
 
-	osg::ref_ptr<osg::Geometry> BuildCone(const osg::Vec3 &center, const osg::Vec3 &bottomNormal, const osg::Vec3 &height, double radius, const Vec4 &color, bool bottomVis /*= true*/)
+	osg::ref_ptr<osg::Geometry> BuildCone(const osg::Vec3 &center, const osg::Vec3 &height, const osg::Vec3 &offset, double radius, const Vec4 &color, bool bottomVis /*= true*/)
 	{
 		ref_ptr<osg::Geometry> geometry = new osg::Geometry();
 		ref_ptr<Vec3Array> vertexArr = new Vec3Array;
@@ -359,6 +359,8 @@ namespace Geometry
 		colArr->push_back(color);
 		geometry->setColorArray(colArr, osg::Array::BIND_OVERALL);
 
+		Vec3 bottomNormal = -height;
+		bottomNormal.normalize();
 		Vec3 xVec = bottomNormal ^ osg::Z_AXIS;
 		if (xVec.length2() < g_epsilon)
 			xVec = osg::X_AXIS;
@@ -392,7 +394,7 @@ namespace Geometry
 		}
 
 		const GLint first = vertexArr->size();
-		Vec3 topPnt = center + height;
+		Vec3 topPnt = center + height + offset;
 		Vec3 prevPnt = pntArr[pntCount - 1];
 		Vec3 prevVec = topPnt - prevPnt;
 		prevVec.normalize();
@@ -455,6 +457,30 @@ namespace Geometry
 			}
 		}
 		geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::TRIANGLES, first, vertexArr->size() - first));
+
+		return geometry;
+	}
+
+	osg::ref_ptr<osg::Geometry> BuildCone(const osg::Vec3 &center, const osg::Vec3 &height, const osg::Vec3 &offset,
+		double bottomRadius, const double topRadius, const osg::Vec4 &color, bool bottomVis /*= true*/, bool topVis /*= true*/)
+	{
+		if (equivalent(bottomRadius, 0.0, g_epsilon))
+		{
+			return BuildCone(center + height + offset, -height, -offset, topRadius, color, topVis);
+		}
+		else if (equivalent(topRadius, 0.0, g_epsilon))
+		{
+			return BuildCone(center, height, offset, bottomRadius, color, bottomVis);
+		}
+
+		ref_ptr<osg::Geometry> geometry = new osg::Geometry();
+		ref_ptr<Vec3Array> vertexArr = new Vec3Array;
+		ref_ptr<Vec3Array> normalArr = new Vec3Array;
+		geometry->setVertexArray(vertexArr);
+		geometry->setNormalArray(normalArr, osg::Array::BIND_PER_VERTEX);
+		osg::ref_ptr<osg::Vec4Array> colArr = new osg::Vec4Array();
+		colArr->push_back(color);
+		geometry->setColorArray(colArr, osg::Array::BIND_OVERALL);
 
 		return geometry;
 	}
