@@ -52,6 +52,20 @@ osg::ref_ptr<osg::Geode> TestSnout()
 	return geode;
 }
 
+osg::ref_ptr<osg::Geode> TestPyramid()
+{
+	osg::Vec3 org(0, 0, 0);
+	osg::Vec3 height(0, 0, 500);
+	osg::Vec3 xAxis(1, 0, 0);
+	osg::Vec3 offset(100, 0, 0);
+	double bottomXLen = 300, bottomYLen = 100;
+	double topXLen = 200, topYlen = 50;
+
+	osg::ref_ptr<osg::Geode> geode = new osg::Geode;
+	geode->addDrawable(Geometry::BuildPyramid(org, height, xAxis, offset, bottomXLen, bottomYLen, topXLen, topYlen, osg::Vec4(1, 1, 1, 0)));
+	return geode;
+}
+
 void InitWnd(osgViewer::Viewer &viewer)
 {
 	int xoffset = 40;
@@ -94,7 +108,8 @@ int main(int argc, char* argv[])
 	//root->addChild(TestCircularTorus());
 	//root->addChild(TestRectangularTorus());
 	//root->addChild(TestCone());
-	root->addChild(TestSnout());
+	//root->addChild(TestSnout());
+	root->addChild(TestPyramid());
 
 	myViewer.setSceneData(root);
 

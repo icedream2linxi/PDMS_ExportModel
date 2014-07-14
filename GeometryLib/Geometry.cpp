@@ -513,4 +513,88 @@ namespace Geometry
 		return geometry;
 	}
 
+	osg::ref_ptr<osg::Geometry> BuildPyramid(const osg::Vec3 &org, const osg::Vec3 &height, const osg::Vec3 &xAxis, const osg::Vec3 &offset,
+		double bottomXLen, double bottomYLen, double topXLen, double topYLen, const osg::Vec4 &color)
+	{
+		osg::Vec3 yAxis = height ^ xAxis;
+		yAxis.normalize();
+		osg::Vec3 zAxis = height / height.length();
+		osg::Vec3 topOrg = org + height + offset;
+
+		osg::Vec3 p1 = org - xAxis * bottomXLen / 2.0 - yAxis * bottomYLen / 2.0;
+		osg::Vec3 p2 = org + xAxis * bottomXLen / 2.0 - yAxis * bottomYLen / 2.0;
+		osg::Vec3 p3 = org + xAxis * bottomXLen / 2.0 + yAxis * bottomYLen / 2.0;
+		osg::Vec3 p4 = org - xAxis * bottomXLen / 2.0 + yAxis * bottomYLen / 2.0;
+
+		osg::Vec3 p5 = topOrg - xAxis * topXLen / 2.0 - yAxis * topYLen / 2.0;
+		osg::Vec3 p6 = topOrg + xAxis * topXLen / 2.0 - yAxis * topYLen / 2.0;
+		osg::Vec3 p7 = topOrg + xAxis * topXLen / 2.0 + yAxis * topYLen / 2.0;
+		osg::Vec3 p8 = topOrg - xAxis * topXLen / 2.0 + yAxis * topYLen / 2.0;
+
+		ref_ptr<osg::Geometry> geometry = new osg::Geometry();
+		ref_ptr<Vec3Array> vertexArr = new Vec3Array;
+		ref_ptr<Vec3Array> normalArr = new Vec3Array;
+		geometry->setVertexArray(vertexArr);
+		geometry->setNormalArray(normalArr, osg::Array::BIND_PER_VERTEX);
+		osg::ref_ptr<osg::Vec4Array> colArr = new osg::Vec4Array();
+		colArr->push_back(color);
+		geometry->setColorArray(colArr, osg::Array::BIND_OVERALL);
+
+		vertexArr->push_back(p1);
+		vertexArr->push_back(p2);
+		vertexArr->push_back(p3);
+		vertexArr->push_back(p4);
+		normalArr->push_back(-zAxis);
+		for (int i = 0; i < 3; ++i)
+			normalArr->push_back(normalArr->back());
+
+		vertexArr->push_back(p5);
+		vertexArr->push_back(p6);
+		vertexArr->push_back(p7);
+		vertexArr->push_back(p8);
+		normalArr->push_back(zAxis);
+		for (int i = 0; i < 3; ++i)
+			normalArr->push_back(normalArr->back());
+
+		vertexArr->push_back(p1);
+		vertexArr->push_back(p2);
+		vertexArr->push_back(p6);
+		vertexArr->push_back(p5);
+		normalArr->push_back((p6 - p1) ^ (p5 - p2));
+		normalArr->back().normalize();
+		for (int i = 0; i < 3; ++i)
+			normalArr->push_back(normalArr->back());
+
+		vertexArr->push_back(p2);
+		vertexArr->push_back(p3);
+		vertexArr->push_back(p7);
+		vertexArr->push_back(p6);
+		normalArr->push_back((p7 - p2) ^ (p6 - p3));
+		normalArr->back().normalize();
+		for (int i = 0; i < 3; ++i)
+			normalArr->push_back(normalArr->back());
+
+		vertexArr->push_back(p3);
+		vertexArr->push_back(p4);
+		vertexArr->push_back(p8);
+		vertexArr->push_back(p7);
+		normalArr->push_back((p8 - p3) ^ (p7 - p4));
+		normalArr->back().normalize();
+		for (int i = 0; i < 3; ++i)
+			normalArr->push_back(normalArr->back());
+
+		vertexArr->push_back(p4);
+		vertexArr->push_back(p1);
+		vertexArr->push_back(p5);
+		vertexArr->push_back(p8);
+		normalArr->push_back((p5 - p4) ^ (p8 - p1));
+		normalArr->back().normalize();
+		for (int i = 0; i < 3; ++i)
+			normalArr->push_back(normalArr->back());
+
+		geometry->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, vertexArr->size()));
+
+		return geometry;
+	}
+
 }
