@@ -15,4 +15,8 @@ namespace Geometry
 		double bottomRadius, const double topRadius, const osg::Vec4 &color, bool bottomVis = true, bool topVis = true);
 	osg::ref_ptr<osg::Geometry> BuildPyramid(const osg::Vec3 &org, const osg::Vec3 &height, const osg::Vec3 &xAxis, const osg::Vec3 &offset,
 		double bottomXLen, double bottomYLen, double topXLen, double topYLen, const osg::Vec4 &color);
+	osg::ref_ptr<osg::Geometry> BuildSphere(const osg::Vec3 &center, const osg::Vec3 &height,
+		double bottomRadius, const osg::Vec4 &color, bool bottomVis = true);
+	osg::ref_ptr<osg::Geometry> BuildSphere(const osg::Vec3 &center, const osg::Vec3 &bottomNormal,
+		double sphereRadius, double angle, const osg::Vec4 &color, bool bottomVis = true);
 }

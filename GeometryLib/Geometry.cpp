@@ -348,7 +348,8 @@ namespace Geometry
 		return BuildCone(center, bottomNormal, height, radius, color, bottomVis);
 	}
 
-	osg::ref_ptr<osg::Geometry> BuildCone(const osg::Vec3 &center, const osg::Vec3 &height, const osg::Vec3 &offset, double radius, const Vec4 &color, bool bottomVis /*= true*/)
+	osg::ref_ptr<osg::Geometry> BuildCone(const osg::Vec3 &center, const osg::Vec3 &height, const osg::Vec3 &offset,
+		double radius, const Vec4 &color, bool bottomVis /*= true*/)
 	{
 		ref_ptr<osg::Geometry> geometry = new osg::Geometry();
 		ref_ptr<Vec3Array> vertexArr = new Vec3Array;
@@ -596,5 +597,115 @@ namespace Geometry
 
 		return geometry;
 	}
+
+	osg::ref_ptr<osg::Geometry> BuildSphere(const osg::Vec3 &center, const osg::Vec3 &height,
+		double bottomRadius, const osg::Vec4 &color, bool bottomVis /*= true*/)
+	{
+		double h = height.length();
+		double sphereRadius = (bottomRadius * bottomRadius + h * h) / 2.0 / h;
+		double angle = M_PI / 2.0 - asin(2.0 * bottomRadius * h / (bottomRadius * bottomRadius + h * h));
+		if (bottomRadius >= h)
+		{
+			angle = M_PI - angle * 2.0;
+		}
+		else
+		{
+			angle = M_PI + angle * 2.0;
+		}
+		Vec3 bottomNormal = -height;
+		bottomNormal.normalize();
+		return BuildSphere(center, bottomNormal, sphereRadius, angle, color, bottomVis);
+	}
+
+	osg::ref_ptr<osg::Geometry> BuildSphere(const osg::Vec3 &center, const osg::Vec3 &bottomNormal,
+		double sphereRadius, double angle, const osg::Vec4 &color, bool bottomVis /*= true*/)
+	{
+		ref_ptr<osg::Geometry> geometry = new osg::Geometry();
+		ref_ptr<Vec3Array> vertexArr = new Vec3Array;
+		ref_ptr<Vec3Array> normalArr = new Vec3Array;
+		geometry->setVertexArray(vertexArr);
+		geometry->setNormalArray(normalArr, osg::Array::BIND_PER_VERTEX);
+		osg::ref_ptr<osg::Vec4Array> colArr = new osg::Vec4Array();
+		colArr->push_back(color);
+		geometry->setColorArray(colArr, osg::Array::BIND_OVERALL);
+
+		Vec3 xVec = bottomNormal ^ osg::Z_AXIS;
+		if (xVec.length2() < g_epsilon)
+			xVec = osg::X_AXIS;
+		Vec3 yVec = xVec ^ bottomNormal;
+		double incAng = 2 * acos((sphereRadius - g_deflection) / sphereRadius);
+		int hCount = (int)ceil(2 * M_PI / incAng);
+		double hIncAng = 2 * M_PI / hCount;
+		Quat hQuat(hIncAng, -bottomNormal);
+
+		int vCount = (int)ceil(angle / incAng);
+		if (vCount & 1) // 如果是奇数，则变成偶数
+			++vCount;
+		double vIncAng = angle / vCount;
+		Quat vQuat(vIncAng, yVec);
+
+		Quat quat(-angle / 2.0, yVec);
+		Vec3 vec1 = quat * (-bottomNormal) * sphereRadius;
+		Vec3 vec2 = vQuat * vec1;
+		if (bottomVis)
+		{
+			const GLint first = vertexArr->size();
+			Vec3 bVec = vec1;
+			Vec3 bottomCenter;
+			if (angle > M_PI)
+			{
+				double len = sphereRadius * sin((angle - M_PI) / 2.0);
+				bottomCenter = center + bottomNormal * len;
+			}
+			else
+			{
+				double len = sphereRadius * sin((M_PI - angle) / 2.0);
+				bottomCenter = center - bottomNormal * len;
+			}
+			vertexArr->push_back(bottomCenter);
+			normalArr->push_back(bottomNormal);
+			for (int i = 0; i < hCount; ++i)
+			{
+				vertexArr->push_back(center + bVec);
+				normalArr->push_back(bottomNormal);
+				bVec = hQuat * bVec;
+			}
+			vertexArr->push_back((*vertexArr)[first + 1]);
+			normalArr->push_back(bottomNormal);
+			geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::TRIANGLE_FAN, first, vertexArr->size() - first));
+		}
+
+		const GLint first = vertexArr->size();
+		for (int i = 0; i < vCount / 2; ++i)
+		{
+			Vec3 hVec1 = vec1;
+			Vec3 hVec2 = vec2;
+			const size_t hFirst = vertexArr->size();
+			for (int j = 0; j < hCount; ++j)
+			{
+				vertexArr->push_back(center + hVec1);
+				vertexArr->push_back(center + hVec2);
+				normalArr->push_back(hVec1);
+				normalArr->back().normalize();
+				normalArr->push_back(hVec2);
+				normalArr->back().normalize();
+
+				hVec1 = hQuat * hVec1;
+				hVec2 = hQuat * hVec2;
+			}
+			vertexArr->push_back((*vertexArr)[hFirst]);
+			vertexArr->push_back((*vertexArr)[hFirst + 1]);
+			normalArr->push_back((*normalArr)[hFirst]);
+			normalArr->push_back((*normalArr)[hFirst + 1]);
+
+			vec1 = vec2;
+			vec2 = vQuat * vec2;
+		}
+		geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::QUAD_STRIP, first, vertexArr->size() - first));
+
+		return geometry;
+	}
+
+
 
 }
