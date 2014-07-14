@@ -417,7 +417,7 @@ namespace Geometry
 		return geometry;
 	}
 
-	osg::ref_ptr<osg::Geometry> BuildCone(const osg::Vec3 &center, const osg::Vec3 &height, const osg::Vec3 &offset,
+	osg::ref_ptr<osg::Geometry> BuildSnout(const osg::Vec3 &center, const osg::Vec3 &height, const osg::Vec3 &offset,
 		double bottomRadius, const double topRadius, const osg::Vec4 &color, bool bottomVis /*= true*/, bool topVis /*= true*/)
 	{
 		if (equivalent(bottomRadius, 0.0, g_epsilon))

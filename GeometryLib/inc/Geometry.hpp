@@ -11,6 +11,6 @@ namespace Geometry
 		double width, double height, double angle, const osg::Vec4 &color, bool topVis = true, bool bottomVis = true);
 	osg::ref_ptr<osg::Geometry> BuildCone(const osg::Vec3 &center, const osg::Vec3 &height, double radius, const osg::Vec4 &color, bool bottomVis = true);
 	osg::ref_ptr<osg::Geometry> BuildCone(const osg::Vec3 &center, const osg::Vec3 &height, const osg::Vec3 &offset, double radius, const osg::Vec4 &color, bool bottomVis = true);
-	osg::ref_ptr<osg::Geometry> BuildCone(const osg::Vec3 &center, const osg::Vec3 &height, const osg::Vec3 &offset,
+	osg::ref_ptr<osg::Geometry> BuildSnout(const osg::Vec3 &center, const osg::Vec3 &height, const osg::Vec3 &offset,
 		double bottomRadius, const double topRadius, const osg::Vec4 &color, bool bottomVis = true, bool topVis = true);
 }

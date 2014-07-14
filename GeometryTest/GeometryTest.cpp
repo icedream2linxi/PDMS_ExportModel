@@ -40,7 +40,7 @@ osg::ref_ptr<osg::Geode> TestCone()
 	return geode;
 }
 
-osg::ref_ptr<osg::Geode> TestCone2()
+osg::ref_ptr<osg::Geode> TestSnout()
 {
 	osg::Vec3 center(0, 0, 0);
 	osg::Vec3 height(0, 0, 500);
@@ -48,7 +48,7 @@ osg::ref_ptr<osg::Geode> TestCone2()
 	double bottomRadius = 200, topRadius = 100;
 
 	osg::ref_ptr<osg::Geode> geode = new osg::Geode;
-	geode->addDrawable(Geometry::BuildCone(center, height, offset, bottomRadius, topRadius, osg::Vec4(1, 1, 1, 0)));
+	geode->addDrawable(Geometry::BuildSnout(center, height, offset, bottomRadius, topRadius, osg::Vec4(1, 1, 1, 0)));
 	return geode;
 }
 
@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
 	//root->addChild(TestCircularTorus());
 	//root->addChild(TestRectangularTorus());
 	//root->addChild(TestCone());
-	root->addChild(TestCone2());
+	root->addChild(TestSnout());
 
 	myViewer.setSceneData(root);
 
