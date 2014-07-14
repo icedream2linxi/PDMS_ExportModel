@@ -453,6 +453,63 @@ namespace Geometry
 		incAng = 2 * M_PI / count;
 		Quat quat(incAng, bottomNormal);
 
+		Vec3 topCenter = center + height + offset;
+		vector<Vec3> bottomPntArr, topPntArr;
+		for (int i = 0; i < count; ++i)
+		{
+			bottomPntArr.push_back(center + xVec * bottomRadius);
+			topPntArr.push_back(topCenter + xVec * topRadius);
+
+			xVec = quat * xVec;
+		}
+		bottomPntArr.push_back(bottomPntArr[0]);
+		topPntArr.push_back(topPntArr[0]);
+		size_t pntCount = bottomPntArr.size();
+
+		if (bottomVis)
+		{
+			const GLint first = vertexArr->size();
+			vertexArr->push_back(center);
+			normalArr->push_back(bottomNormal);
+			for (size_t i = 0; i < pntCount; ++i)
+			{
+				vertexArr->push_back(bottomPntArr[i]);
+				normalArr->push_back(bottomNormal);
+			}
+			geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::TRIANGLE_FAN, first, vertexArr->size() - first));
+		}
+
+		if (topVis)
+		{
+			const GLint first = vertexArr->size();
+			Vec3 topNormal = -bottomNormal;
+			vertexArr->push_back(topCenter);
+			normalArr->push_back(topNormal);
+			for (size_t i = 0; i < pntCount; ++i)
+			{
+				vertexArr->push_back(topPntArr[i]);
+				normalArr->push_back(topNormal);
+			}
+			geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::TRIANGLE_FAN, first, vertexArr->size() - first));
+		}
+
+		Vec3 yVec = height ^ xVec;
+		yVec.normalize();
+		const GLint first = vertexArr->size();
+		for (size_t i = 0; i < pntCount; ++i)
+		{
+			vertexArr->push_back(topPntArr[i]);
+			vertexArr->push_back(bottomPntArr[i]);
+
+			Vec3 normal = yVec ^ (topPntArr[i] - bottomPntArr[i]);
+			normal.normalize();
+			normalArr->push_back(normal);
+			normalArr->push_back(normal);
+
+			yVec = quat * yVec;
+		}
+		geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::QUAD_STRIP, first, vertexArr->size() - first));
+
 		return geometry;
 	}
 

@@ -32,11 +32,23 @@ osg::ref_ptr<osg::Geode> TestCone()
 {
 	osg::Vec3 center(0, 0, 0);
 	osg::Vec3 height(0, 0, 500);
-	osg::Vec3 top(200, 0, 0);
+	osg::Vec3 offset(200, 0, 0);
 	double radius = 200;
 
 	osg::ref_ptr<osg::Geode> geode = new osg::Geode;
-	geode->addDrawable(Geometry::BuildCone(center, height, top - center, radius, osg::Vec4(1, 1, 1, 0)));
+	geode->addDrawable(Geometry::BuildCone(center, height, offset, radius, osg::Vec4(1, 1, 1, 0)));
+	return geode;
+}
+
+osg::ref_ptr<osg::Geode> TestCone2()
+{
+	osg::Vec3 center(0, 0, 0);
+	osg::Vec3 height(0, 0, 500);
+	osg::Vec3 offset(200, 0, 0);
+	double bottomRadius = 200, topRadius = 100;
+
+	osg::ref_ptr<osg::Geode> geode = new osg::Geode;
+	geode->addDrawable(Geometry::BuildCone(center, height, offset, bottomRadius, topRadius, osg::Vec4(1, 1, 1, 0)));
 	return geode;
 }
 
@@ -81,7 +93,8 @@ int main(int argc, char* argv[])
 	//root->addChild(TestCasCadeByMakeTorus());
 	//root->addChild(TestCircularTorus());
 	//root->addChild(TestRectangularTorus());
-	root->addChild(TestCone());
+	//root->addChild(TestCone());
+	root->addChild(TestCone2());
 
 	myViewer.setSceneData(root);
 
