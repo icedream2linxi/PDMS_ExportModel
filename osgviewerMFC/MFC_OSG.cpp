@@ -12,6 +12,7 @@
 #include <Standard_ConstructionError.hxx>
 
 #include "GeometryUtility.h"
+#include <Geometry.hpp>
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -261,47 +262,56 @@ inline void Point2Vec3(Point^ pnt, osg::Vec3 &vec)
 	vec[2] = pnt->Z;
 }
 
+//inline osg::Vec4 CvtColor(int color)
+//{
+//	System::Drawing::Color col = System::Drawing::Color::FromArgb(color);
+//	return osg::Vec4(col.R / 256.0, col.G / 256.0, col.B / 256.0, col.A / 256.0);
+//}
+
 osg::Node* cOSG::CreateCylinders(NHibernate::ISession^ session)
 {
-	//osg::Geode *pCylinders = new osg::Geode();
-	//IList<Cylinder^>^ cylList = session->CreateQuery("from Cylinder")->List<Cylinder^>();
-	//osg::Vec3 center, dir;
-	//for (int i = 0; i < cylList->Count; ++i) {
-	//	Cylinder^ cyl = cylList->default[i];
-	//	Point2Vec3(cyl->Org, center);
-	//	Point2Vec3(cyl->Height, dir);
-	//	float height = dir.length();
-
-	//	osg::Matrixf matrix = osg::Matrixf::rotate(osg::Z_AXIS, dir);
-	//	osg::Quat quat;
-	//	quat.set(matrix);
-
-	//	osg::Cylinder *pOsgCyl = new osg::Cylinder(center + dir / 2.0, safe_cast<float>(cyl->Radius), height);
-	//	pOsgCyl->setRotation(quat);
-
-	//	osg::ShapeDrawable *pShape = new osg::ShapeDrawable(pOsgCyl, mHints);
-	//	pCylinders->addDrawable(pShape);
-	//}
-
-	osg::Group *pCylinders = new osg::Group();
+	osg::Geode *pCylinders = new osg::Geode();
 	IList<Cylinder^>^ cylList = session->CreateQuery("from Cylinder")->List<Cylinder^>();
+	osg::Vec3 center, dir;
 	for (int i = 0; i < cylList->Count; ++i) {
 		Cylinder^ cyl = cylList->default[i];
-		pCylinders->addChild(BuildCylinder(cyl));
+		Point2Vec3(cyl->Org, center);
+		Point2Vec3(cyl->Height, dir);
+		float height = dir.length();
+
+		osg::Matrixf matrix = osg::Matrixf::rotate(osg::Z_AXIS, dir);
+		osg::Quat quat;
+		quat.set(matrix);
+
+		osg::Cylinder *pOsgCyl = new osg::Cylinder(center + dir / 2.0, safe_cast<float>(cyl->Radius), height);
+		pOsgCyl->setRotation(quat);
+
+		osg::ShapeDrawable *pShape = new osg::ShapeDrawable(pOsgCyl, mHints);
+		pShape->setColor(CvtColor(cyl->Color));
+		pCylinders->addDrawable(pShape);
 	}
+
+	//osg::Group *pCylinders = new osg::Group();
+	//IList<Cylinder^>^ cylList = session->CreateQuery("from Cylinder")->List<Cylinder^>();
+	//for (int i = 0; i < cylList->Count; ++i) {
+	//	Cylinder^ cyl = cylList->default[i];
+	//	pCylinders->addChild(BuildCylinder(cyl));
+	//}
 
 	return pCylinders;
 }
 
 osg::Node* cOSG::CreateCone(NHibernate::ISession^ session)
 {
-	osg::Group *pCones = new osg::Group();
+	osg::Geode *pCones = new osg::Geode();
 	IList<Cone^>^ coneList = session->CreateQuery("from Cone")->List<Cone^>();
-	osg::Vec3 center, dir;
+	osg::Vec3 center, height, offset;
 	for (int i = 0; i < coneList->Count; ++i)
 	{
 		Cone^ cone = coneList->default[i];
-		pCones->addChild(BuildCone(cone));
+		Point2Vec3(cone->Org, center);
+		Point2Vec3(cone->Height, height);
+		pCones->addDrawable(Geometry::BuildSnout(center, height, offset, cone->ButtomRadius, cone->TopRadius, CvtColor(cone->Color)));
 	}
 	return pCones;
 }
@@ -338,47 +348,47 @@ osg::Geode * cOSG::CreateBoxs(NHibernate::ISession^ session)
 
 osg::Node* cOSG::CreateCircularTorus(NHibernate::ISession^ session)
 {
-	osg::Group *pCts = new osg::Group();
+	osg::Geode *pCts = new osg::Geode();
 	IList<CircularTorus^>^ ctList = session->CreateQuery("from CircularTorus")->List<CircularTorus^>();
+	osg::Vec3 center, startPnt, normal;
 	for (int i = 0; i < ctList->Count; ++i) {
 		CircularTorus^ ct = ctList->default[i];
-		try
-		{
-			pCts->addChild(BuildCircularTorus(ct));
-		}
-		catch (Standard_ConstructionError &e)
-		{
-			AfxMessageBox(e.GetMessageString(), MB_OK | MB_ICONERROR);
-		}
+		Point2Vec3(ct->Center, center);
+		Point2Vec3(ct->StartPnt, startPnt);
+		Point2Vec3(ct->Normal, normal);
+		pCts->addDrawable(Geometry::BuildCircularTorus(center, startPnt, normal, ct->Radius, ct->Angle, CvtColor(ct->Color)));
 	}
 	return pCts;
 }
 
 osg::Node* cOSG::CreateSnout(NHibernate::ISession^ session)
 {
-	osg::Group *pSnouts = new osg::Group();
+	osg::Geode *pSnouts = new osg::Geode();
 	IList<Snout^>^ snoutList = session->CreateQuery("from Snout")->List<Snout^>();
+	osg::Vec3 center, height, offset;
 	for (int i = 0; i < snoutList->Count; ++i) {
 		Snout^ snout = snoutList->default[i];
-		pSnouts->addChild(BuildSnout(snout));
+		Point2Vec3(snout->Org, center);
+		Point2Vec3(snout->Height, height);
+		Point2Vec3(snout->Offset, offset);
+		pSnouts->addDrawable(Geometry::BuildSnout(center, height, offset, snout->ButtomRadius, snout->TopRadius, CvtColor(snout->Color)));
 	}
 	return pSnouts;
 }
 
 osg::Node* cOSG::CreateDish(NHibernate::ISession^ session)
 {
-	osg::Group *pDish = new osg::Group();
+	osg::Geode *pDish = new osg::Geode();
 	IList<Dish^>^ dishList = session->CreateQuery("from Dish")->List<Dish^>();
+	osg::Vec3 center, height;
 	for (int i = 0; i < dishList->Count; ++i) {
 		Dish^ dish = dishList->default[i];
-		try
-		{
-			pDish->addChild(BuildDish(dish));
-		}
-		catch (Standard_Failure &e)
-		{
-			AfxMessageBox(e.GetMessageString(), MB_OK | MB_ICONERROR);
-		}
+		Point2Vec3(dish->Org, center);
+		Point2Vec3(dish->Height, height);
+		if (dish->IsEllipse)
+			pDish->addDrawable(Geometry::BuildEllipsoid(center, height, dish->Radius, CvtColor(dish->Color)));
+		else
+			pDish->addDrawable(Geometry::BuildSphere(center, height, dish->Radius, CvtColor(dish->Color)));
 	}
 	return pDish;
 }
@@ -392,92 +402,29 @@ osg::Node* cOSG::CreatePyramid(NHibernate::ISession^ session)
 {
 	osg::ref_ptr<osg::Geode> pPyramids = new osg::Geode();
 	IList<Pyramid^>^ pyramidList = session->CreateQuery("from Pyramid")->List<Pyramid^>();
+	osg::Vec3 org, height, xAxis, offset;
 	for each (Pyramid^ pyramid in pyramidList)
 	{
-		osg::ref_ptr<deprecated_osg::Geometry> pGemetry = new deprecated_osg::Geometry();
-		osg::ref_ptr<osg::Vec3Array> pVertices = new osg::Vec3Array();
-		osg::ref_ptr<osg::Vec3Array> pNormals = new osg::Vec3Array();
-
-		osg::Vec3 org = ToOsgVec3(pyramid->Org);
-		osg::Vec3 height = ToOsgVec3(pyramid->Height);
-		osg::Vec3 xAxis = ToOsgVec3(pyramid->XAxis);
-		osg::Vec3 yAxis = height ^ xAxis;
-		yAxis.normalize();
-		osg::Vec3 zAxis = height / height.length();
-		osg::Vec3 offset = ToOsgVec3(pyramid->Offset);
-		osg::Vec3 topOrg = org + height + offset;
-
-		osg::Vec3 p1 = org - xAxis * pyramid->BottomXLen / 2.0 - yAxis * pyramid->BottomYLen / 2.0;
-		osg::Vec3 p2 = org + xAxis * pyramid->BottomXLen / 2.0 - yAxis * pyramid->BottomYLen / 2.0;
-		osg::Vec3 p3 = org + xAxis * pyramid->BottomXLen / 2.0 + yAxis * pyramid->BottomYLen / 2.0;
-		osg::Vec3 p4 = org - xAxis * pyramid->BottomXLen / 2.0 + yAxis * pyramid->BottomYLen / 2.0;
-
-		osg::Vec3 p5 = topOrg - xAxis * pyramid->TopXLen / 2.0 - yAxis * pyramid->TopYLen / 2.0;
-		osg::Vec3 p6 = topOrg + xAxis * pyramid->TopXLen / 2.0 - yAxis * pyramid->TopYLen / 2.0;
-		osg::Vec3 p7 = topOrg + xAxis * pyramid->TopXLen / 2.0 + yAxis * pyramid->TopYLen / 2.0;
-		osg::Vec3 p8 = topOrg - xAxis * pyramid->TopXLen / 2.0 + yAxis * pyramid->TopYLen / 2.0;
-
-		pVertices->push_back(p1);
-		pVertices->push_back(p2);
-		pVertices->push_back(p3);
-		pVertices->push_back(p4);
-		pNormals->push_back(-zAxis);
-
-		pVertices->push_back(p5);
-		pVertices->push_back(p6);
-		pVertices->push_back(p7);
-		pVertices->push_back(p8);
-		pNormals->push_back(zAxis);
-
-		pVertices->push_back(p1);
-		pVertices->push_back(p2);
-		pVertices->push_back(p6);
-		pVertices->push_back(p5);
-		pNormals->push_back((p6 - p1) ^ (p5 - p2));
-		pNormals->back().normalize();
-
-		pVertices->push_back(p2);
-		pVertices->push_back(p3);
-		pVertices->push_back(p7);
-		pVertices->push_back(p6);
-		pNormals->push_back((p7 - p2) ^ (p6 - p3));
-		pNormals->back().normalize();
-
-		pVertices->push_back(p3);
-		pVertices->push_back(p4);
-		pVertices->push_back(p8);
-		pVertices->push_back(p7);
-		pNormals->push_back((p8 - p3) ^ (p7 - p4));
-		pNormals->back().normalize();
-
-		pVertices->push_back(p4);
-		pVertices->push_back(p1);
-		pVertices->push_back(p5);
-		pVertices->push_back(p8);
-		pNormals->push_back((p5 - p4) ^ (p8 - p1));
-		pNormals->back().normalize();
-
-		pGemetry->setVertexArray(pVertices);
-		pGemetry->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, pVertices->size()));
-
-		pGemetry->setNormalArray(pNormals);
-		pGemetry->setNormalBinding(deprecated_osg::Geometry::BIND_PER_PRIMITIVE);
-
-		osg::ref_ptr<osg::Vec4Array> colArr = new osg::Vec4Array();
-		colArr->push_back(CvtColor(pyramid->Color));
-		pGemetry->setColorArray(colArr, osg::Array::BIND_OVERALL);
-
-		pPyramids->addDrawable(pGemetry);
+		Point2Vec3(pyramid->Org, org);
+		Point2Vec3(pyramid->Height, height);
+		Point2Vec3(pyramid->XAxis, xAxis);
+		Point2Vec3(pyramid->Offset, offset);
+		pPyramids->addDrawable(Geometry::BuildPyramid(org, height, xAxis, offset,
+			pyramid->BottomXLen, pyramid->BottomYLen, pyramid->TopXLen, pyramid->TopYLen, CvtColor(pyramid->Color)));
 	}
 	return pPyramids.release();
 }
 
 osg::Node* cOSG::CreateRectangularTorus(NHibernate::ISession^ session)
 {
-	osg::Group *pRt = new osg::Group();
+	osg::Geode *pRt = new osg::Geode();
 	IList<RectangularTorus^>^ rtList = session->CreateQuery("from RectangularTorus")->List<RectangularTorus^>();
+	osg::Vec3 center, startPnt, normal;
 	for each (RectangularTorus^ rt in rtList) {
-		pRt->addChild(BuildRectangularTorus(rt));
+		Point2Vec3(rt->Center, center);
+		Point2Vec3(rt->StartPnt, startPnt);
+		Point2Vec3(rt->Normal, normal);
+		pRt->addDrawable(Geometry::BuildRectangularTorus(center, startPnt, normal, rt->Width, rt->Height, rt->Angle, CvtColor(rt->Color)));
 	}
 	return pRt;
 }

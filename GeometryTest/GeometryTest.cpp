@@ -131,11 +131,11 @@ int main(int argc, char* argv[])
 	//root->addChild(TestCasCadeByMakeTorus());
 	//root->addChild(TestCircularTorus());
 	//root->addChild(TestRectangularTorus());
-	//root->addChild(TestCone());
+	root->addChild(TestCone());
 	//root->addChild(TestSnout());
 	//root->addChild(TestPyramid());
 	//root->addChild(TestSphere());
-	root->addChild(TestEllipsoid());
+	//root->addChild(TestEllipsoid());
 
 
 	myViewer.setSceneData(root);
