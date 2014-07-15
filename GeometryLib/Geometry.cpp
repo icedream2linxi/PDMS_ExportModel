@@ -706,6 +706,94 @@ namespace Geometry
 		return geometry;
 	}
 
+	osg::ref_ptr<osg::Geometry> BuildEllipsoid(const osg::Vec3 &center, const osg::Vec3 &height,
+		double radius, const osg::Vec4 &color, bool bottomVis /*= true*/)
+	{
+		ref_ptr<osg::Geometry> geometry = new osg::Geometry();
+		ref_ptr<Vec3Array> vertexArr = new Vec3Array;
+		ref_ptr<Vec3Array> normalArr = new Vec3Array;
+		geometry->setVertexArray(vertexArr);
+		geometry->setNormalArray(normalArr, osg::Array::BIND_PER_VERTEX);
+		osg::ref_ptr<osg::Vec4Array> colArr = new osg::Vec4Array();
+		colArr->push_back(color);
+		geometry->setColorArray(colArr, osg::Array::BIND_OVERALL);
+
+		Vec3 bottomNormal = -height;
+		bottomNormal.normalize();
+		Quat localToWold;
+		localToWold.makeRotate(osg::Z_AXIS, -bottomNormal);
+		Vec3 xVec = localToWold * osg::X_AXIS;
+		Vec3 yVec = xVec ^ bottomNormal;
+		double incAng = 2 * acos((radius - g_deflection) / radius);
+		int hCount = (int)ceil(2 * M_PI / incAng);
+		double hIncAng = 2 * M_PI / hCount;
+		Quat hQuat(hIncAng, -bottomNormal);
+
+		int vCount = (int)ceil(M_PI / incAng);
+		if (vCount & 1) // 如果是奇数，则变成偶数
+			++vCount;
+		double vIncAng = M_PI / vCount;
+
+		if (bottomVis)
+		{
+			const GLint first = vertexArr->size();
+			Vec3 bVec = xVec * radius;
+			vertexArr->push_back(center);
+			normalArr->push_back(bottomNormal);
+			for (int i = 0; i < hCount; ++i)
+			{
+				vertexArr->push_back(center + bVec);
+				normalArr->push_back(bottomNormal);
+				bVec = hQuat * bVec;
+			}
+			vertexArr->push_back((*vertexArr)[first + 1]);
+			normalArr->push_back(bottomNormal);
+			geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::TRIANGLE_FAN, first, vertexArr->size() - first));
+		}
+
+		double currAngle = M_PI_2;
+		double h = height.length();
+		Vec3 vec1(radius * sin(currAngle), 0, h * cos(currAngle));
+		vec1 = localToWold * vec1;
+
+		currAngle -= vIncAng;
+		Vec3 vec2(radius * sin(currAngle), 0, h * cos(currAngle));
+		vec2 = localToWold * vec2;
+
+		const GLint first = vertexArr->size();
+		for (int i = 0; i < vCount / 2; ++i)
+		{
+			Vec3 hVec1 = vec1;
+			Vec3 hVec2 = vec2;
+			const size_t hFirst = vertexArr->size();
+			for (int j = 0; j < hCount; ++j)
+			{
+				vertexArr->push_back(center + hVec1);
+				vertexArr->push_back(center + hVec2);
+				normalArr->push_back(hVec1);
+				normalArr->back().normalize();
+				normalArr->push_back(hVec2);
+				normalArr->back().normalize();
+
+				hVec1 = hQuat * hVec1;
+				hVec2 = hQuat * hVec2;
+			}
+			vertexArr->push_back((*vertexArr)[hFirst]);
+			vertexArr->push_back((*vertexArr)[hFirst + 1]);
+			normalArr->push_back((*normalArr)[hFirst]);
+			normalArr->push_back((*normalArr)[hFirst + 1]);
+
+			vec1 = vec2;
+			currAngle -= vIncAng;
+			vec2.set(radius * sin(currAngle), 0, h * cos(currAngle));
+			vec2 = localToWold * vec2;
+		}
+		geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::QUAD_STRIP, first, vertexArr->size() - first));
+
+		return geometry;
+	}
+
+
 
 
 }

@@ -14,6 +14,8 @@
 #include <ctime>
 
 // TODO: reference additional headers your program requires here
+#include <osg/Shape>
+#include <osg/ShapeDrawable>
 #include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers>
 #include <osgGA/StateSetManipulator>

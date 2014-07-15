@@ -19,4 +19,6 @@ namespace Geometry
 		double bottomRadius, const osg::Vec4 &color, bool bottomVis = true);
 	osg::ref_ptr<osg::Geometry> BuildSphere(const osg::Vec3 &center, const osg::Vec3 &bottomNormal,
 		double sphereRadius, double angle, const osg::Vec4 &color, bool bottomVis = true);
+	osg::ref_ptr<osg::Geometry> BuildEllipsoid(const osg::Vec3 &center, const osg::Vec3 &height,
+		double radius, const osg::Vec4 &color, bool bottomVis = true);
 }

@@ -78,6 +78,18 @@ osg::ref_ptr<osg::Geode> TestSphere()
 	return geode;
 }
 
+osg::ref_ptr<osg::Geode> TestEllipsoid()
+{
+	osg::Vec3 center(0, 0, 0);
+	osg::Vec3 height(100, 100, 100);
+	double bottomRadius = 500;
+	osg::Vec4 color(1, 1, 1, 0);
+
+	osg::ref_ptr<osg::Geode> geode = new osg::Geode;
+	geode->addDrawable(Geometry::BuildEllipsoid(center, height, bottomRadius, color));
+	return geode;
+}
+
 void InitWnd(osgViewer::Viewer &viewer)
 {
 	int xoffset = 40;
@@ -122,7 +134,9 @@ int main(int argc, char* argv[])
 	//root->addChild(TestCone());
 	//root->addChild(TestSnout());
 	//root->addChild(TestPyramid());
-	root->addChild(TestSphere());
+	//root->addChild(TestSphere());
+	root->addChild(TestEllipsoid());
+
 
 	myViewer.setSceneData(root);
 
