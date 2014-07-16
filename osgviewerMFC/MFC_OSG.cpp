@@ -267,7 +267,7 @@ osg::Node* cOSG::CreateCylinders(NHibernate::ISession^ session)
 	osg::Geode *pCylinders = new osg::Geode();
 	IList<Cylinder^>^ cylList = session->CreateQuery("from Cylinder")->List<Cylinder^>();
 	osg::Vec3 center, dir;
-	for (int i = 18; i < 20/*cylList->Count*/; ++i) {
+	for (int i = 0; i < cylList->Count; ++i) {
 		Cylinder^ cyl = cylList->default[i];
 		Point2Vec3(cyl->Org, center);
 		Point2Vec3(cyl->Height, dir);

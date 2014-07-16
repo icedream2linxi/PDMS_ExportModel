@@ -10,6 +10,14 @@ namespace ExportModel
 	{
 		private string exper;
 		private IOperator op = null;
+		enum BracketType
+		{
+			GENERAL,
+			FUNCTION
+		}
+		private Stack<BracketType> bracketStack = new Stack<BracketType>();
+		private bool isFunBracketEnd = false;
+
 		public string Exper
 		{
 			get
@@ -74,10 +82,11 @@ namespace ExportModel
 			NONE,
 			NEED_OPERATOR,
 			NEED_VALUE,
+			NEED_PARAM,
 			NEED_BRACKET
 		};
 
-		private bool Parse(CharEnumerator experIter, IOperator prevOp, ref IOperator op, OperatorOrder opOrder, ref bool isEnd)
+		private bool Parse(CharEnumerator experIter, IOperator prevOp, ref IOperator op, ref bool isEnd)
 		{
 			if (!SkipSpace(experIter))
 				return true;
@@ -99,9 +108,9 @@ namespace ExportModel
 							if (!isEof)
 							{
 								IOperator nextValueOp = null;
-								isEof = !experIter.MoveNext();
+								//isEof = !experIter.MoveNext();
 								if (!isEof)
-									isEof = Parse(experIter, valueOp, ref nextValueOp, opOrder, ref isEnd);
+									isEof = Parse(experIter, valueOp, ref nextValueOp, ref isEnd);
 								if (nextValueOp == null)
 									op = new SubOp(prevOp, valueOp);
 								else
@@ -116,9 +125,9 @@ namespace ExportModel
 							if (!isEof)
 							{
 								IOperator nextValueOp = null;
-								isEof = !experIter.MoveNext();
+								//isEof = !experIter.MoveNext();
 								if (!isEof)
-									isEof = Parse(experIter, valueOp, ref nextValueOp, opOrder, ref isEnd);
+									isEof = Parse(experIter, valueOp, ref nextValueOp, ref isEnd);
 								if (nextValueOp == null)
 									op = new AddOp(prevOp, valueOp);
 								else
@@ -146,8 +155,12 @@ namespace ExportModel
 			}
 			else if (curCh == ')')
 			{
-				if (opOrder != OperatorOrder.NEED_BRACKET)
-					isEof = !experIter.MoveNext();
+				if (bracketStack.Count <= 0)
+					throw new FormatException();
+				BracketType type = bracketStack.Pop();
+				if (type == BracketType.FUNCTION)
+					isFunBracketEnd = true;
+				isEof = !experIter.MoveNext();
 				return isEof;
 			}
 			else if (curCh == ',')
@@ -202,12 +215,21 @@ namespace ExportModel
 				if (!SkipSpace(experIter))
 					throw new FormatException();
 
-				isEof = Parse(experIter, opOrder == OperatorOrder.NEED_BRACKET ? OperatorOrder.NEED_BRACKET : OperatorOrder.NONE, ref op);
+				if (opOrder == OperatorOrder.NEED_PARAM)
+					bracketStack.Push(BracketType.FUNCTION);
+				else
+					bracketStack.Push(BracketType.GENERAL);
+				isFunBracketEnd = false;
+				isEof = Parse(experIter, OperatorOrder.NONE, ref op);
 			}
 			else if (experIter.Current == ')')
 			{
-				if (opOrder != OperatorOrder.NEED_BRACKET)
-					isEof = !experIter.MoveNext();
+				if (bracketStack.Count <= 0)
+					throw new FormatException();
+				BracketType type = bracketStack.Pop();
+				if (type == BracketType.FUNCTION)
+					isFunBracketEnd = true;
+				isEof = !experIter.MoveNext();
 				return isEof;
 			}
 			else
@@ -216,14 +238,12 @@ namespace ExportModel
 			}
 
 			bool isEnd = false;
-			while (!isEof && !isEnd && (
-				(opOrder == OperatorOrder.NEED_BRACKET && experIter.Current != ')')
-				|| opOrder == OperatorOrder.NONE
-				)
+			while (!isEof && !isEnd && !isFunBracketEnd
+				&& (opOrder == OperatorOrder.NONE || opOrder == OperatorOrder.NEED_PARAM)
 				&& experIter.Current != ',')
 			{
 				IOperator nextValueOp = null;
-				isEof = Parse(experIter, op, ref nextValueOp, opOrder, ref isEnd);
+				isEof = Parse(experIter, op, ref nextValueOp, ref isEnd);
 				if (nextValueOp != null)
 					op = nextValueOp;
 			}
@@ -312,34 +332,31 @@ namespace ExportModel
 			else if (item.Equals("MIN"))
 			{
 				IOperator valueOp = null;
-				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
+				isEof = Parse(experIter, OperatorOrder.NEED_PARAM, ref valueOp);
 				if (isEof || experIter.Current != ',' || !experIter.MoveNext())
 					throw new FormatException();
 				IOperator nextValueOp = null;
-				isEof = Parse(experIter, OperatorOrder.NEED_BRACKET, ref nextValueOp);
-				if (isEof || experIter.Current != ')' || !experIter.MoveNext())
-					throw new FormatException();
+				isEof = Parse(experIter, OperatorOrder.NONE, ref nextValueOp);
+				isFunBracketEnd = false;
 				op = new MinOp(valueOp, nextValueOp);
 			}
 			else if (item.Equals("MAX"))
 			{
 				IOperator valueOp = null;
-				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
+				isEof = Parse(experIter, OperatorOrder.NEED_PARAM, ref valueOp);
 				if (isEof || experIter.Current != ',' || !experIter.MoveNext())
 					throw new FormatException();
 				IOperator nextValueOp = null;
-				isEof = Parse(experIter, OperatorOrder.NEED_BRACKET, ref nextValueOp);
-				if (isEof || experIter.Current != ')' || !experIter.MoveNext())
-					throw new FormatException();
+				isEof = Parse(experIter, OperatorOrder.NONE, ref nextValueOp);
+				isFunBracketEnd = false;
 				op = new MaxOp(valueOp, nextValueOp);
 			}
 			else if (item.Equals("COS"))
 			{
 				CosOp cosOp = new CosOp();
 				IOperator valueOp = null;
-				isEof = Parse(experIter, OperatorOrder.NEED_BRACKET, ref valueOp);
-				if (isEof || experIter.Current != ')' || !experIter.MoveNext())
-					throw new FormatException();
+				isEof = Parse(experIter, OperatorOrder.NEED_PARAM, ref valueOp);
+				isFunBracketEnd = false;
 				cosOp.Item = valueOp;
 				op = cosOp;
 				return isEof;
@@ -348,9 +365,8 @@ namespace ExportModel
 			{
 				SinOp sinOp = new SinOp();
 				IOperator valueOp = null;
-				isEof = Parse(experIter, OperatorOrder.NEED_BRACKET, ref valueOp);
-				if (isEof || experIter.Current != ')' || !experIter.MoveNext())
-					throw new FormatException();
+				isEof = Parse(experIter, OperatorOrder.NEED_PARAM, ref valueOp);
+				isFunBracketEnd = false;
 				sinOp.Item = valueOp;
 				op = sinOp;
 				return isEof;
@@ -359,9 +375,8 @@ namespace ExportModel
 			{
 				IntOp intOp = new IntOp();
 				IOperator valueOp = null;
-				isEof = Parse(experIter, OperatorOrder.NEED_BRACKET, ref valueOp);
-				if (isEof || experIter.Current != ')' || !experIter.MoveNext())
-					throw new FormatException();
+				isEof = Parse(experIter, OperatorOrder.NEED_PARAM, ref valueOp);
+				isFunBracketEnd = false;
 				intOp.Item = valueOp;
 				op = intOp;
 				return isEof;
