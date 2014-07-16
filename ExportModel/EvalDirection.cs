@@ -114,6 +114,12 @@ namespace ExportModel
 
 		private static Direction ParseExperDir(string exper, DbElement modelEle)
 		{
+			if (exper.IndexOfAny(flags) < 0 && exper.Contains("P"))
+			{
+				AxisDir dir = Eval(modelEle, exper);
+				return dir.Dir;
+			}
+
 			StringBuilder sb = new StringBuilder();
 			int preIdx = 0, nextIdx;
 			while ((nextIdx = exper.IndexOfAny(flags, preIdx)) >= 0)
