@@ -29,7 +29,11 @@ namespace ExportModel
 				exper = exper.Substring(exper[1] == 'P' ? 2 : 1);
 
 				int num = int.Parse(exper);
-				return MakeDirection(num, isNeg, modelEle);
+				AxisDir ad = null;
+				ad = MakeDirection(num, isNeg, modelEle);
+				if (ad == null || (ad.Dir.East + ad.Dir.North + ad.Dir.Up) < 0.000001)
+					ad = null;
+				return ad;
 			}
 			else
 			{

@@ -371,6 +371,16 @@ namespace ExportModel
 				op = sinOp;
 				return isEof;
 			}
+			else if (item.Equals("SQRT"))
+			{
+				SqrtOp sqrtOp = new SqrtOp();
+				IOperator valueOp = null;
+				isEof = Parse(experIter, OperatorOrder.NEED_PARAM, ref valueOp);
+				isFunBracketEnd = false;
+				sqrtOp.Item = valueOp;
+				op = sqrtOp;
+				return isEof;
+			}
 			else if (item.Equals("INT"))
 			{
 				IntOp intOp = new IntOp();
@@ -809,6 +819,25 @@ namespace ExportModel
 		public override double Eval()
 		{
 			return Math.Sin(Item.Eval());
+		}
+	}
+
+	class SqrtOp : OneObjOp
+	{
+		public SqrtOp()
+		{
+
+		}
+
+		public SqrtOp(IOperator item)
+			: base(item)
+		{
+
+		}
+
+		public override double Eval()
+		{
+			return Math.Sqrt(Item.Eval());
 		}
 	}
 

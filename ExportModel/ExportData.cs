@@ -229,6 +229,8 @@ namespace ExportModel
 			{
 				int leave = prevEle.GetInteger(DbAttributeInstance.LEAV);
 				AxisDir ptax = EvalDirection.Eval(prevEle, "P" + leave);
+				if (ptax == null)
+					return;
 
 				D3Transform eleTrans = transform.Multiply(GetTransform(prevEle));
 				dir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(ptax.Dir));
