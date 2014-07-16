@@ -262,18 +262,12 @@ inline void Point2Vec3(Point^ pnt, osg::Vec3 &vec)
 	vec[2] = pnt->Z;
 }
 
-//inline osg::Vec4 CvtColor(int color)
-//{
-//	System::Drawing::Color col = System::Drawing::Color::FromArgb(color);
-//	return osg::Vec4(col.R / 256.0, col.G / 256.0, col.B / 256.0, col.A / 256.0);
-//}
-
 osg::Node* cOSG::CreateCylinders(NHibernate::ISession^ session)
 {
 	osg::Geode *pCylinders = new osg::Geode();
 	IList<Cylinder^>^ cylList = session->CreateQuery("from Cylinder")->List<Cylinder^>();
 	osg::Vec3 center, dir;
-	for (int i = 0; i < cylList->Count; ++i) {
+	for (int i = 18; i < 20/*cylList->Count*/; ++i) {
 		Cylinder^ cyl = cylList->default[i];
 		Point2Vec3(cyl->Org, center);
 		Point2Vec3(cyl->Height, dir);
@@ -311,7 +305,7 @@ osg::Node* cOSG::CreateCone(NHibernate::ISession^ session)
 		Cone^ cone = coneList->default[i];
 		Point2Vec3(cone->Org, center);
 		Point2Vec3(cone->Height, height);
-		pCones->addDrawable(Geometry::BuildSnout(center, height, offset, cone->ButtomRadius, cone->TopRadius, CvtColor(cone->Color)));
+		pCones->addDrawable(Geometry::BuildSnout(center, height, offset, cone->BottomRadius, cone->TopRadius, CvtColor(cone->Color)));
 	}
 	return pCones;
 }
@@ -371,14 +365,14 @@ osg::Node* cOSG::CreateSnout(NHibernate::ISession^ session)
 		Point2Vec3(snout->Org, center);
 		Point2Vec3(snout->Height, height);
 		Point2Vec3(snout->Offset, offset);
-		pSnouts->addDrawable(Geometry::BuildSnout(center, height, offset, snout->ButtomRadius, snout->TopRadius, CvtColor(snout->Color)));
+		pSnouts->addDrawable(Geometry::BuildSnout(center, height, offset, snout->BottomRadius, snout->TopRadius, CvtColor(snout->Color)));
 	}
 	return pSnouts;
 }
 
 osg::Node* cOSG::CreateDish(NHibernate::ISession^ session)
 {
-	osg::Geode *pDish = new osg::Geode();
+	osg::Geode *pDishs = new osg::Geode();
 	IList<Dish^>^ dishList = session->CreateQuery("from Dish")->List<Dish^>();
 	osg::Vec3 center, height;
 	for (int i = 0; i < dishList->Count; ++i) {
@@ -386,11 +380,11 @@ osg::Node* cOSG::CreateDish(NHibernate::ISession^ session)
 		Point2Vec3(dish->Org, center);
 		Point2Vec3(dish->Height, height);
 		if (dish->IsEllipse)
-			pDish->addDrawable(Geometry::BuildEllipsoid(center, height, dish->Radius, CvtColor(dish->Color)));
+			pDishs->addDrawable(Geometry::BuildEllipsoid(center, height, dish->Radius, CvtColor(dish->Color)));
 		else
-			pDish->addDrawable(Geometry::BuildSphere(center, height, dish->Radius, CvtColor(dish->Color)));
+			pDishs->addDrawable(Geometry::BuildSphere(center, height, dish->Radius, CvtColor(dish->Color)));
 	}
-	return pDish;
+	return pDishs;
 }
 
 inline osg::Vec3 ToOsgVec3(Point^ pnt)
@@ -424,7 +418,8 @@ osg::Node* cOSG::CreateRectangularTorus(NHibernate::ISession^ session)
 		Point2Vec3(rt->Center, center);
 		Point2Vec3(rt->StartPnt, startPnt);
 		Point2Vec3(rt->Normal, normal);
-		pRt->addDrawable(Geometry::BuildRectangularTorus(center, startPnt, normal, rt->Width, rt->Height, rt->Angle, CvtColor(rt->Color)));
+		pRt->addDrawable(Geometry::BuildRectangularTorus(center, startPnt, normal,
+			rt->Width, rt->Height, rt->Angle, CvtColor(rt->Color)));
 	}
 	return pRt;
 }

@@ -23,8 +23,8 @@ namespace DbModel
 		[Point(After = typeof(IdAttribute), Name = "Offset")]
 		public virtual Point Offset { get; set; }
 
-		[Property(Column = "buttom_radius")]
-		public virtual double ButtomRadius { get; set; }
+		[Property(Column = "bottom_radius")]
+		public virtual double BottomRadius { get; set; }
 
 		[Property(Column = "top_radius")]
 		public virtual double TopRadius { get; set; }

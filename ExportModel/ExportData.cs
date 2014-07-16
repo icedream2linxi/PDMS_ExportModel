@@ -299,245 +299,258 @@ namespace ExportModel
 						continue;
 					}
 
-					if (gEle.GetElementType() == DbElementTypeInstance.SCYLINDER)
+					try
 					{
-						string expr = gEle.GetAsString(DbAttributeInstance.PAXI);
-						AxisDir paxi = EvalDirection.Eval(ele, expr);
-
-						double phei = GetExper(gEle, DbAttributeInstance.PHEI).Eval(ele);
-						double pdia = GetExper(gEle, DbAttributeInstance.PDIA).Eval(ele);
-						double pdis = GetExper(gEle, DbAttributeInstance.PDIS).Eval(ele);
-
-						D3Vector dir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(paxi.Dir));
-						D3Point pos = eleTrans.Multiply(GeometryUtility.ToD3Point(paxi.Pos));
-
-						Cylinder cyl = new Cylinder();
-						cyl.Org = new Point(pos)
-							.MoveBy(dir, pdis);
-						cyl.Height = new Point(dir).Mul(phei);
-						cyl.Radius = pdia / 2.0;
-						cyl.Color = color;
-						session.Save(cyl);
-					}
-					else if (gEle.GetElementType() == DbElementTypeInstance.LCYLINDER)
-					{
-						string expr = gEle.GetAsString(DbAttributeInstance.PAXI);
-						AxisDir paxi = EvalDirection.Eval(ele, expr);
-
-						double pdia = GetExper(gEle, DbAttributeInstance.PDIA).Eval(ele);
-						double pbdi = GetExper(gEle, DbAttributeInstance.PBDI).Eval(ele);
-						double ptdi = GetExper(gEle, DbAttributeInstance.PTDI).Eval(ele);
-
-						D3Vector dir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(paxi.Dir));
-						D3Point pos = eleTrans.Multiply(GeometryUtility.ToD3Point(paxi.Pos));
-		
-						Cylinder cyl = new Cylinder();
-						cyl.Org = new Point(pos)
-							.MoveBy(dir, pbdi);
-						cyl.Height = new Point(dir).Mul(ptdi - pbdi);
-						cyl.Radius = pdia / 2.0;
-						cyl.Color = color;
-						session.Save(cyl);
-					}
-					else if (gEle.GetElementType() == DbElementTypeInstance.SBOX)
-					{
-						double pxlen = GetExper(gEle, DbAttributeInstance.PXLE).Eval(ele);
-						double pylen = GetExper(gEle, DbAttributeInstance.PYLE).Eval(ele);
-						double pzlen = GetExper(gEle, DbAttributeInstance.PZLE).Eval(ele);
-						double px = GetExper(gEle, DbAttributeInstance.PX).Eval(ele);
-						double py = GetExper(gEle, DbAttributeInstance.PY).Eval(ele);
-						double pz = GetExper(gEle, DbAttributeInstance.PZ).Eval(ele);
-
-						Point xlen = new Point(eleTrans.Multiply(D3Vector.D3EAST));
-						Point ylen = new Point(eleTrans.Multiply(D3Vector.D3NORTH));
-						Point zlen = new Point(eleTrans.Multiply(D3Vector.D3UP));
-
-						Point pos = new Point(eleTrans.Multiply(GeometryUtility.Org));
-						pos.MoveBy(xlen, px - pxlen / 2.0).MoveBy(ylen, py - pylen / 2.0).MoveBy(zlen, pz - pzlen / 2.0);
-						xlen.Mul(pxlen);
-						ylen.Mul(pylen);
-						zlen.Mul(pzlen);
-
-						Box box = new Box();
-						box.Org = pos;
-						box.XLen = xlen;
-						box.YLen = ylen;
-						box.ZLen = zlen;
-						box.Color = color;
-						session.Save(box);
-					}
-					else if (gEle.GetElementType() == DbElementTypeInstance.SCTORUS)
-					{
-						string expr = gEle.GetAsString(DbAttributeInstance.PAAX);
-						AxisDir paax = EvalDirection.Eval(ele, expr);
-
-						expr = gEle.GetAsString(DbAttributeInstance.PBAX);
-						AxisDir pbax = EvalDirection.Eval(ele, expr);
-
-						double pdia = GetExper(gEle, DbAttributeInstance.PDIA).Eval(ele);
-
-						CircularTorus ct = new CircularTorus();
-						Direction normal = null;
-						if (!paax.Dir.IsParallel(pbax.Dir))
-							normal = paax.Dir.Orthogonal(pbax.Dir);
-						else
-							normal = paax.Dir.Orthogonal(Direction.Create(paax.Pos, pbax.Pos));
-						ct.Normal = new Point(eleTrans.Multiply(GeometryUtility.ToD3VectorRef(normal)));
-
-						ct.StartPnt = new Point(eleTrans.Multiply(GeometryUtility.ToD3Point(pbax.Pos)));
-						ct.Radius = pdia / 2.0;
-
-						double mRadius = 0.0;
-						if (!paax.Dir.IsParallel(pbax.Dir))
+						if (gEle.GetElementType() == DbElementTypeInstance.SCYLINDER)
 						{
-							double ang = paax.Dir.Angle(pbax.Dir) * Math.PI / 180.0;
-							ct.Angle = Math.PI - ang;
-							ang /= 2.0;
-							double len = paax.Pos.Distance(pbax.Pos) / 2;
-							mRadius = len / Math.Sin(ang) * Math.Tan(ang);
-
+							string expr = gEle.GetAsString(DbAttributeInstance.PAXI);
+							AxisDir paxi = EvalDirection.Eval(ele, expr);
+	
+							double phei = GetExper(gEle, DbAttributeInstance.PHEI).Eval(ele);
+							double pdia = GetExper(gEle, DbAttributeInstance.PDIA).Eval(ele);
+							double pdis = GetExper(gEle, DbAttributeInstance.PDIS).Eval(ele);
+	
+							D3Vector dir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(paxi.Dir));
+							D3Point pos = eleTrans.Multiply(GeometryUtility.ToD3Point(paxi.Pos));
+	
+							Cylinder cyl = new Cylinder();
+							cyl.Org = new Point(pos)
+								.MoveBy(dir, pdis);
+							cyl.Height = new Point(dir).Mul(phei);
+							cyl.Radius = pdia / 2.0;
+							cyl.Color = color;
+							session.Save(cyl);
 						}
-						else
+						else if (gEle.GetElementType() == DbElementTypeInstance.LCYLINDER)
 						{
-							ct.Angle = Math.PI;
-							mRadius = paax.Pos.Distance(pbax.Pos) / 2.0;
+							string expr = gEle.GetAsString(DbAttributeInstance.PAXI);
+							AxisDir paxi = EvalDirection.Eval(ele, expr);
+	
+							double pdia = GetExper(gEle, DbAttributeInstance.PDIA).Eval(ele);
+							double pbdi = GetExper(gEle, DbAttributeInstance.PBDI).Eval(ele);
+							double ptdi = GetExper(gEle, DbAttributeInstance.PTDI).Eval(ele);
+	
+							D3Vector dir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(paxi.Dir));
+							D3Point pos = eleTrans.Multiply(GeometryUtility.ToD3Point(paxi.Pos));
+			
+							Cylinder cyl = new Cylinder();
+							cyl.Org = new Point(pos)
+								.MoveBy(dir, pbdi);
+							cyl.Height = new Point(dir).Mul(ptdi - pbdi);
+							cyl.Radius = pdia / 2.0;
+							cyl.Color = color;
+							session.Save(cyl);
 						}
-						D3Vector radiusDir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(pbax.Dir.Orthogonal(normal)));
-						ct.Center = new Point(ct.StartPnt).MoveBy(radiusDir, mRadius);
-						ct.Color = color;
-
-						session.Save(ct);
-					}
-					else if (gEle.GetElementType() == DbElementTypeInstance.SRTORUS)
-					{
-						string expr = gEle.GetAsString(DbAttributeInstance.PAAX);
-						AxisDir paax = EvalDirection.Eval(ele, expr);
-
-						expr = gEle.GetAsString(DbAttributeInstance.PBAX);
-						AxisDir pbax = EvalDirection.Eval(ele, expr);
-
-						double pdia = GetExper(gEle, DbAttributeInstance.PDIA).Eval(ele);
-						double phei = GetExper(gEle, DbAttributeInstance.PHEI).Eval(ele);
-
-						RectangularTorus rt = new RectangularTorus();
-						Direction normal = null;
-						if (!paax.Dir.IsParallel(pbax.Dir))
-							normal = paax.Dir.Orthogonal(pbax.Dir);
-						else
-							normal = paax.Dir.Orthogonal(Direction.Create(paax.Pos, pbax.Pos));
-						rt.Normal = new Point(eleTrans.Multiply(GeometryUtility.ToD3VectorRef(normal)));
-
-						rt.StartPnt = new Point(eleTrans.Multiply(GeometryUtility.ToD3Point(pbax.Pos)));
-						rt.Width = pdia;
-						rt.Height = phei;
-
-						double mRadius = 0.0;
-						if (!paax.Dir.IsParallel(pbax.Dir))
+						else if (gEle.GetElementType() == DbElementTypeInstance.SBOX)
 						{
-							double ang = paax.Dir.Angle(pbax.Dir) * Math.PI / 180.0;
-							rt.Angle = Math.PI - ang;
-							ang /= 2.0;
-							double len = paax.Pos.Distance(pbax.Pos) / 2;
-							mRadius = len / Math.Sin(ang) * Math.Tan(ang);
-
+							double pxlen = GetExper(gEle, DbAttributeInstance.PXLE).Eval(ele);
+							double pylen = GetExper(gEle, DbAttributeInstance.PYLE).Eval(ele);
+							double pzlen = GetExper(gEle, DbAttributeInstance.PZLE).Eval(ele);
+							double px = GetExper(gEle, DbAttributeInstance.PX).Eval(ele);
+							double py = GetExper(gEle, DbAttributeInstance.PY).Eval(ele);
+							double pz = GetExper(gEle, DbAttributeInstance.PZ).Eval(ele);
+	
+							Point xlen = new Point(eleTrans.Multiply(D3Vector.D3EAST));
+							Point ylen = new Point(eleTrans.Multiply(D3Vector.D3NORTH));
+							Point zlen = new Point(eleTrans.Multiply(D3Vector.D3UP));
+	
+							Point pos = new Point(eleTrans.Multiply(GeometryUtility.Org));
+							pos.MoveBy(xlen, px - pxlen / 2.0).MoveBy(ylen, py - pylen / 2.0).MoveBy(zlen, pz - pzlen / 2.0);
+							xlen.Mul(pxlen);
+							ylen.Mul(pylen);
+							zlen.Mul(pzlen);
+	
+							Box box = new Box();
+							box.Org = pos;
+							box.XLen = xlen;
+							box.YLen = ylen;
+							box.ZLen = zlen;
+							box.Color = color;
+							session.Save(box);
 						}
-						else
+						else if (gEle.GetElementType() == DbElementTypeInstance.SCTORUS)
 						{
-							rt.Angle = Math.PI;
-							mRadius = paax.Pos.Distance(pbax.Pos) / 2.0;
+							string expr = gEle.GetAsString(DbAttributeInstance.PAAX);
+							AxisDir paax = EvalDirection.Eval(ele, expr);
+	
+							expr = gEle.GetAsString(DbAttributeInstance.PBAX);
+							AxisDir pbax = EvalDirection.Eval(ele, expr);
+	
+							double pdia = GetExper(gEle, DbAttributeInstance.PDIA).Eval(ele);
+	
+							CircularTorus ct = new CircularTorus();
+							Direction normal = null;
+							if (!paax.Dir.IsParallel(pbax.Dir))
+								normal = paax.Dir.Orthogonal(pbax.Dir);
+							else
+								normal = paax.Dir.Orthogonal(Direction.Create(paax.Pos, pbax.Pos));
+							ct.Normal = new Point(eleTrans.Multiply(GeometryUtility.ToD3VectorRef(normal)));
+	
+							ct.StartPnt = new Point(eleTrans.Multiply(GeometryUtility.ToD3Point(pbax.Pos)));
+							ct.Radius = pdia / 2.0;
+	
+							double mRadius = 0.0;
+							if (!paax.Dir.IsParallel(pbax.Dir))
+							{
+								double ang = paax.Dir.Angle(pbax.Dir) * Math.PI / 180.0;
+								ct.Angle = Math.PI - ang;
+								ang /= 2.0;
+								double len = paax.Pos.Distance(pbax.Pos) / 2;
+								mRadius = len / Math.Sin(ang) * Math.Tan(ang);
+	
+							}
+							else
+							{
+								ct.Angle = Math.PI;
+								mRadius = paax.Pos.Distance(pbax.Pos) / 2.0;
+							}
+							D3Vector radiusDir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(pbax.Dir.Orthogonal(normal)));
+							ct.Center = new Point(ct.StartPnt).MoveBy(radiusDir, mRadius);
+							ct.Color = color;
+	
+							session.Save(ct);
 						}
-						D3Vector radiusDir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(pbax.Dir.Orthogonal(normal)));
-						rt.Center = new Point(rt.StartPnt).MoveBy(radiusDir, mRadius);
-						rt.Color = color;
-
-						session.Save(rt);
+						else if (gEle.GetElementType() == DbElementTypeInstance.SRTORUS)
+						{
+							string expr = gEle.GetAsString(DbAttributeInstance.PAAX);
+							AxisDir paax = EvalDirection.Eval(ele, expr);
+	
+							expr = gEle.GetAsString(DbAttributeInstance.PBAX);
+							AxisDir pbax = EvalDirection.Eval(ele, expr);
+	
+							double pdia = GetExper(gEle, DbAttributeInstance.PDIA).Eval(ele);
+							double phei = GetExper(gEle, DbAttributeInstance.PHEI).Eval(ele);
+	
+							RectangularTorus rt = new RectangularTorus();
+							Direction normal = null;
+							if (!paax.Dir.IsParallel(pbax.Dir))
+								normal = paax.Dir.Orthogonal(pbax.Dir);
+							else
+								normal = paax.Dir.Orthogonal(Direction.Create(paax.Pos, pbax.Pos));
+							rt.Normal = new Point(eleTrans.Multiply(GeometryUtility.ToD3VectorRef(normal)));
+	
+							rt.StartPnt = new Point(eleTrans.Multiply(GeometryUtility.ToD3Point(pbax.Pos)));
+							rt.Width = pdia;
+							rt.Height = phei;
+	
+							double mRadius = 0.0;
+							if (!paax.Dir.IsParallel(pbax.Dir))
+							{
+								double ang = paax.Dir.Angle(pbax.Dir) * Math.PI / 180.0;
+								rt.Angle = Math.PI - ang;
+								ang /= 2.0;
+								double len = paax.Pos.Distance(pbax.Pos) / 2;
+								mRadius = len / Math.Sin(ang) * Math.Tan(ang);
+	
+							}
+							else
+							{
+								rt.Angle = Math.PI;
+								mRadius = paax.Pos.Distance(pbax.Pos) / 2.0;
+							}
+							D3Vector radiusDir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(pbax.Dir.Orthogonal(normal)));
+							rt.Center = new Point(rt.StartPnt).MoveBy(radiusDir, mRadius);
+							rt.Color = color;
+	
+							session.Save(rt);
+						}
+						else if (gEle.GetElementType() == DbElementTypeInstance.LSNOUT)
+						{
+							string expr = gEle.GetAsString(DbAttributeInstance.PAAX);
+							AxisDir paax = EvalDirection.Eval(ele, expr);
+	
+							expr = gEle.GetAsString(DbAttributeInstance.PBAX);
+							AxisDir pbax = EvalDirection.Eval(ele, expr);
+	
+							double ptdi = GetExper(gEle, DbAttributeInstance.PTDI).Eval(ele);
+							double pbdi = GetExper(gEle, DbAttributeInstance.PBDI).Eval(ele);
+							double ptdm = GetExper(gEle, DbAttributeInstance.PTDM).Eval(ele);
+							double pbdm = GetExper(gEle, DbAttributeInstance.PBDM).Eval(ele);
+							double poff = GetExper(gEle, DbAttributeInstance.POFF).Eval(ele);
+	
+							Snout snout = new Snout();
+							snout.BottomRadius = pbdm / 2.0;
+							snout.TopRadius = ptdm / 2.0;
+	
+							D3Vector tdir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(paax.Dir));
+							D3Point pos = eleTrans.Multiply(GeometryUtility.ToD3Point(paax.Pos));
+							D3Vector bdir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(pbax.Dir));
+	
+							snout.Org = new Point(pos).MoveBy(tdir, pbdi);
+							snout.Offset = new Point(bdir).Mul(poff);
+							snout.Height = new Point(tdir).Mul(ptdi - pbdi);
+							snout.Color = color;
+	
+							session.Save(snout);
+						}
+						else if (gEle.GetElementType() == DbElementTypeInstance.SDSH)
+						{
+							string expr = gEle.GetAsString(DbAttributeInstance.PAXI);
+							AxisDir paxi = EvalDirection.Eval(ele, expr);
+	
+							double phei = GetExper(gEle, DbAttributeInstance.PHEI).Eval(ele);
+							double pdia = GetExper(gEle, DbAttributeInstance.PDIA).Eval(ele);
+							double pdis = GetExper(gEle, DbAttributeInstance.PDIS).Eval(ele);
+							double prad = GetExper(gEle, DbAttributeInstance.PRAD).Eval(ele);
+	
+							D3Vector dir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(paxi.Dir));
+							Dish dish = new Dish();
+							dish.Org = new Point(eleTrans.Multiply(GeometryUtility.ToD3Point(paxi.Pos)))
+								.MoveBy(dir, pdis);
+							dish.Height = new Point(dir).Mul(phei);
+							dish.Radius = pdia / 2.0;
+							dish.IsEllipse = prad > 0.0;
+							dish.Color = color;
+							session.Save(dish);
+						}
+						else if (gEle.GetElementType() == DbElementTypeInstance.LPYRAMID)
+						{
+							string exper = gEle.GetAsString(DbAttributeInstance.PAAX);
+							AxisDir paax = EvalDirection.Eval(ele, exper);
+							exper = gEle.GetAsString(DbAttributeInstance.PBAX);
+							AxisDir pbax = EvalDirection.Eval(ele, exper);
+							exper = gEle.GetAsString(DbAttributeInstance.PCAX);
+							AxisDir pcax = EvalDirection.Eval(ele, exper);
+	
+							double pbtp = GetExper(gEle, DbAttributeInstance.PBTP).Eval(ele);
+							double pctp = GetExper(gEle, DbAttributeInstance.PCTP).Eval(ele);
+							double pbbt = GetExper(gEle, DbAttributeInstance.PBBT).Eval(ele);
+							double pcbt = GetExper(gEle, DbAttributeInstance.PCBT).Eval(ele);
+							double pbof = GetExper(gEle, DbAttributeInstance.PBOF).Eval(ele);
+							double pcof = GetExper(gEle, DbAttributeInstance.PCOF).Eval(ele);
+							double ptdi = GetExper(gEle, DbAttributeInstance.PTDI).Eval(ele);
+							double pbdi = GetExper(gEle, DbAttributeInstance.PBDI).Eval(ele);
+	
+							D3Vector zDir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(paax.Dir));
+							D3Vector xDir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(pbax.Dir));
+							D3Vector yDir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(pcax.Dir));
+							D3Point org = eleTrans.Multiply(GeometryUtility.ToD3Point(paax.Pos));
+							org.MoveBy(zDir * pbdi);
+	
+							double height = ptdi - pbdi;
+	
+							Pyramid pyramid = new Pyramid();
+							pyramid.Org = new Point(org);
+							pyramid.Height = new Point(zDir).Mul(height);
+							pyramid.XAxis = new Point(xDir);
+							pyramid.BottomXLen = pbbt;
+							pyramid.BottomYLen = pcbt;
+							pyramid.TopXLen = pbtp;
+							pyramid.TopYLen = pctp;
+							pyramid.Offset = new Point(xDir * pbof + yDir * pcof);
+							pyramid.Color = color;
+							session.Save(pyramid);
+						}
 					}
-					else if (gEle.GetElementType() == DbElementTypeInstance.LSNOUT)
+					catch (System.NullReferenceException )
 					{
-						string expr = gEle.GetAsString(DbAttributeInstance.PAAX);
-						AxisDir paax = EvalDirection.Eval(ele, expr);
-
-						expr = gEle.GetAsString(DbAttributeInstance.PBAX);
-						AxisDir pbax = EvalDirection.Eval(ele, expr);
-
-						double ptdi = GetExper(gEle, DbAttributeInstance.PTDI).Eval(ele);
-						double pbdi = GetExper(gEle, DbAttributeInstance.PBDI).Eval(ele);
-						double ptdm = GetExper(gEle, DbAttributeInstance.PTDM).Eval(ele);
-						double pbdm = GetExper(gEle, DbAttributeInstance.PBDM).Eval(ele);
-						double poff = GetExper(gEle, DbAttributeInstance.POFF).Eval(ele);
-
-						Snout snout = new Snout();
-						snout.ButtomRadius = pbdm / 2.0;
-						snout.TopRadius = ptdm / 2.0;
-
-						D3Vector tdir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(paax.Dir));
-						D3Point pos = eleTrans.Multiply(GeometryUtility.ToD3Point(paax.Pos));
-						D3Vector bdir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(pbax.Dir));
-
-						snout.Org = new Point(pos).MoveBy(tdir, pbdi);
-						snout.Offset = new Point(bdir).Mul(poff);
-						snout.Height = new Point(tdir).Mul(ptdi - pbdi);
-						snout.Color = color;
-
-						session.Save(snout);
+						
 					}
-					else if (gEle.GetElementType() == DbElementTypeInstance.SDSH)
+					catch (System.Exception)
 					{
-						string expr = gEle.GetAsString(DbAttributeInstance.PAXI);
-						AxisDir paxi = EvalDirection.Eval(ele, expr);
-
-						double phei = GetExper(gEle, DbAttributeInstance.PHEI).Eval(ele);
-						double pdia = GetExper(gEle, DbAttributeInstance.PDIA).Eval(ele);
-						double pdis = GetExper(gEle, DbAttributeInstance.PDIS).Eval(ele);
-						double prad = GetExper(gEle, DbAttributeInstance.PRAD).Eval(ele);
-
-						D3Vector dir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(paxi.Dir));
-						Dish dish = new Dish();
-						dish.Org = new Point(eleTrans.Multiply(GeometryUtility.ToD3Point(paxi.Pos)))
-							.MoveBy(dir, pdis);
-						dish.Height = new Point(dir).Mul(phei);
-						dish.Radius = pdia / 2.0;
-						dish.IsEllipse = prad > 0.0;
-						dish.Color = color;
-						session.Save(dish);
-					}
-					else if (gEle.GetElementType() == DbElementTypeInstance.LPYRAMID)
-					{
-						string exper = gEle.GetAsString(DbAttributeInstance.PAAX);
-						AxisDir paax = EvalDirection.Eval(ele, exper);
-						exper = gEle.GetAsString(DbAttributeInstance.PBAX);
-						AxisDir pbax = EvalDirection.Eval(ele, exper);
-						exper = gEle.GetAsString(DbAttributeInstance.PCAX);
-						AxisDir pcax = EvalDirection.Eval(ele, exper);
-
-						double pbtp = GetExper(gEle, DbAttributeInstance.PBTP).Eval(ele);
-						double pctp = GetExper(gEle, DbAttributeInstance.PCTP).Eval(ele);
-						double pbbt = GetExper(gEle, DbAttributeInstance.PBBT).Eval(ele);
-						double pcbt = GetExper(gEle, DbAttributeInstance.PCBT).Eval(ele);
-						double pbof = GetExper(gEle, DbAttributeInstance.PBOF).Eval(ele);
-						double pcof = GetExper(gEle, DbAttributeInstance.PCOF).Eval(ele);
-						double ptdi = GetExper(gEle, DbAttributeInstance.PTDI).Eval(ele);
-						double pbdi = GetExper(gEle, DbAttributeInstance.PBDI).Eval(ele);
-
-						D3Vector zDir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(paax.Dir));
-						D3Vector xDir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(pbax.Dir));
-						D3Vector yDir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(pcax.Dir));
-						D3Point org = eleTrans.Multiply(GeometryUtility.ToD3Point(paax.Pos));
-						org.MoveBy(zDir * pbdi);
-
-						double height = ptdi - pbdi;
-
-						Pyramid pyramid = new Pyramid();
-						pyramid.Org = new Point(org);
-						pyramid.Height = new Point(zDir).Mul(height);
-						pyramid.XAxis = new Point(xDir);
-						pyramid.BottomXLen = pbbt;
-						pyramid.BottomYLen = pcbt;
-						pyramid.TopXLen = pbtp;
-						pyramid.TopYLen = pctp;
-						pyramid.Offset = new Point(xDir * pbof + yDir * pcof);
-						pyramid.Color = color;
-						session.Save(pyramid);
+						System.Console.WriteLine("Ele = " + ele.GetAsString(DbAttributeInstance.NAME));
+						System.Console.WriteLine("GEle = " + gEle.GetAsString(DbAttributeInstance.NAME));
+						throw;
 					}
 				}
 				gEle = gEle.Next();
@@ -679,7 +692,7 @@ namespace ExportModel
 				cone.Height = new Point(dir)
 					.Mul(height);
 				cone.TopRadius = ele.GetDouble(DbAttributeInstance.DTOP) / 2.0;
-				cone.ButtomRadius = ele.GetDouble(DbAttributeInstance.DBOT) / 2.0;
+				cone.BottomRadius = ele.GetDouble(DbAttributeInstance.DBOT) / 2.0;
 				cone.Color = color;
 				session.Save(cone);
 			}

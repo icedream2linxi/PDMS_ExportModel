@@ -26,7 +26,7 @@ namespace ExportModel
 					exper = exper.Substring(1).Trim();
 				}
 
-				exper = exper.Substring(1);
+				exper = exper.Substring(exper[1] == 'P' ? 2 : 1);
 
 				int num = int.Parse(exper);
 				return MakeDirection(num, isNeg, modelEle);
@@ -58,7 +58,7 @@ namespace ExportModel
 				else if (type == DbElementTypeInstance.PTMIX)
 					return MakeMixedDirection(num, isNeg, pt, modelEle);
 				else if (type == DbElementTypeInstance.PTPOS)
-					return MakePositionTypeDirection(num, isNeg, cate);
+					return MakePositionTypeDirection(num, isNeg, pt, modelEle);
 				pt = pt.Next();
 			}
 			return null;
@@ -103,9 +103,13 @@ namespace ExportModel
 			return new AxisDir(Position.Create(x, y, z), dir);
 		}
 
-		private static AxisDir MakePositionTypeDirection(int num, bool isNeg, DbElement cate)
+		private static AxisDir MakePositionTypeDirection(int num, bool isNeg, DbElement pnt, DbElement modelEle)
 		{
-			throw new NotImplementedException();
+			Direction dir = ParseExperDir(pnt.GetAsString(DbAttributeInstance.PTCD), modelEle);
+			AxisDir pos = Eval(modelEle, pnt.GetAsString(DbAttributeInstance.PTCPOS));
+			if (isNeg)
+				dir = dir.Opposite();
+			return new AxisDir(pos.Pos, dir);
 		}
 
 		private static Direction ParseExperDir(string exper, DbElement modelEle)

@@ -23,8 +23,8 @@ namespace DbModel
 		[Property(Column = "top_radius")]
 		public virtual double TopRadius { get; set; }
 
-		[Property(Column = "buttom_radius")]
-		public virtual double ButtomRadius { get; set; }
+		[Property(Column = "bottom_radius")]
+		public virtual double BottomRadius { get; set; }
 
 		[Property(Column = "color")]
 		public virtual int Color { get; set; }

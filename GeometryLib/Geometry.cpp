@@ -752,8 +752,8 @@ namespace Geometry
 		}
 
 		double currAngle = M_PI_2;
-		double a = height.length();
 		double b = radius;
+		double a = height.length();
 		Vec3 vec1(b * sin(currAngle), 0, a * cos(currAngle));
 		vec1 = localToWold * vec1;
 		Vec3 normal1(sin(currAngle) / b, 0, cos(currAngle) / a);
@@ -784,6 +784,7 @@ namespace Geometry
 
 				hVec1 = hQuat * hVec1;
 				hVec2 = hQuat * hVec2;
+
 				hNormal1 = hQuat * hNormal1;
 				hNormal2 = hQuat * hNormal2;
 			}
