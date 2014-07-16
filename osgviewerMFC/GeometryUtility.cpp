@@ -307,14 +307,14 @@ osg::Node* BuildSnout(DbModel::Snout^ snout)
 	BRepOffsetAPI_ThruSections thruSection(Standard_False, Standard_True);
 
 	gp_Ax2 axis(buttomPnt, heightVec);
-	if (snout->ButtomRadius <= Precision::Confusion())
+	if (snout->BottomRadius <= Precision::Confusion())
 	{
 		BRepBuilderAPI_MakeVertex vertex(axis.Location());
 		thruSection.AddVertex(vertex);
 	}
 	else
 	{
-		gp_Circ buttomCirc(axis, snout->ButtomRadius);
+		gp_Circ buttomCirc(axis, snout->BottomRadius);
 		BRepBuilderAPI_MakeEdge buttomEdge(buttomCirc);
 		BRepBuilderAPI_MakeWire buttomWire(buttomEdge);
 		thruSection.AddWire(buttomWire);
@@ -417,7 +417,7 @@ osg::Node* BuildCone(DbModel::Cone^ cone)
 	gp_Vec vec = ToGpVec(cone->Height);
 	gp_Ax2 axis(org, vec);
 	osg::ref_ptr<osg::Geode> geode = new osg::Geode();
-	TopoDS_Shape shape = BRepPrimAPI_MakeCone(axis, cone->ButtomRadius, cone->TopRadius, vec.Magnitude()).Shape();
+	TopoDS_Shape shape = BRepPrimAPI_MakeCone(axis, cone->BottomRadius, cone->TopRadius, vec.Magnitude()).Shape();
 	BuildShapeMesh(geode, shape, CvtColor(cone->Color));
 	return geode.release();
 }

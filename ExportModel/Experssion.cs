@@ -370,8 +370,58 @@ namespace ExportModel
 				if (attr == null)
 					throw new FormatException();
 
+				AttribArrayOp paramOp = new AttribArrayOp(this);
+				paramOp.Attr = attr;
+				IOperator valueOp = null;
+				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
+				paramOp.Item = valueOp;
+				op = paramOp;
+			}
+			else if (item.Equals("PL") || item.Equals("PA"))
+			{
+				isEof = !SkipSpace(experIter);
+				if (isEof)
+					throw new FormatException();
+
+				sb = new StringBuilder();
+				while (!IsSplit(experIter.Current) && !IsOp(experIter.Current) && experIter.Current != '(' && experIter.Current != ')')
+				{
+					sb.Append(experIter.Current);
+					if (!experIter.MoveNext())
+					{
+						isEof = true;
+						break;
+					}
+				}
+
+				if (isEof)
+					throw new FormatException();
+
+				DbAttribute attr = item.Equals("PL") ? DbAttributeInstance.LOD : DbAttributeInstance.AOD;
+				item = sb.ToString();
+				if (!item.Equals("OD"))
+					throw new FormatException();
+
 				AttribOp paramOp = new AttribOp(this);
 				paramOp.Attr = attr;
+				IOperator valueOp = null;
+				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
+				paramOp.Item = valueOp;
+				op = paramOp;
+			}
+			else if (item.Equals("PLOD"))
+			{
+				AttribOp paramOp = new AttribOp(this);
+				paramOp.Attr = DbAttributeInstance.LOD;
+				IOperator valueOp = null;
+				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
+				paramOp.Item = valueOp;
+				op = paramOp;
+			}
+			else if (item.Equals("PAOD"))
+			{
+				AttribOp paramOp = new AttribOp(this);
+				paramOp.Attr = DbAttributeInstance.AOD;
 				IOperator valueOp = null;
 				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
 				paramOp.Item = valueOp;
@@ -592,7 +642,10 @@ namespace ExportModel
 		{
 			DbElement spref = Exper.ModelElement.GetElement(DbAttributeInstance.SPRE);
 			DbElement cate = spref.GetElement(DbAttributeInstance.CATR);
-			return cate.GetDoubleArray(DbAttributeInstance.PARA)[(int)Item.Eval() - 1];
+			double[] para = cate.GetDoubleArray(DbAttributeInstance.PARA);
+			if (para == null || para.Length <= 0)
+				return 0.0;
+			return para[(int)Item.Eval() - 1];
 		}
 	}
 
@@ -605,9 +658,36 @@ namespace ExportModel
 
 		public override double Eval()
 		{
-			return Exper.ModelElement.GetDoubleArray(DbAttributeInstance.DESP)[(int)Item.Eval() - 1];
+			double[] deps = Exper.ModelElement.GetDoubleArray(DbAttributeInstance.DESP);
+			if (deps == null || deps.Length <= 0)
+				return 0.0;
+			return deps[(int)Item.Eval() - 1];
 		}
 	}
+
+	class AttribArrayOp : EleOp
+	{
+		public DbAttribute Attr { get; set; }
+
+		public AttribArrayOp(Experssion exper)
+			: base(exper)
+		{
+		}
+
+		public void SetAttr(string name)
+		{
+			Attr = DbAttribute.GetDbAttribute(name);
+		}
+
+		public override double Eval()
+		{
+			double[] attr = Exper.ModelElement.GetDoubleArray(Attr);
+			if (attr == null || attr.Length <= 0)
+				return 0.0;
+			return attr[(int)Item.Eval() - 1];
+		}
+	}
+
 	class AttribOp : EleOp
 	{
 		public DbAttribute Attr { get; set; }
@@ -624,7 +704,27 @@ namespace ExportModel
 
 		public override double Eval()
 		{
-			return Exper.ModelElement.GetDoubleArray(Attr)[(int)Item.Eval() - 1];
+			return Exper.ModelElement.GetDouble(Attr);
+		}
+	}
+
+	class TwoAttribOp : EleOp
+	{
+		public DbAttribute Attr1 { get; set; }
+		public DbAttribute Attr2 { get; set; }
+
+		public TwoAttribOp(Experssion exper)
+			: base(exper)
+		{
+		}
+
+		public override double Eval()
+		{
+			DbElement ele = Exper.ModelElement.GetElement(Attr1);
+			double[] attr = ele.GetDoubleArray(Attr2);
+			if (attr == null || attr.Length <= 0)
+				return 0.0;
+			return attr[(int)Item.Eval() - 1];
 		}
 	}
 
