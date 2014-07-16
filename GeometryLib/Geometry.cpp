@@ -752,31 +752,41 @@ namespace Geometry
 		}
 
 		double currAngle = M_PI_2;
-		double h = height.length();
-		Vec3 vec1(radius * sin(currAngle), 0, h * cos(currAngle));
+		double b = radius;
+		double a = height.length();
+		Vec3 vec1(b * sin(currAngle), 0, a * cos(currAngle));
 		vec1 = localToWold * vec1;
+		Vec3 normal1(sin(currAngle) / b, 0, cos(currAngle) / a);
+		normal1 = localToWold * normal1;
+		normal1.normalize();
 
 		currAngle -= vIncAng;
-		Vec3 vec2(radius * sin(currAngle), 0, h * cos(currAngle));
+		Vec3 vec2(b * sin(currAngle), 0, a * cos(currAngle));
 		vec2 = localToWold * vec2;
+		Vec3 normal2(sin(currAngle) / b, 0, cos(currAngle) / a);
+		normal2 = localToWold * normal2;
+		normal2.normalize();
 
 		const GLint first = vertexArr->size();
 		for (int i = 0; i < vCount / 2; ++i)
 		{
 			Vec3 hVec1 = vec1;
 			Vec3 hVec2 = vec2;
+			Vec3 hNormal1 = normal1;
+			Vec3 hNormal2 = normal2;
 			const size_t hFirst = vertexArr->size();
 			for (int j = 0; j < hCount; ++j)
 			{
 				vertexArr->push_back(center + hVec1);
 				vertexArr->push_back(center + hVec2);
-				normalArr->push_back(hVec1);
-				normalArr->back().normalize();
-				normalArr->push_back(hVec2);
-				normalArr->back().normalize();
+				normalArr->push_back(hNormal1);
+				normalArr->push_back(hNormal2);
 
 				hVec1 = hQuat * hVec1;
 				hVec2 = hQuat * hVec2;
+
+				hNormal1 = hQuat * hNormal1;
+				hNormal2 = hQuat * hNormal2;
 			}
 			vertexArr->push_back((*vertexArr)[hFirst]);
 			vertexArr->push_back((*vertexArr)[hFirst + 1]);
@@ -785,8 +795,13 @@ namespace Geometry
 
 			vec1 = vec2;
 			currAngle -= vIncAng;
-			vec2.set(radius * sin(currAngle), 0, h * cos(currAngle));
+			vec2.set(b * sin(currAngle), 0, a * cos(currAngle));
 			vec2 = localToWold * vec2;
+
+			normal1 = normal2;
+			normal2.set(sin(currAngle) / b, 0, cos(currAngle) / a);
+			normal2 = localToWold * normal2;
+			normal2.normalize();
 		}
 		geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::QUAD_STRIP, first, vertexArr->size() - first));
 
