@@ -73,10 +73,11 @@ namespace ExportModel
 		{
 			NONE,
 			NEED_OPERATOR,
-			NEED_VALUE
+			NEED_VALUE,
+			NEED_BRACKET
 		};
 
-		private bool Parse(CharEnumerator experIter, IOperator prevOp, ref IOperator op)
+		private bool Parse(CharEnumerator experIter, IOperator prevOp, ref IOperator op, OperatorOrder opOrder, ref bool isEnd)
 		{
 			if (!SkipSpace(experIter))
 				return true;
@@ -100,7 +101,7 @@ namespace ExportModel
 								IOperator nextValueOp = null;
 								isEof = !experIter.MoveNext();
 								if (!isEof)
-									isEof = Parse(experIter, valueOp, ref nextValueOp);
+									isEof = Parse(experIter, valueOp, ref nextValueOp, opOrder, ref isEnd);
 								if (nextValueOp == null)
 									op = new SubOp(prevOp, valueOp);
 								else
@@ -117,7 +118,7 @@ namespace ExportModel
 								IOperator nextValueOp = null;
 								isEof = !experIter.MoveNext();
 								if (!isEof)
-									isEof = Parse(experIter, valueOp, ref nextValueOp);
+									isEof = Parse(experIter, valueOp, ref nextValueOp, opOrder, ref isEnd);
 								if (nextValueOp == null)
 									op = new AddOp(prevOp, valueOp);
 								else
@@ -145,8 +146,14 @@ namespace ExportModel
 			}
 			else if (curCh == ')')
 			{
-				isEof = !experIter.MoveNext();
+				if (opOrder != OperatorOrder.NEED_BRACKET)
+					isEof = !experIter.MoveNext();
 				return isEof;
+			}
+			else if (curCh == ',')
+			{
+				isEnd = true;
+				op = null;
 			}
 			else
 			{
@@ -195,11 +202,12 @@ namespace ExportModel
 				if (!SkipSpace(experIter))
 					throw new FormatException();
 
-				isEof = Parse(experIter, OperatorOrder.NONE, ref op);
+				isEof = Parse(experIter, opOrder == OperatorOrder.NEED_BRACKET ? OperatorOrder.NEED_BRACKET : OperatorOrder.NONE, ref op);
 			}
 			else if (experIter.Current == ')')
 			{
-				isEof = !experIter.MoveNext();
+				if (opOrder != OperatorOrder.NEED_BRACKET)
+					isEof = !experIter.MoveNext();
 				return isEof;
 			}
 			else
@@ -207,10 +215,15 @@ namespace ExportModel
 				isEof = ParseItem(experIter, OperatorOrder.NEED_VALUE, ref op);
 			}
 
-			while (!isEof && opOrder == OperatorOrder.NONE)
+			bool isEnd = false;
+			while (!isEof && !isEnd && (
+				(opOrder == OperatorOrder.NEED_BRACKET && experIter.Current != ')')
+				|| opOrder == OperatorOrder.NONE
+				)
+				&& experIter.Current != ',')
 			{
 				IOperator nextValueOp = null;
-				isEof = Parse(experIter, op, ref nextValueOp);
+				isEof = Parse(experIter, op, ref nextValueOp, opOrder, ref isEnd);
 				if (nextValueOp != null)
 					op = nextValueOp;
 			}
@@ -296,11 +309,37 @@ namespace ExportModel
 				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref nextValueOp);
 				op = new TanfOp(valueOp, nextValueOp);
 			}
+			else if (item.Equals("MIN"))
+			{
+				IOperator valueOp = null;
+				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
+				if (isEof || experIter.Current != ',' || !experIter.MoveNext())
+					throw new FormatException();
+				IOperator nextValueOp = null;
+				isEof = Parse(experIter, OperatorOrder.NEED_BRACKET, ref nextValueOp);
+				if (isEof || experIter.Current != ')' || !experIter.MoveNext())
+					throw new FormatException();
+				op = new MinOp(valueOp, nextValueOp);
+			}
+			else if (item.Equals("MAX"))
+			{
+				IOperator valueOp = null;
+				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
+				if (isEof || experIter.Current != ',' || !experIter.MoveNext())
+					throw new FormatException();
+				IOperator nextValueOp = null;
+				isEof = Parse(experIter, OperatorOrder.NEED_BRACKET, ref nextValueOp);
+				if (isEof || experIter.Current != ')' || !experIter.MoveNext())
+					throw new FormatException();
+				op = new MaxOp(valueOp, nextValueOp);
+			}
 			else if (item.Equals("COS"))
 			{
 				CosOp cosOp = new CosOp();
 				IOperator valueOp = null;
-				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
+				isEof = Parse(experIter, OperatorOrder.NEED_BRACKET, ref valueOp);
+				if (isEof || experIter.Current != ')' || !experIter.MoveNext())
+					throw new FormatException();
 				cosOp.Item = valueOp;
 				op = cosOp;
 				return isEof;
@@ -309,9 +348,22 @@ namespace ExportModel
 			{
 				SinOp sinOp = new SinOp();
 				IOperator valueOp = null;
-				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
+				isEof = Parse(experIter, OperatorOrder.NEED_BRACKET, ref valueOp);
+				if (isEof || experIter.Current != ')' || !experIter.MoveNext())
+					throw new FormatException();
 				sinOp.Item = valueOp;
 				op = sinOp;
+				return isEof;
+			}
+			else if (item.Equals("INT"))
+			{
+				IntOp intOp = new IntOp();
+				IOperator valueOp = null;
+				isEof = Parse(experIter, OperatorOrder.NEED_BRACKET, ref valueOp);
+				if (isEof || experIter.Current != ')' || !experIter.MoveNext())
+					throw new FormatException();
+				intOp.Item = valueOp;
+				op = intOp;
 				return isEof;
 			}
 			else if (item.Equals("PARAM"))
@@ -425,12 +477,26 @@ namespace ExportModel
 					if (attr == null)
 						throw new FormatException();
 
-					AttribArrayOp paramOp = new AttribArrayOp(this);
-					paramOp.Attr = attr;
-					IOperator valueOp = null;
-					isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
-					paramOp.Item = valueOp;
-					op = paramOp;
+					while (!isEof && Char.IsWhiteSpace(experIter.Current))
+					{
+						isEof = !experIter.MoveNext();
+					}
+
+					if (isEof || experIter.Current == '[')
+					{
+						AttribArrayOp paramOp = new AttribArrayOp(this);
+						paramOp.Attr = attr;
+						IOperator valueOp = null;
+						isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
+						paramOp.Item = valueOp;
+						op = paramOp;
+					}
+					else
+					{
+						AttribOp paramOp = new AttribOp(this);
+						paramOp.Attr = attr;
+						op = paramOp;
+					}
 				}
 			}
 			else if (item.Equals("PL") || item.Equals("PA"))
@@ -618,6 +684,44 @@ namespace ExportModel
 		}
 	}
 
+	class MinOp : TwoObjOp
+	{
+		public MinOp()
+		{
+
+		}
+
+		public MinOp(IOperator lhs, IOperator rhs)
+			: base(lhs, rhs)
+		{
+
+		}
+
+		public override double Eval()
+		{
+			return Math.Min(LhsItem.Eval(), RhsItem.Eval());
+		}
+	}
+
+	class MaxOp : TwoObjOp
+	{
+		public MaxOp()
+		{
+
+		}
+
+		public MaxOp(IOperator lhs, IOperator rhs)
+			: base(lhs, rhs)
+		{
+
+		}
+
+		public override double Eval()
+		{
+			return Math.Max(LhsItem.Eval(), RhsItem.Eval());
+		}
+	}
+
 	class NegOp : OneObjOp
 	{
 		public NegOp()
@@ -633,6 +737,25 @@ namespace ExportModel
 		public override double Eval()
 		{
 			return -Item.Eval();
+		}
+	}
+
+	class IntOp : OneObjOp
+	{
+		public IntOp()
+		{
+
+		}
+
+		public IntOp(IOperator item)
+			: base(item)
+		{
+
+		}
+
+		public override double Eval()
+		{
+			return (int)Item.Eval();
 		}
 	}
 
