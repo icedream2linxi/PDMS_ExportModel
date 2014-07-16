@@ -546,6 +546,12 @@ namespace ExportModel
 					{
 						
 					}
+					catch (System.Exception)
+					{
+						System.Console.WriteLine("Ele = " + ele.GetAsString(DbAttributeInstance.NAME));
+						System.Console.WriteLine("GEle = " + gEle.GetAsString(DbAttributeInstance.NAME));
+						throw;
+					}
 				}
 				gEle = gEle.Next();
 			}

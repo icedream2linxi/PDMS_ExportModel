@@ -280,6 +280,14 @@ namespace ExportModel
 				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref nextValueOp);
 				op = new AddOp(valueOp, nextValueOp);
 			}
+			else if (item.Equals("DIV"))
+			{
+				IOperator valueOp = null;
+				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
+				IOperator nextValueOp = null;
+				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref nextValueOp);
+				op = new DivOp(valueOp, nextValueOp);
+			}
 			else if (item.Equals("TANF"))
 			{
 				IOperator valueOp = null;
@@ -287,6 +295,24 @@ namespace ExportModel
 				IOperator nextValueOp = null;
 				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref nextValueOp);
 				op = new TanfOp(valueOp, nextValueOp);
+			}
+			else if (item.Equals("COS"))
+			{
+				CosOp cosOp = new CosOp();
+				IOperator valueOp = null;
+				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
+				cosOp.Item = valueOp;
+				op = cosOp;
+				return isEof;
+			}
+			else if (item.Equals("SIN"))
+			{
+				SinOp sinOp = new SinOp();
+				IOperator valueOp = null;
+				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
+				sinOp.Item = valueOp;
+				op = sinOp;
+				return isEof;
 			}
 			else if (item.Equals("PARAM"))
 			{
@@ -366,16 +392,46 @@ namespace ExportModel
 					throw new FormatException();
 
 				item = sb.ToString();
-				DbAttribute attr = DbAttribute.GetDbAttribute(item);
-				if (attr == null)
-					throw new FormatException();
 
-				AttribArrayOp paramOp = new AttribArrayOp(this);
-				paramOp.Attr = attr;
-				IOperator valueOp = null;
-				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
-				paramOp.Item = valueOp;
-				op = paramOp;
+				if (item.Equals("RPRO"))
+				{
+					isEof = !SkipSpace(experIter);
+					if (isEof)
+						throw new FormatException();
+
+					sb = new StringBuilder();
+					while (!IsSplit(experIter.Current) && !IsOp(experIter.Current) && experIter.Current != '(' && experIter.Current != ')')
+					{
+						sb.Append(experIter.Current);
+						if (!experIter.MoveNext())
+						{
+							isEof = true;
+							break;
+						}
+					}
+
+					if (isEof)
+						throw new FormatException();
+
+					item = sb.ToString();
+
+					DbExperOp experOp = new DbExperOp(this);
+					experOp.DbExper = DbExpression.Parse("ATTRIB RPRO " + item);
+					op = experOp;
+				}
+				else
+				{
+					DbAttribute attr = DbAttribute.GetDbAttribute(item);
+					if (attr == null)
+						throw new FormatException();
+
+					AttribArrayOp paramOp = new AttribArrayOp(this);
+					paramOp.Attr = attr;
+					IOperator valueOp = null;
+					isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
+					paramOp.Item = valueOp;
+					op = paramOp;
+				}
 			}
 			else if (item.Equals("PL") || item.Equals("PA"))
 			{
@@ -404,27 +460,18 @@ namespace ExportModel
 
 				AttribOp paramOp = new AttribOp(this);
 				paramOp.Attr = attr;
-				IOperator valueOp = null;
-				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
-				paramOp.Item = valueOp;
 				op = paramOp;
 			}
 			else if (item.Equals("PLOD"))
 			{
 				AttribOp paramOp = new AttribOp(this);
 				paramOp.Attr = DbAttributeInstance.LOD;
-				IOperator valueOp = null;
-				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
-				paramOp.Item = valueOp;
 				op = paramOp;
 			}
 			else if (item.Equals("PAOD"))
 			{
 				AttribOp paramOp = new AttribOp(this);
 				paramOp.Attr = DbAttributeInstance.AOD;
-				IOperator valueOp = null;
-				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
-				paramOp.Item = valueOp;
 				op = paramOp;
 			}
 			else
@@ -589,6 +636,44 @@ namespace ExportModel
 		}
 	}
 
+	class CosOp : OneObjOp
+	{
+		public CosOp()
+		{
+
+		}
+
+		public CosOp(IOperator item)
+			: base(item)
+		{
+
+		}
+
+		public override double Eval()
+		{
+			return Math.Cos(Item.Eval());
+		}
+	}
+
+	class SinOp : OneObjOp
+	{
+		public SinOp()
+		{
+
+		}
+
+		public SinOp(IOperator item)
+			: base(item)
+		{
+
+		}
+
+		public override double Eval()
+		{
+			return Math.Sin(Item.Eval());
+		}
+	}
+
 	class TwiceOp : OneObjOp
 	{
 		public TwiceOp()
@@ -688,13 +773,14 @@ namespace ExportModel
 		}
 	}
 
-	class AttribOp : EleOp
+	class AttribOp : IOperator
 	{
+		public Experssion Exper { get; set; }
 		public DbAttribute Attr { get; set; }
 
 		public AttribOp(Experssion exper)
-			: base(exper)
 		{
+			Exper = exper;
 		}
 
 		public void SetAttr(string name)
@@ -702,9 +788,24 @@ namespace ExportModel
 			Attr = DbAttribute.GetDbAttribute(name);
 		}
 
-		public override double Eval()
+		public double Eval()
 		{
 			return Exper.ModelElement.GetDouble(Attr);
+		}
+	}
+
+	class DbExperOp : IOperator
+	{
+		public Experssion Exper { get; set; }
+		public DbExpression DbExper { get; set; }
+		public DbExperOp(Experssion exper)
+		{
+			Exper = exper;
+		}
+
+		public double Eval()
+		{
+			return Exper.ModelElement.EvaluateDouble(DbExper, DbAttributeUnit.DIST);
 		}
 	}
 
