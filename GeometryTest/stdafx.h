@@ -19,3 +19,10 @@
 #include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers>
 #include <osgGA/StateSetManipulator>
+#include <osg/Fog>
+#include <osgUtil/Optimizer>
+#include <osgParticle/PrecipitationEffect>
+#include <osgParticle/ExplosionEffect>
+#include <osgParticle/ExplosionDebrisEffect>
+#include <osgParticle/SmokeEffect>
+#include <osgParticle/FireEffect>

@@ -36,7 +36,7 @@ osg::ref_ptr<osg::Geode> TestCone()
 	double radius = 200;
 
 	osg::ref_ptr<osg::Geode> geode = new osg::Geode;
-	geode->addDrawable(Geometry::BuildCone(center, height, offset, radius, osg::Vec4(1, 1, 1, 0)));
+	geode->addDrawable(Geometry::BuildCone(center, height, offset, radius, osg::Vec4(1, 0, 0, 0)));
 	return geode;
 }
 
@@ -90,6 +90,45 @@ osg::ref_ptr<osg::Geode> TestEllipsoid()
 	return geode;
 }
 
+osg::ref_ptr<osg::Fog> TestFog()
+{
+	bool bLinear = true;
+	osg::ref_ptr<osg::Fog> fog = new osg::Fog();
+	fog->setColor(osg::Vec4(1, 1, 1, 1));
+	fog->setDensity(0.01f);
+	if (bLinear)
+		fog->setMode(osg::Fog::LINEAR);
+	else
+		fog->setMode(osg::Fog::EXP);
+	fog->setStart(5.0f);
+	fog->setEnd(2000.0f);
+	return fog;
+}
+
+osg::ref_ptr<osg::Node> TestExplode()
+{
+	osg::ref_ptr<osg::Group> explode = new osg::Group();
+	osg::Vec3 wind(1, 0, 0);
+	osg::Vec3 position(0, 0, -10);
+
+	osg::ref_ptr<osgParticle::ExplosionEffect> explosion = new osgParticle::ExplosionEffect(position, 1.0f);
+	osg::ref_ptr<osgParticle::ExplosionDebrisEffect> explosionDebri = new osgParticle::ExplosionDebrisEffect(position, 1.0f);
+	osg::ref_ptr<osgParticle::SmokeEffect> smoke = new osgParticle::SmokeEffect(position, 1.0f);
+	osg::ref_ptr<osgParticle::FireEffect> fire = new osgParticle::FireEffect(position, 1.0f);
+
+	explosion->setWind(wind);
+	explosionDebri->setWind(wind);
+	smoke->setWind(wind);
+	fire->setWind(wind);
+
+	explode->addChild(explosion);
+	explode->addChild(explosionDebri);
+	explode->addChild(smoke);
+	explode->addChild(fire);
+
+	return explode;
+}
+
 void InitWnd(osgViewer::Viewer &viewer)
 {
 	int xoffset = 40;
@@ -131,14 +170,29 @@ int main(int argc, char* argv[])
 	//root->addChild(TestCasCadeByMakeTorus());
 	//root->addChild(TestCircularTorus());
 	//root->addChild(TestRectangularTorus());
-	root->addChild(TestCone());
+	//root->addChild(TestCone());
 	//root->addChild(TestSnout());
 	//root->addChild(TestPyramid());
 	//root->addChild(TestSphere());
 	//root->addChild(TestEllipsoid());
+	//root->getOrCreateStateSet()->setAttributeAndModes(TestFog(), osg::StateAttribute::ON);
 
+	//osg::ref_ptr<osgParticle::PrecipitationEffect> pe = new osgParticle::PrecipitationEffect();
+	//pe->snow(0.5f);
+	//pe->rain(0.5f);
+	//myViewer.getCamera()->setClearColor(pe->getFog()->getColor());
+
+	osg::ref_ptr<osg::Node> node = TestCone();
+	//node->getOrCreateStateSet()->setAttributeAndModes(pe->getFog());
+	//root->addChild(node);
+	//root->addChild(pe);
+	root->addChild(TestExplode());
+
+	osgUtil::Optimizer optimizer;
+	optimizer.optimize(root);
 
 	myViewer.setSceneData(root);
+	myViewer.realize();
 
 	myViewer.addEventHandler(new osgGA::StateSetManipulator(myViewer.getCamera()->getOrCreateStateSet()));
 	myViewer.addEventHandler(new osgViewer::StatsHandler);
