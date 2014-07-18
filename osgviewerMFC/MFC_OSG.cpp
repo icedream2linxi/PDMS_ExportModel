@@ -110,6 +110,21 @@ void cOSG::InitSceneGraph(void)
 		//stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
 		//stateSet->setMode(GL_LIGHTING, )
 	}
+	else if (modelFile.extension() == ".lst")
+	{
+		ifstream fin(m_ModelName);
+		osg::ref_ptr<osg::Group> group = new osg::Group();
+		string line;
+		path parentPath = modelFile.parent_path();
+		while (getline(fin, line))
+		{
+			path fileName(line);
+			path filePath = parentPath / fileName;
+			osg::ref_ptr<osg::Node> node = osgDB::readNodeFile(filePath);
+			group->addChild(node);
+		}
+		mModel = group;
+	}
 	else {
 		// Load the Model from the model name
 		mModel = osgDB::readNodeFile(m_ModelName);
