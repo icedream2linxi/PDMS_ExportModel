@@ -1,0 +1,4 @@
+LIBRARY         PDSOFTExport
+EXPORTS
+				acrxEntryPoint
+                acrxGetApiVersion

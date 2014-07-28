@@ -98,7 +98,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_OBJECTARX2000_;_OBJECTARX2010_;_WINDOWS;_USRDLL;PDSOFTEXPORT_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_OBJECTARX2000_;_OBJECTARX2004_;_OBJECTARX2007_;_OBJECTARX2010_;_WINDOWS;_USRDLL;PDSOFTEXPORT_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>.\;.\pdgeom;e:\ObjectARX2014\inc\;e:\ObjectARX2014\inc-x64\;e:\ObjectARX2014\utils\amodeler\inc\;e:\ObjectARX2014\utils\brep\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -109,6 +109,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>e:\ObjectARX2014\lib-x64\;e:\ObjectARX2014\utils\amodeler\lib-x64\;e:\ObjectARX2014\utils\brep\lib-x64\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>acdb19.lib;acge19.lib;acgex19.lib;ac1st19.lib;accore.lib;rxapi.lib;AecModeler.lib;acbr19.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>PDSOFTExport.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -135,7 +136,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;_OBJECTARX2000_;_OBJECTARX2010_;NDEBUG;_WINDOWS;_USRDLL;PDSOFTEXPORT_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_OBJECTARX2000_;_OBJECTARX2004_;_OBJECTARX2007_;_OBJECTARX2010_;NDEBUG;_WINDOWS;_USRDLL;PDSOFTEXPORT_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>.\;.\pdgeom;e:\ObjectARX2014\inc\;e:\ObjectARX2014\inc-x64\;e:\ObjectARX2014\utils\amodeler\inc\;e:\ObjectARX2014\utils\brep\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -146,6 +147,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>e:\ObjectARX2014\lib-x64\;e:\ObjectARX2014\utils\amodeler\lib-x64\;e:\ObjectARX2014\utils\brep\lib-x64\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>acdb19.lib;acge19.lib;acgex19.lib;ac1st19.lib;accore.lib;rxapi.lib;AecModeler.lib;acbr19.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>PDSOFTExport.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
