@@ -42,6 +42,9 @@
     <ClInclude Include="GeometryUtility.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ManipulatorTravel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ChildFrm.cpp">
@@ -66,6 +69,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GeometryUtility.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ManipulatorTravel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

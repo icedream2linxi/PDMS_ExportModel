@@ -1,0 +1,180 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="pdgeom">
+      <UniqueIdentifier>{01c67608-914a-470d-aa4b-ca066c7337d7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pdgeom\PDBox.h">
+      <Filter>pdgeom</Filter>
+    </ClInclude>
+    <ClInclude Include="pdgeom\PDBox1.h">
+      <Filter>pdgeom</Filter>
+    </ClInclude>
+    <ClInclude Include="pdgeom\PDConcone.h">
+      <Filter>pdgeom</Filter>
+    </ClInclude>
+    <ClInclude Include="pdgeom\PDCylinder.h">
+      <Filter>pdgeom</Filter>
+    </ClInclude>
+    <ClInclude Include="pdgeom\PDEcone.h">
+      <Filter>pdgeom</Filter>
+    </ClInclude>
+    <ClInclude Include="pdgeom\PDOval.h">
+      <Filter>pdgeom</Filter>
+    </ClInclude>
+    <ClInclude Include="pdgeom\PDPrimary3D.h">
+      <Filter>pdgeom</Filter>
+    </ClInclude>
+    <ClInclude Include="pdgeom\PDPrism.h">
+      <Filter>pdgeom</Filter>
+    </ClInclude>
+    <ClInclude Include="pdgeom\PDPrism1.h">
+      <Filter>pdgeom</Filter>
+    </ClInclude>
+    <ClInclude Include="pdgeom\PDRevolve.h">
+      <Filter>pdgeom</Filter>
+    </ClInclude>
+    <ClInclude Include="pdgeom\PDSaddle.h">
+      <Filter>pdgeom</Filter>
+    </ClInclude>
+    <ClInclude Include="pdgeom\PDScylinder.h">
+      <Filter>pdgeom</Filter>
+    </ClInclude>
+    <ClInclude Include="pdgeom\PDSphere.h">
+      <Filter>pdgeom</Filter>
+    </ClInclude>
+    <ClInclude Include="pdgeom\PDSpolygon.h">
+      <Filter>pdgeom</Filter>
+    </ClInclude>
+    <ClInclude Include="pdgeom\PDSqucir.h">
+      <Filter>pdgeom</Filter>
+    </ClInclude>
+    <ClInclude Include="pdgeom\PDSqucone.h">
+      <Filter>pdgeom</Filter>
+    </ClInclude>
+    <ClInclude Include="pdgeom\PDSqutorus.h">
+      <Filter>pdgeom</Filter>
+    </ClInclude>
+    <ClInclude Include="pdgeom\PDSqutorus1.h">
+      <Filter>pdgeom</Filter>
+    </ClInclude>
+    <ClInclude Include="pdgeom\PDTorus.h">
+      <Filter>pdgeom</Filter>
+    </ClInclude>
+    <ClInclude Include="pdgeom\PDTorus1.h">
+      <Filter>pdgeom</Filter>
+    </ClInclude>
+    <ClInclude Include="pdgeom\PDWedge.h">
+      <Filter>pdgeom</Filter>
+    </ClInclude>
+    <ClInclude Include="pdgeom\AsdkBodyAModelerCallBack.h">
+      <Filter>pdgeom</Filter>
+    </ClInclude>
+    <ClInclude Include="pdgeom\FilerCallBack.h">
+      <Filter>pdgeom</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PDSOFTExport.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pdgeom\PDBox.cpp">
+      <Filter>pdgeom</Filter>
+    </ClCompile>
+    <ClCompile Include="pdgeom\PDBox1.cpp">
+      <Filter>pdgeom</Filter>
+    </ClCompile>
+    <ClCompile Include="pdgeom\PDConcone.cpp">
+      <Filter>pdgeom</Filter>
+    </ClCompile>
+    <ClCompile Include="pdgeom\PDCylinder.cpp">
+      <Filter>pdgeom</Filter>
+    </ClCompile>
+    <ClCompile Include="pdgeom\PDEcone.cpp">
+      <Filter>pdgeom</Filter>
+    </ClCompile>
+    <ClCompile Include="pdgeom\PDOval.cpp">
+      <Filter>pdgeom</Filter>
+    </ClCompile>
+    <ClCompile Include="pdgeom\PDPrimary3D.cpp">
+      <Filter>pdgeom</Filter>
+    </ClCompile>
+    <ClCompile Include="pdgeom\PDPrism.cpp">
+      <Filter>pdgeom</Filter>
+    </ClCompile>
+    <ClCompile Include="pdgeom\PDPrism1.cpp">
+      <Filter>pdgeom</Filter>
+    </ClCompile>
+    <ClCompile Include="pdgeom\PDRevolve.cpp">
+      <Filter>pdgeom</Filter>
+    </ClCompile>
+    <ClCompile Include="pdgeom\PDSaddle.cpp">
+      <Filter>pdgeom</Filter>
+    </ClCompile>
+    <ClCompile Include="pdgeom\PDScylinder.cpp">
+      <Filter>pdgeom</Filter>
+    </ClCompile>
+    <ClCompile Include="pdgeom\PDSphere.cpp">
+      <Filter>pdgeom</Filter>
+    </ClCompile>
+    <ClCompile Include="pdgeom\PDSpolygon.cpp">
+      <Filter>pdgeom</Filter>
+    </ClCompile>
+    <ClCompile Include="pdgeom\PDSqucir.cpp">
+      <Filter>pdgeom</Filter>
+    </ClCompile>
+    <ClCompile Include="pdgeom\PDSqucone.cpp">
+      <Filter>pdgeom</Filter>
+    </ClCompile>
+    <ClCompile Include="pdgeom\PDSqutorus.cpp">
+      <Filter>pdgeom</Filter>
+    </ClCompile>
+    <ClCompile Include="pdgeom\PDSqutorus1.cpp">
+      <Filter>pdgeom</Filter>
+    </ClCompile>
+    <ClCompile Include="pdgeom\PDTorus.cpp">
+      <Filter>pdgeom</Filter>
+    </ClCompile>
+    <ClCompile Include="pdgeom\PDTorus1.cpp">
+      <Filter>pdgeom</Filter>
+    </ClCompile>
+    <ClCompile Include="pdgeom\PDWedge.cpp">
+      <Filter>pdgeom</Filter>
+    </ClCompile>
+    <ClCompile Include="pdgeom\AsdkBodyAModelerCallBack.cpp">
+      <Filter>pdgeom</Filter>
+    </ClCompile>
+    <ClCompile Include="pdgeom\FilerCallBack.cpp">
+      <Filter>pdgeom</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

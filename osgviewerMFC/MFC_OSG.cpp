@@ -6,6 +6,7 @@
 #include <osg/MatrixTransform>
 #include <osgDB/WriteFile>
 #include <osg/Multisample>
+#include <osgGA/AnimationPathManipulator>
 
 #include <Standard_ErrorHandler.hxx>
 #include <Standard_Failure.hxx>
@@ -13,6 +14,7 @@
 
 #include "GeometryUtility.h"
 #include <Geometry.hpp>
+#include "ManipulatorTravel.h"
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -84,6 +86,11 @@ void cOSG::InitManipulators(void)
 
     // Add our trackball manipulator to the switcher
     keyswitchManipulator->addMatrixManipulator( '1', "Trackball", trackball.get());
+
+	osg::ref_ptr<osgGA::AnimationPathManipulator> apm = new osgGA::AnimationPathManipulator();
+	keyswitchManipulator->addMatrixManipulator('2', "Path", apm);
+
+	keyswitchManipulator->addMatrixManipulator('3', "Flight", new osgGA::FlightManipulator());
 
     // Init the switcher to the first manipulator (in this case the only manipulator)
     keyswitchManipulator->selectMatrixManipulator(0);  // Zero based index Value
@@ -207,6 +214,7 @@ void cOSG::InitCameraConfig(void)
 
     // Add the Camera Manipulator to the Viewer
     mViewer->setCameraManipulator(keyswitchManipulator.get());
+	mViewer->addEventHandler(new osgViewer::RecordCameraPathHandler);
 
     // Set the Scene Data
     mViewer->setSceneData(mRoot.get());

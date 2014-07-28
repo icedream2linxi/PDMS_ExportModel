@@ -67,3 +67,4 @@ using namespace std::tr2::sys;
 #endif
 
 
+#include <osgGA/FlightManipulator>

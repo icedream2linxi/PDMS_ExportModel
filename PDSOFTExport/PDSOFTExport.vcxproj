@@ -19,42 +19,36 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{1182C2E4-79B2-443F-AB02-D27B30ED2C2F}</ProjectGuid>
+    <ProjectGuid>{E8F11AC0-5628-4F7A-8313-B6534C4F856E}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>osgviewerMFC</RootNamespace>
+    <RootNamespace>PDSOFTExport</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <UseOfMfc>Dynamic</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
-    <UseOfMfc>Dynamic</UseOfMfc>
-    <CLRSupport>true</CLRSupport>
+    <PlatformToolset>v100</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <UseOfMfc>Dynamic</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v100</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
-    <UseOfMfc>Dynamic</UseOfMfc>
-    <CLRSupport>true</CLRSupport>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -77,20 +71,21 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <TargetExt>.arx</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <TargetExt>.arx</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;PDSOFTEXPORT_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
@@ -103,29 +98,27 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;WNT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_OBJECTARX2000_;_OBJECTARX2010_;_WINDOWS;_USRDLL;PDSOFTEXPORT_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>e:\OpenSourceCode\OpenSceneGraph\source\OpenSceneGraph-3.3.1\include\;e:\OpenSourceCode\OpenSceneGraph\build\include\;e:\OpenSourceCode\OpenCasCade\source\ros\inc\;..\GeometryLib\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;.\pdgeom;e:\ObjectARX2014\inc\;e:\ObjectARX2014\inc-x64\;e:\ObjectARX2014\utils\amodeler\inc\;e:\ObjectARX2014\utils\brep\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <AdditionalOptions>-Zm256 %(AdditionalOptions)</AdditionalOptions>
+      <DisableSpecificWarnings>4819;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>e:\OpenSourceCode\OpenSceneGraph\build\lib\;e:\OpenSourceCode\OpenCasCade\source\ros\win64\vc12\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>OpenThreadsrd.lib;osgDBrd.lib;osgGArd.lib;osgrd.lib;osgTextrd.lib;osgUtilrd.lib;osgViewerrd.lib;TKernel.lib;TKMath.lib;TKBrep.lib;TKMesh.lib;TKTopAlgo.lib;TKPrim.lib;TKOffset.lib;TKG3d.lib;TKGeomBase.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>e:\ObjectARX2014\lib-x64\;e:\ObjectARX2014\utils\amodeler\lib-x64\;e:\ObjectARX2014\utils\brep\lib-x64\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>acdb19.lib;acge19.lib;acgex19.lib;ac1st19.lib;accore.lib;rxapi.lib;AecModeler.lib;acbr19.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;PDSOFTEXPORT_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
@@ -142,70 +135,96 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;WNT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_OBJECTARX2000_;_OBJECTARX2010_;NDEBUG;_WINDOWS;_USRDLL;PDSOFTEXPORT_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>e:\OpenSourceCode\OpenSceneGraph\source\OpenSceneGraph-3.3.1\include\;e:\OpenSourceCode\OpenSceneGraph\build\include\;e:\OpenSourceCode\OpenCasCade\source\ros\inc\;..\GeometryLib\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>-Zm256 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>.\;.\pdgeom;e:\ObjectARX2014\inc\;e:\ObjectARX2014\inc-x64\;e:\ObjectARX2014\utils\amodeler\inc\;e:\ObjectARX2014\utils\brep\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>e:\OpenSourceCode\OpenSceneGraph\build\lib\;e:\OpenSourceCode\OpenCasCade\source\ros\win64\vc12\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>OpenThreadsrd.lib;osgDBrd.lib;osgGArd.lib;osgrd.lib;osgTextrd.lib;osgUtilrd.lib;osgViewerrd.lib;TKernel.lib;TKMath.lib;TKBrep.lib;TKMesh.lib;TKTopAlgo.lib;TKPrim.lib;TKOffset.lib;TKG3d.lib;TKGeomBase.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>e:\ObjectARX2014\lib-x64\;e:\ObjectARX2014\utils\amodeler\lib-x64\;e:\ObjectARX2014\utils\brep\lib-x64\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>acdb19.lib;acge19.lib;acgex19.lib;ac1st19.lib;accore.lib;rxapi.lib;AecModeler.lib;acbr19.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="ChildFrm.h" />
-    <ClInclude Include="GeometryUtility.h" />
-    <ClInclude Include="MainFrm.h" />
-    <ClInclude Include="ManipulatorTravel.h" />
-    <ClInclude Include="MFC_OSG.h" />
-    <ClInclude Include="MFC_OSG_MDI.h" />
-    <ClInclude Include="MFC_OSG_MDIDoc.h" />
-    <ClInclude Include="MFC_OSG_MDIView.h" />
-    <ClInclude Include="Resource.h" />
-    <ClInclude Include="stdafx.h" />
+    <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ChildFrm.cpp" />
-    <ClCompile Include="GeometryUtility.cpp" />
-    <ClCompile Include="MainFrm.cpp" />
-    <ClCompile Include="ManipulatorTravel.cpp" />
-    <ClCompile Include="MFC_OSG.cpp" />
-    <ClCompile Include="MFC_OSG_MDI.cpp" />
-    <ClCompile Include="MFC_OSG_MDIDoc.cpp" />
-    <ClCompile Include="MFC_OSG_MDIView.cpp" />
+    <ClInclude Include="pdgeom\AsdkBodyAModelerCallBack.h" />
+    <ClInclude Include="pdgeom\FilerCallBack.h" />
+    <ClInclude Include="pdgeom\PDBox.h" />
+    <ClInclude Include="pdgeom\PDBox1.h" />
+    <ClInclude Include="pdgeom\PDConcone.h" />
+    <ClInclude Include="pdgeom\PDCylinder.h" />
+    <ClInclude Include="pdgeom\PDEcone.h" />
+    <ClInclude Include="pdgeom\PDOval.h" />
+    <ClInclude Include="pdgeom\PDPrimary3D.h" />
+    <ClInclude Include="pdgeom\PDPrism.h" />
+    <ClInclude Include="pdgeom\PDPrism1.h" />
+    <ClInclude Include="pdgeom\PDRevolve.h" />
+    <ClInclude Include="pdgeom\PDSaddle.h" />
+    <ClInclude Include="pdgeom\PDScylinder.h" />
+    <ClInclude Include="pdgeom\PDSphere.h" />
+    <ClInclude Include="pdgeom\PDSpolygon.h" />
+    <ClInclude Include="pdgeom\PDSqucir.h" />
+    <ClInclude Include="pdgeom\PDSqucone.h" />
+    <ClInclude Include="pdgeom\PDSqutorus.h" />
+    <ClInclude Include="pdgeom\PDSqutorus1.h" />
+    <ClInclude Include="pdgeom\PDTorus.h" />
+    <ClInclude Include="pdgeom\PDTorus1.h" />
+    <ClInclude Include="pdgeom\PDWedge.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</CompileAsManaged>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </PrecompiledHeader>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</CompileAsManaged>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="pdgeom\AsdkBodyAModelerCallBack.cpp" />
+    <ClCompile Include="pdgeom\FilerCallBack.cpp" />
+    <ClCompile Include="pdgeom\PDBox.cpp" />
+    <ClCompile Include="pdgeom\PDBox1.cpp" />
+    <ClCompile Include="pdgeom\PDConcone.cpp" />
+    <ClCompile Include="pdgeom\PDCylinder.cpp" />
+    <ClCompile Include="pdgeom\PDEcone.cpp" />
+    <ClCompile Include="pdgeom\PDOval.cpp" />
+    <ClCompile Include="pdgeom\PDPrimary3D.cpp" />
+    <ClCompile Include="pdgeom\PDPrism.cpp" />
+    <ClCompile Include="pdgeom\PDPrism1.cpp" />
+    <ClCompile Include="pdgeom\PDRevolve.cpp" />
+    <ClCompile Include="pdgeom\PDSaddle.cpp" />
+    <ClCompile Include="pdgeom\PDScylinder.cpp" />
+    <ClCompile Include="pdgeom\PDSphere.cpp" />
+    <ClCompile Include="pdgeom\PDSpolygon.cpp" />
+    <ClCompile Include="pdgeom\PDSqucir.cpp" />
+    <ClCompile Include="pdgeom\PDSqucone.cpp" />
+    <ClCompile Include="pdgeom\PDSqutorus.cpp" />
+    <ClCompile Include="pdgeom\PDSqutorus1.cpp" />
+    <ClCompile Include="pdgeom\PDTorus.cpp" />
+    <ClCompile Include="pdgeom\PDTorus1.cpp" />
+    <ClCompile Include="pdgeom\PDWedge.cpp" />
+    <ClCompile Include="PDSOFTExport.cpp" />
     <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="MFC_OSG_MDI.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\DbModel\DbModel.csproj">
-      <Project>{59c95a5b-acb6-4cd1-bdbc-e53b7aee3be3}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\GeometryLib\GeometryLib.vcxproj">
-      <Project>{d5470c15-a5f6-4adf-949f-05ac9adea7ac}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="NHibernate">
-      <HintPath>..\packages\NHibernate.3.3.3.4001\lib\Net35\NHibernate.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Data" />
-    <Reference Include="System.Drawing" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
-  <ProjectExtensions>
-    <VisualStudio>
-      <UserProperties RESOURCE_FILE="MFC_OSG_MDI.rc" />
-    </VisualStudio>
-  </ProjectExtensions>
 </Project>

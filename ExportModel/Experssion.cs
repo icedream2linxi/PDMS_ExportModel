@@ -18,6 +18,8 @@ namespace ExportModel
 		private Stack<BracketType> bracketStack = new Stack<BracketType>();
 		private bool isFunBracketEnd = false;
 
+		private int bracketLevel = 0;
+
 		public string Exper
 		{
 			get
@@ -58,6 +60,7 @@ namespace ExportModel
 		{
 			try
 			{
+				bracketLevel = 0;
 				CharEnumerator experIter = Exper.GetEnumerator();
 				if (experIter.MoveNext())
 					Parse(experIter, OperatorOrder.NONE, ref op);
@@ -75,6 +78,532 @@ namespace ExportModel
 		{
 			ModelElement = ele;
 			return op.Eval();
+		}
+
+		private bool Parse(CharEnumerator experIter, IOperator prevOp, out IOperator op)
+		{
+			if (!SkipSpace(experIter))
+			{
+				op = null;
+				return true;
+			}
+
+			bool isEof = false;
+			char curCh = experIter.Current;
+			switch (curCh)
+			{
+				case '-':
+					isEof = ParseSub(experIter, prevOp, out op);
+					break;
+				case '+':
+					break;
+				default:
+					op = null;
+					break;
+			}
+			return isEof;
+		}
+
+		private bool ParseSub(CharEnumerator experIter, IOperator prevOp, out IOperator op)
+		{
+			IOperator nextOp;
+			bool isEof = Parse(experIter, null, out nextOp);
+			if (nextOp == null)
+				throw new FormatException();
+			if (prevOp == null)
+			{
+				NegOp negOp = new NegOp();
+				negOp.Item = nextOp;
+				op = negOp;
+			}
+			else
+			{
+				SubOp subOp = new SubOp();
+				subOp.LhsItem = prevOp;
+				if (!isEof)
+				{
+					IOperator tmpOp;
+					isEof = Parse(experIter, nextOp, out tmpOp);
+					if (tmpOp != null)
+						nextOp = tmpOp;
+				}
+				subOp.RhsItem = nextOp;
+				op = subOp;
+			}
+			return isEof;
+		}
+
+		private bool ParseAdd(CharEnumerator experIter, IOperator prevOp, out IOperator op)
+		{
+			IOperator nextOp;
+			bool isEof = Parse(experIter, null, out nextOp);
+			if (nextOp == null)
+				throw new FormatException();
+			if (prevOp == null)
+			{
+				op = nextOp;
+			}
+			else
+			{
+				AddOp addOp = new AddOp();
+				addOp.LhsItem = prevOp;
+				if (!isEof)
+				{
+					IOperator tmpOp;
+					isEof = Parse(experIter, nextOp, out tmpOp);
+					if (tmpOp != null)
+						nextOp = tmpOp;
+				}
+				addOp.RhsItem = nextOp;
+				op = addOp;
+			}
+			return isEof;
+		}
+
+		private bool ParseMul(CharEnumerator experIter, IOperator prevOp, out IOperator op)
+		{
+			if (prevOp == null)
+				throw new FormatException();
+			IOperator nextOp;
+			bool isEof = Parse(experIter, null, out nextOp);
+			MulOp mulOp = new MulOp();
+			mulOp.LhsItem = prevOp;
+			mulOp.RhsItem = nextOp;
+
+			if (isEof)
+			{
+				op = mulOp;
+				return isEof;
+			}
+
+			isEof = Parse(experIter, mulOp, out nextOp);
+			if (nextOp != null)
+				op = nextOp;
+			else
+				op = mulOp;
+			return isEof;
+		}
+
+		private bool ParseDiv(CharEnumerator experIter, IOperator prevOp, out IOperator op)
+		{
+			if (prevOp == null)
+				throw new FormatException();
+			IOperator nextOp;
+			bool isEof = Parse(experIter, null, out nextOp);
+			DivOp divOp = new DivOp();
+			divOp.LhsItem = prevOp;
+			divOp.RhsItem = nextOp;
+
+			if (isEof)
+			{
+				op = divOp;
+				return isEof;
+			}
+
+			isEof = Parse(experIter, divOp, out nextOp);
+			if (nextOp != null)
+				op = nextOp;
+			else
+				op = divOp;
+			return isEof;
+		}
+
+		private bool ParseStartBracket(CharEnumerator experIter, IOperator prevOp, out IOperator op)
+		{
+			if (prevOp != null)
+				throw new FormatException();
+			int currLevel = bracketLevel++;
+			bool isEof = Parse(experIter, null, out op);
+			if (isEof || op == null)
+				throw new FormatException();
+			IOperator nextOp;
+			isEof = Parse(experIter, op, out nextOp);
+			if (nextOp != null)
+				op = nextOp;
+			if (bracketLevel != currLevel)
+				throw new FormatException();
+			return isEof;
+		}
+
+		private bool ParseEndBracket(CharEnumerator experIter, IOperator prevOp, out IOperator op)
+		{
+			if (prevOp == null)
+				throw new FormatException();
+			--bracketLevel;
+			op = null;
+			return !experIter.MoveNext();
+		}
+
+		private bool ParseComma(CharEnumerator experIter, IOperator prevOp, out IOperator op)
+		{
+			if (prevOp == null)
+				throw new FormatException();
+			op = null;
+			return !experIter.MoveNext();
+		}
+
+		private bool ParseValue(CharEnumerator experIter, IOperator prevOp, out IOperator op)
+		{
+			bool isEof = false;
+			StringBuilder sb = new StringBuilder();
+			if (!isEof && (Char.IsDigit(experIter.Current) || experIter.Current == '.'))
+			{
+				sb.Append(experIter.Current);
+				isEof = !experIter.MoveNext();
+			}
+
+			op = new ValOp(Double.Parse(sb.ToString()));
+			return isEof;
+		}
+
+		private bool ParseFunc(CharEnumerator experIter, IOperator prevOp, out IOperator op)
+		{
+			StringBuilder sb = new StringBuilder();
+			bool isEof = false;
+			while (!IsSplit(experIter.Current) && !IsOp(experIter.Current) && experIter.Current != '(' && experIter.Current != ')')
+			{
+				sb.Append(experIter.Current);
+				if (!experIter.MoveNext())
+				{
+					isEof = true;
+					break;
+				}
+			}
+
+			string item = sb.ToString();
+			if (item.Equals("DDHEIGHT"))
+			{
+				op = new HeightOp(this);
+				return isEof;
+			}
+			else if (item.Equals("DDANGLE"))
+			{
+				op = new AngleOp(this);
+				return isEof;
+			}
+			else if (item.Equals("DDRADIUS"))
+			{
+				op = new RadiusOp(this);
+				return isEof;
+			}
+
+			if (isEof)
+				throw new FormatException();
+
+			if (item.Equals("TIMES"))
+			{
+				isEof = ParseMul(experIter, prevOp, out op);
+			}
+			else if (item.Equals("DIFFERENCE"))
+			{
+				IOperator valueOp = null;
+				isEof = Parse(experIter, null, out valueOp);
+				if (isEof)
+					throw new FormatException();
+				IOperator nextValueOp = null;
+				isEof = Parse(experIter, null, out nextValueOp);
+				op = new SubOp(valueOp, nextValueOp);
+			}
+			else if (item.Equals("SUM"))
+			{
+				IOperator valueOp = null;
+				isEof = Parse(experIter, null, out valueOp);
+				if (isEof)
+					throw new FormatException();
+				IOperator nextValueOp = null;
+				isEof = Parse(experIter, null, out nextValueOp);
+				op = new AddOp(valueOp, nextValueOp);
+			}
+			else if (item.Equals("DIV"))
+			{
+				IOperator valueOp = null;
+				isEof = Parse(experIter, null, out valueOp);
+				if (isEof)
+					throw new FormatException();
+				IOperator nextValueOp = null;
+				isEof = Parse(experIter, null, out nextValueOp);
+				op = new DivOp(valueOp, nextValueOp);
+			}
+			else if (item.Equals("TANF"))
+			{
+				IOperator valueOp = null;
+				isEof = Parse(experIter, null, out valueOp);
+				if (isEof)
+					throw new FormatException();
+				IOperator nextValueOp = null;
+				isEof = Parse(experIter, null, out nextValueOp);
+				op = new TanfOp(valueOp, nextValueOp);
+			}
+			else if (item.Equals("MIN"))
+			{
+				isEof = !SkipSpace(experIter);
+				if (isEof || experIter.Current != '(')
+					throw new FormatException();
+				int currBracket = bracketLevel++;
+				IOperator valueOp = null;
+				isEof = Parse(experIter, null, out valueOp);
+				if (isEof)
+					throw new FormatException();
+				IOperator nextValueOp = null;
+				isEof = Parse(experIter, null, out nextValueOp);
+				if (currBracket != bracketLevel)
+					throw new FormatException();
+				op = new MinOp(valueOp, nextValueOp);
+			}
+			else if (item.Equals("MAX"))
+			{
+				isEof = !SkipSpace(experIter);
+				if (isEof || experIter.Current != '(')
+					throw new FormatException();
+				int currBracket = bracketLevel++;
+				IOperator valueOp = null;
+				isEof = Parse(experIter, null, out valueOp);
+				if (isEof)
+					throw new FormatException();
+				IOperator nextValueOp = null;
+				isEof = Parse(experIter, null, out nextValueOp);
+				if (currBracket != bracketLevel)
+					throw new FormatException();
+				op = new MaxOp(valueOp, nextValueOp);
+			}
+			else if (item.Equals("COS"))
+			{
+				isEof = !SkipSpace(experIter);
+				if (isEof || experIter.Current != '(')
+					throw new FormatException();
+				int currBracket = bracketLevel++;
+				IOperator valueOp = null;
+				isEof = Parse(experIter, null, out valueOp);
+				if (isEof || currBracket != bracketLevel)
+					throw new FormatException();
+				CosOp cosOp = new CosOp();
+				cosOp.Item = valueOp;
+				op = cosOp;
+				return isEof;
+			}
+			else if (item.Equals("SIN"))
+			{
+				isEof = !SkipSpace(experIter);
+				if (isEof || experIter.Current != '(')
+					throw new FormatException();
+				int currBracket = bracketLevel++;
+				IOperator valueOp = null;
+				isEof = Parse(experIter, null, out valueOp);
+				if (isEof || currBracket != bracketLevel)
+					throw new FormatException();
+				SinOp sinOp = new SinOp();
+				sinOp.Item = valueOp;
+				op = sinOp;
+				return isEof;
+			}
+			else if (item.Equals("SQRT"))
+			{
+				isEof = !SkipSpace(experIter);
+				if (isEof || experIter.Current != '(')
+					throw new FormatException();
+				int currBracket = bracketLevel++;
+				IOperator valueOp = null;
+				isEof = Parse(experIter, null, out valueOp);
+				if (isEof || currBracket != bracketLevel)
+					throw new FormatException();
+				SqrtOp sqrtOp = new SqrtOp();
+				sqrtOp.Item = valueOp;
+				op = sqrtOp;
+				return isEof;
+			}
+			else if (item.Equals("INT"))
+			{
+				isEof = !SkipSpace(experIter);
+				if (isEof || experIter.Current != '(')
+					throw new FormatException();
+				int currBracket = bracketLevel++;
+				IOperator valueOp = null;
+				isEof = Parse(experIter, null, out valueOp);
+				if (isEof || currBracket != bracketLevel)
+					throw new FormatException();
+				IntOp intOp = new IntOp();
+				intOp.Item = valueOp;
+				op = intOp;
+				return isEof;
+			}
+			else if (item.Equals("PARAM"))
+			{
+				ParamOp paramOp = new ParamOp(this);
+				IOperator valueOp = null;
+				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
+				paramOp.Item = valueOp;
+				op = paramOp;
+				return isEof;
+			}
+			else if (item.Equals("IPARAM"))
+			{
+				IParamOp paramOp = new IParamOp(this);
+				IOperator valueOp = null;
+				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
+				paramOp.Item = valueOp;
+				op = paramOp;
+				return isEof;
+			}
+			else if (item.Equals("DESIGN"))
+			{
+				isEof = !SkipSpace(experIter);
+				if (isEof)
+					throw new FormatException();
+
+				sb = new StringBuilder();
+				while (!IsSplit(experIter.Current) && !IsOp(experIter.Current) && experIter.Current != '(' && experIter.Current != ')')
+				{
+					sb.Append(experIter.Current);
+					if (!experIter.MoveNext())
+					{
+						isEof = true;
+						break;
+					}
+				}
+
+				if (isEof)
+					throw new FormatException();
+
+				item = sb.ToString();
+				if (item.Equals("PARAM"))
+				{
+					DParamOp paramOp = new DParamOp(this);
+					IOperator valueOp = null;
+					isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
+					paramOp.Item = valueOp;
+					op = paramOp;
+					return isEof;
+				}
+				else
+					throw new FormatException();
+			}
+			else if (item.Equals("TWICE"))
+			{
+				IOperator valueOp = null;
+				isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
+				op = new TwiceOp(valueOp);
+			}
+			else if (item.Equals("ATTRIB"))
+			{
+				isEof = !SkipSpace(experIter);
+				if (isEof)
+					throw new FormatException();
+
+				sb = new StringBuilder();
+				while (!IsSplit(experIter.Current) && !IsOp(experIter.Current) && experIter.Current != '(' && experIter.Current != ')')
+				{
+					sb.Append(experIter.Current);
+					if (!experIter.MoveNext())
+					{
+						isEof = true;
+						break;
+					}
+				}
+
+				if (isEof)
+					throw new FormatException();
+
+				item = sb.ToString();
+
+				if (item.Equals("RPRO"))
+				{
+					isEof = !SkipSpace(experIter);
+					if (isEof)
+						throw new FormatException();
+
+					sb = new StringBuilder();
+					while (!IsSplit(experIter.Current) && !IsOp(experIter.Current) && experIter.Current != '(' && experIter.Current != ')')
+					{
+						sb.Append(experIter.Current);
+						if (!experIter.MoveNext())
+						{
+							isEof = true;
+							break;
+						}
+					}
+
+					if (isEof)
+						throw new FormatException();
+
+					item = sb.ToString();
+
+					DbExperOp experOp = new DbExperOp(this);
+					experOp.DbExper = DbExpression.Parse("ATTRIB RPRO " + item);
+					op = experOp;
+				}
+				else
+				{
+					DbAttribute attr = DbAttribute.GetDbAttribute(item);
+					if (attr == null)
+						throw new FormatException();
+
+					while (!isEof && Char.IsWhiteSpace(experIter.Current))
+					{
+						isEof = !experIter.MoveNext();
+					}
+
+					if (isEof || experIter.Current == '[')
+					{
+						AttribArrayOp paramOp = new AttribArrayOp(this);
+						paramOp.Attr = attr;
+						IOperator valueOp = null;
+						isEof = Parse(experIter, OperatorOrder.NEED_VALUE, ref valueOp);
+						paramOp.Item = valueOp;
+						op = paramOp;
+					}
+					else
+					{
+						AttribOp paramOp = new AttribOp(this);
+						paramOp.Attr = attr;
+						op = paramOp;
+					}
+				}
+			}
+			else if (item.Equals("PL") || item.Equals("PA"))
+			{
+				isEof = !SkipSpace(experIter);
+				if (isEof)
+					throw new FormatException();
+
+				sb = new StringBuilder();
+				while (!IsSplit(experIter.Current) && !IsOp(experIter.Current) && experIter.Current != '(' && experIter.Current != ')')
+				{
+					sb.Append(experIter.Current);
+					if (!experIter.MoveNext())
+					{
+						isEof = true;
+						break;
+					}
+				}
+
+				if (isEof)
+					throw new FormatException();
+
+				DbAttribute attr = item.Equals("PL") ? DbAttributeInstance.LOD : DbAttributeInstance.AOD;
+				item = sb.ToString();
+				if (!item.Equals("OD"))
+					throw new FormatException();
+
+				AttribOp paramOp = new AttribOp(this);
+				paramOp.Attr = attr;
+				op = paramOp;
+			}
+			else if (item.Equals("PLOD"))
+			{
+				AttribOp paramOp = new AttribOp(this);
+				paramOp.Attr = DbAttributeInstance.LOD;
+				op = paramOp;
+			}
+			else if (item.Equals("PAOD"))
+			{
+				AttribOp paramOp = new AttribOp(this);
+				paramOp.Attr = DbAttributeInstance.AOD;
+				op = paramOp;
+			}
+			else
+				throw new FormatException();
+
+			return isEof;
 		}
 
 		enum OperatorOrder

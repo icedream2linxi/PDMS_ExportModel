@@ -1,0 +1,115 @@
+// PDPrism.h: interface for the PDPrism class.
+//
+//////////////////////////////////////////////////////////////////////
+
+#if !defined(AFX_PDPRISM_H__64A78DA9_89B0_479C_844B_7A154B90BD39__INCLUDED_)
+#define AFX_PDPRISM_H__64A78DA9_89B0_479C_844B_7A154B90BD39__INCLUDED_
+
+#if _MSC_VER > 1000
+#pragma once
+#endif // _MSC_VER > 1000
+
+#include "PDPrimary3D.h"
+
+
+class PDPrism : public PDPrimary3D  
+{
+public:
+	ACRX_DECLARE_MEMBERS(PDPrism); 
+	PDPrism(AcGePoint3d cP1,AcGePoint3d cP2,AcGePoint3d eP3,Adesk::UInt32 eNum, bool HasSnap = false);
+//	GlePrism(GlePrism&);
+	PDPrism(bool HasSnap = false);
+	virtual ~PDPrism();
+public:
+#ifdef _OBJECTARX2010_
+	virtual Adesk::Boolean subWorldDraw(AcGiWorldDraw* mode);
+	virtual Acad::ErrorStatus subTransformBy(const AcGeMatrix3d &xform);
+	virtual void subList() const;
+	virtual Acad::ErrorStatus   subGetGeomExtents(AcDbExtents& extents) const;
+	virtual Acad::ErrorStatus subExplode(AcDbVoidPtrArray& entitySet) const;
+	virtual Acad::ErrorStatus   subGetOsnapPoints(
+		AcDb::OsnapMode     osnapMode,
+		Adesk::GsMarker     gsSelectionMark,
+		const AcGePoint3d&  pickPoint,
+		const AcGePoint3d&  lastPoint,
+		const AcGeMatrix3d& viewXform,
+		AcGePoint3dArray&   snapPoints,
+		AcDbIntArray &   geomIds) const;
+	virtual Acad::ErrorStatus subGetGripPoints(
+		AcGePoint3dArray& gripPoints,
+		AcDbIntArray& osnapModes,
+		AcDbIntArray& geomIds) const;
+#else
+	virtual Adesk::Boolean worldDraw(AcGiWorldDraw* mode);
+	virtual Acad::ErrorStatus transformBy(const AcGeMatrix3d &xform);
+	virtual void list() const;
+	virtual Acad::ErrorStatus   getGeomExtents(AcDbExtents& extents) const;
+	virtual Acad::ErrorStatus explode(AcDbVoidPtrArray& entitySet) const;
+	virtual Acad::ErrorStatus getOsnapPoints(  AcDb::OsnapMode osnapMode,
+		int gsSelectionMark,
+		const AcGePoint3d&    pickPoint,
+		const AcGePoint3d&    lastPoint,
+		const AcGeMatrix3d&   viewXform,
+		AcGePoint3dArray&     snapPoints,
+		AcDbIntArray&         geomIds) const;
+	virtual Acad::ErrorStatus getGripPoints(
+		AcGePoint3dArray& gripPoints,
+		AcDbIntArray& osnapModes,
+		AcDbIntArray& geomIds) const;
+#endif
+	Acad::ErrorStatus getVertices(AcGePoint3dArray& vertexArray)const;
+	/*!
+	 * 获取m_ptcenP1所在底面的所有顶点
+	 * \param [in,out] vertexArray 
+	 * \return Acad::ErrorStatus
+	 */
+	Acad::ErrorStatus getVerticesInP1Plane(AcGePoint3dArray& vertexArray) const;
+	/*!
+	* 获取m_ptcenP2所在底面的所有顶点
+	* \param [in,out] vertexArray 
+	* \return Acad::ErrorStatus
+	*/
+	Acad::ErrorStatus getVerticesInP2Plane(AcGePoint3dArray& vertexArray) const;
+
+	virtual Acad::ErrorStatus	dwgInFields(AcDbDwgFiler* filer);
+	virtual Acad::ErrorStatus	dwgOutFields(AcDbDwgFiler* filer) const;
+	virtual Acad::ErrorStatus	dxfInFields(AcDbDxfFiler* filer);
+	virtual Acad::ErrorStatus	dxfOutFields(AcDbDxfFiler* filer) const;
+
+
+	Acad::ErrorStatus getpointCenP1(AcGePoint3d& ptcenP1);
+	Acad::ErrorStatus getpointCenP2(AcGePoint3d& ptcenP2);
+	Acad::ErrorStatus getpointP3(AcGePoint3d& ptP3);
+	Acad::ErrorStatus getedgeNum(Adesk::UInt32& edgeNum);
+
+	Acad::ErrorStatus setParameters(AcGePoint3d& ptcenP1,AcGePoint3d& ptcenP2,
+		                            AcGePoint3d& ptP3,	Adesk::UInt32 edgeNum);
+
+    virtual void createBody();
+
+	//  [9/5/2007 suzhiyong]
+	virtual Acad::ErrorStatus explodeTo3DSolid(AcDb3dSolid* &p3dSolid) const;
+
+private:
+	AcGePoint3d        m_ptcenP1,m_ptcenP2,m_ptP3;
+	Adesk::UInt32       m_nedgeNum;
+	//AcGeVector3d       xVector;
+	//double             height;
+
+#ifndef _OBJECTARX2010_
+private:
+	void *operator new[](unsigned nSize) { return 0; }
+	void operator delete[](void *p) {};
+	void *operator new[](unsigned nSize, const char *file, int line) { return 0; }
+#endif
+
+public:
+  //zxb,20090113,增加audit，暂时只check自身成员数据
+  virtual Acad::ErrorStatus audit(AcDbAuditInfo* pAuditInfo);
+  virtual void setDefault(); //设置缺省的对象数据
+  virtual bool isValidData(double &f); //检查是否成员数据均是合法数据, 并返回出错数
+
+};
+MAKE_ACDBOPENOBJECT_FUNCTION(PDPrism);
+
+#endif // !defined(AFX_PDPRISM_H__64A78DA9_89B0_479C_844B_7A154B90BD39__INCLUDED_)
