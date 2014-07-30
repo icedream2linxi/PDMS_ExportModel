@@ -180,6 +180,7 @@
     <ClInclude Include="pdgeom\PDWedge.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="TestModel.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -226,6 +227,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TestModel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DbModel\DbModel.csproj">
@@ -234,13 +236,13 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="accoremgd">
-      <HintPath>D:\Program Files\Autodesk\AutoCAD 2014\accoremgd.dll</HintPath>
+      <HintPath>E:\ObjectARX2014\inc\AcCoreMgd.dll</HintPath>
     </Reference>
     <Reference Include="Acdbmgd">
-      <HintPath>D:\Program Files\Autodesk\AutoCAD 2014\acdbmgd.dll</HintPath>
+      <HintPath>E:\ObjectARX2014\inc\AcDbMgd.dll</HintPath>
     </Reference>
     <Reference Include="Acmgd">
-      <HintPath>D:\Program Files\Autodesk\AutoCAD 2014\acmgd.dll</HintPath>
+      <HintPath>E:\ObjectARX2014\inc\AcMgd.dll</HintPath>
     </Reference>
     <Reference Include="NHibernate">
       <HintPath>..\packages\NHibernate.3.3.3.4001\lib\Net35\NHibernate.dll</HintPath>

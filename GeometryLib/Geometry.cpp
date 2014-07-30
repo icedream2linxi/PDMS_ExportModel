@@ -28,7 +28,11 @@ namespace Geometry
 
 		Vec3 mainVec = startPnt - center;
 		double mainRadius = mainVec.length() + radius;
-		double mainIncAng = 2 * acos((mainRadius - g_deflection) / mainRadius);
+		double mainIncAng = 0.0;
+		if (g_deflection > mainRadius)
+			mainIncAng = angle / 4.0;
+		else
+			mainIncAng = 2 * acos((mainRadius - g_deflection) / mainRadius);
 		int mainCount = (int)ceil(angle / mainIncAng);
 		mainIncAng = angle / mainCount;
 		Quat mainQuat(mainIncAng, normal);

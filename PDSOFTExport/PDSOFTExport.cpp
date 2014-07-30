@@ -36,6 +36,8 @@
 #include "PDSPolygon.h"
 #include "PDRevolve.h"
 
+#include "TestModel.h"
+
 using namespace Autodesk::AutoCAD::Runtime;
 using namespace Autodesk::AutoCAD::ApplicationServices;
 
@@ -97,6 +99,7 @@ void InitApplication()
 	acrxBuildClassHierarchy();
 
 	acedRegCmds->addCommand(_T("PDSOFT_EXPORT"), _T("PDExport"), _T("PDExport"), ACRX_CMD_TRANSPARENT | ACRX_CMD_USEPICKSET, Export);
+	acedRegCmds->addCommand(_T("PDSOFT_EXPORT"), _T("PDTestModel"), _T("PDTestModel"), ACRX_CMD_TRANSPARENT | ACRX_CMD_USEPICKSET, PDPRIMARY3D_MODEL);
 }
 
 void UnloadApplication()
@@ -300,8 +303,8 @@ void ExportEntity(NHibernate::ISession^ session, const AcDbEntity *pEnt, const A
 		DbModel::Cone^ cone = gcnew DbModel::Cone();
 		cone->Org = ToPnt(org);
 		cone->Height = ToPnt(height);
-		cone->BottomRadius = pdcone.getDiameter1();
-		cone->TopRadius = pdcone.getDiameter2();
+		cone->BottomRadius = pdcone.getDiameter1() / 2.0;
+		cone->TopRadius = pdcone.getDiameter2() / 2.0;
 		cone->Color = GetColor(pEnt);
 		session->Save(cone);
 	}
@@ -486,7 +489,8 @@ void ExportEntity(NHibernate::ISession^ session, const AcDbEntity *pEnt, const A
 		center.transformBy(mtx);
 		AcGePoint3d startPnt = pdtorus.getP1();
 		startPnt.transformBy(mtx);
-		AcGeVector3d normal = (startPnt - center).crossProduct(pdtorus.getNormalP2());
+		//AcGeVector3d normal = (startPnt - center).crossProduct(pdtorus.getNormalP2());
+		AcGeVector3d normal = pdtorus.getNormalP2();
 		normal.normalize();
 
 		DbModel::RectangularTorus^ rt = gcnew DbModel::RectangularTorus();
