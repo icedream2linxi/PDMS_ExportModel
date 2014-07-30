@@ -23,4 +23,6 @@ namespace Geometry
 		double radius, const osg::Vec4 &color, bool bottomVis = true);
 	osg::ref_ptr<osg::Geometry> BuildWedge(const osg::Vec3 &org, const osg::Vec3 &edge1,
 		const osg::Vec3 &edge2, const osg::Vec3 &height, const osg::Vec4 &color);
+	osg::ref_ptr<osg::Geometry> BuildPrism(const osg::Vec3 &org, const osg::Vec3 &height,
+		const osg::Vec3 &bottomStartPnt, int edgeNum, const osg::Vec4 &color);
 }

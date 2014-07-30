@@ -46,6 +46,7 @@ private:
 	osg::Node* CreatePyramid(NHibernate::ISession^ session);
 	osg::Node* CreateRectangularTorus(NHibernate::ISession^ session);
 	osg::Node* CreateWedge(NHibernate::ISession^ session);
+	osg::Node* CreatePrism(NHibernate::ISession^ session);
 private:
     bool mDone;
     std::string m_ModelName;

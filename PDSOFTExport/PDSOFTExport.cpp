@@ -313,13 +313,15 @@ void ExportEntity(NHibernate::ISession^ session, const AcDbEntity *pEnt, const A
 		AcGeVector3d height = pdcone.getpointEnd() - pdcone.getpointStart();
 		height.transformBy(mtx);
 		AcGeVector3d offset = pdcone.getVect();
-		offset.transformBy(mtx);
+		offset.transformBy(mtx).normalize();
+		offset *= fabs(pdcone.getDiameter1() / 2.0 - pdcone.getDiameter2() / 2.0);
+		height -= offset;
 
 		DbModel::Snout^ cone = gcnew DbModel::Snout();
 		cone->Org = ToPnt(org);
 		cone->Height = ToPnt(height);
-		cone->BottomRadius = pdcone.getDiameter1();
-		cone->TopRadius = pdcone.getDiameter2();
+		cone->BottomRadius = pdcone.getDiameter1() / 2.0;
+		cone->TopRadius = pdcone.getDiameter2() / 2.0;
 		cone->Offset = ToPnt(offset);
 		cone->Color = GetColor(pEnt);
 		session->Save(cone);
@@ -359,7 +361,8 @@ void ExportEntity(NHibernate::ISession^ session, const AcDbEntity *pEnt, const A
 		double radius = vect.length() / cos(angle);
 		vect.normalize();
 		AcGeMatrix3d xform = AcGeMatrix3d::rotation(angle, height);
-		AcGePoint3d bottomStartPnt = org + vect.transformBy(xform);
+		vect.transformBy(xform).normalize();
+		AcGePoint3d bottomStartPnt = org + vect * radius;
 
 		DbModel::Prism^ prism = gcnew DbModel::Prism();
 		prism->Org = ToPnt(org);

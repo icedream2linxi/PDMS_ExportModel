@@ -884,5 +884,63 @@ namespace Geometry
 		return geometry;
 	}
 
+	osg::ref_ptr<osg::Geometry> BuildPrism(const osg::Vec3 &org, const osg::Vec3 &height,
+		const osg::Vec3 &bottomStartPnt, int edgeNum, const osg::Vec4 &color)
+	{
+		ref_ptr<osg::Geometry> geometry = new osg::Geometry();
+		ref_ptr<Vec3Array> vertexArr = new Vec3Array;
+		ref_ptr<Vec3Array> normalArr = new Vec3Array;
+		geometry->setVertexArray(vertexArr);
+		geometry->setNormalArray(normalArr, osg::Array::BIND_PER_VERTEX);
+		osg::ref_ptr<osg::Vec4Array> colArr = new osg::Vec4Array();
+		colArr->push_back(color);
+		geometry->setColorArray(colArr, osg::Array::BIND_OVERALL);
+
+		double incAng = 2.0 * M_PI / edgeNum;
+
+		// bottom
+		GLint first = vertexArr->size();
+		osg::Vec3 vec = bottomStartPnt - org;
+		osg::Vec3 normal = -height;
+		normal.normalize();
+		Quat quat(incAng, normal);
+		vertexArr->push_back(org);
+		for (int i = 0; i < edgeNum; ++i)
+		{
+			vertexArr->push_back(org + vec);
+			vec = quat * vec;
+		}
+		vertexArr->push_back((*vertexArr)[first + 1]);
+		for (int i = 0; i < edgeNum + 2; ++i)
+			normalArr->push_back(normal);
+		geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::TRIANGLE_FAN, first, vertexArr->size() - first));
+
+		// top
+		first = vertexArr->size();
+		normal = -normal;
+		for (int i = 0; i < edgeNum + 2; ++i)
+		{
+			vertexArr->push_back((*vertexArr)[i] + height);
+			normalArr->push_back(normal);
+		}
+		geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::TRIANGLE_FAN, first, vertexArr->size() - first));
+
+		first = vertexArr->size();
+		for (int i = 0; i < edgeNum; ++i)
+		{
+			vertexArr->push_back((*vertexArr)[i + 1]);
+			vertexArr->push_back((*vertexArr)[i + 2]);
+			vertexArr->push_back((*vertexArr)[i + edgeNum + 4]);
+			vertexArr->push_back((*vertexArr)[i + edgeNum + 3]);
+
+			normal = height ^ ((*vertexArr)[i + 2] - (*vertexArr)[i + 1]);
+			normal.normalize();
+			for (int j = 0; j < 4; ++j)
+				normalArr->push_back(normal);
+		}
+		geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::QUADS, first, vertexArr->size() - first));
+
+		return geometry;
+	}
 
 }
