@@ -275,8 +275,10 @@ void ExportEntity(NHibernate::ISession^ session, const AcDbEntity *pEnt, const A
 		const PDBox1 &pdbox = *PDBox1::cast(pEnt);
 		AcGeVector3d xLen = pdbox.getVectLength();
 		xLen.transformBy(mtx);
+		xLen *= pdbox.getLength();
 		AcGeVector3d yLen = pdbox.getVectWidth();
 		yLen.transformBy(mtx);
+		yLen *= pdbox.getWidth();
 		AcGeVector3d zLen = xLen.crossProduct(yLen);
 		zLen.normalize();
 		zLen *= pdbox.getHeight();
@@ -315,10 +317,16 @@ void ExportEntity(NHibernate::ISession^ session, const AcDbEntity *pEnt, const A
 		org.transformBy(mtx);
 		AcGeVector3d height = pdcone.getpointEnd() - pdcone.getpointStart();
 		height.transformBy(mtx);
+		double dbHeight = height.length();
 		AcGeVector3d offset = pdcone.getVect();
 		offset.transformBy(mtx).normalize();
+
+		height.normalize();
+		height = offset.crossProduct(height.crossProduct(offset));
+		height.normalize();
+		height *= dbHeight;
+
 		offset *= fabs(pdcone.getDiameter1() / 2.0 - pdcone.getDiameter2() / 2.0);
-		height -= offset;
 
 		DbModel::Snout^ cone = gcnew DbModel::Snout();
 		cone->Org = ToPnt(org);
@@ -391,6 +399,7 @@ void ExportEntity(NHibernate::ISession^ session, const AcDbEntity *pEnt, const A
 		pyramid->Org = ToPnt(org);
 		pyramid->Height = ToPnt(height);
 		pyramid->Offset = ToPnt(offset);
+		pyramid->XAxis = ToPnt(xAxis);
 		pyramid->BottomXLen = squcone.getLength1();
 		pyramid->BottomYLen = squcone.getWidth1();
 		pyramid->TopXLen = squcone.getLength2();

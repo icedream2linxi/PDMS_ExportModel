@@ -855,8 +855,8 @@ namespace Geometry
 		first = vertexArr->size();
 		vertexArr->push_back((*vertexArr)[0]);
 		vertexArr->push_back((*vertexArr)[1]);
-		vertexArr->push_back((*vertexArr)[3]);
 		vertexArr->push_back((*vertexArr)[4]);
+		vertexArr->push_back((*vertexArr)[3]);
 		for (int i = 0; i < 4; ++i)
 			normalArr->push_back(normal);
 		geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::QUADS, first, vertexArr->size() - first));
