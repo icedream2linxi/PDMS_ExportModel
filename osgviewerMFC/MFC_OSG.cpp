@@ -259,6 +259,7 @@ osg::Group *cOSG::InitOSGFromDb()
 				group->addChild(CreateDish(session));
 				group->addChild(CreatePyramid(session));
 				group->addChild(CreateRectangularTorus(session));
+				group->addChild(CreateWedge(session));
 				tx->Commit();
 				return group;
 			}
@@ -447,6 +448,22 @@ osg::Node* cOSG::CreateRectangularTorus(NHibernate::ISession^ session)
 	return pRt;
 }
 
+osg::Node* cOSG::CreateWedge(NHibernate::ISession^ session)
+{
+	osg::Geode *pWedge = new osg::Geode();
+	IList<Wedge^>^ wedgeList = session->CreateQuery("from Wedge")->List<Wedge^>();
+	osg::Vec3 org, edge1, edge2, height;
+	for each (Wedge^ wedge in wedgeList)
+	{
+		Point2Vec3(wedge->Org, org);
+		Point2Vec3(wedge->Edge1, edge1);
+		Point2Vec3(wedge->Edge2, edge2);
+		Point2Vec3(wedge->Height, height);
+		pWedge->addDrawable(Geometry::BuildWedge(org, edge1, edge2, height, CvtColor(wedge->Color)));
+	}
+	return pWedge;
+}
+
 void cOSG::CreatePoint(const osg::Vec3 &pos, int idx)
 {
 	if (mPoints == NULL)
@@ -491,7 +508,6 @@ void cOSG::SaveAs(const TCHAR *filename)
 {
 	osgDB::writeNodeFile(*mRoot, filename);
 }
-
 
 
 /*void cOSG::Render(void* ptr)

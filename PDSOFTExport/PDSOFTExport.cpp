@@ -394,7 +394,23 @@ void ExportEntity(NHibernate::ISession^ session, const AcDbEntity *pEnt, const A
 	}
 	else if (pEnt->isKindOf(PDWedge::desc()))
 	{
+		const PDWedge &pdwedge = *PDWedge::cast(pEnt);
+		AcGePoint3d org = pdwedge.getpointP2();
+		org.transformBy(mtx);
+		AcGeVector3d edge1 = pdwedge.getpointP3() - pdwedge.getpointP2();
+		edge1.transformBy(mtx);
+		AcGeVector3d edge2 = pdwedge.getpointP1() - pdwedge.getpointP2();
+		edge2.transformBy(mtx);
+		AcGeVector3d height = pdwedge.getpointP4() - pdwedge.getpointP2();
+		height.transformBy(mtx);
 
+		DbModel::Wedge^ wedge = gcnew DbModel::Wedge();
+		wedge->Org = ToPnt(org);
+		wedge->Edge1 = ToPnt(edge1);
+		wedge->Edge2 = ToPnt(edge2);
+		wedge->Height = ToPnt(height);
+		wedge->Color = GetColor(pEnt);
+		session->Save(wedge);
 	}
 	else if (pEnt->isKindOf(PDSphere::desc()))
 	{

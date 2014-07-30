@@ -812,7 +812,77 @@ namespace Geometry
 		return geometry;
 	}
 
+	osg::ref_ptr<osg::Geometry> BuildWedge(const osg::Vec3 &org, const osg::Vec3 &edge1, const osg::Vec3 &edge2,
+		const osg::Vec3 &height, const osg::Vec4 &color)
+	{
+		ref_ptr<osg::Geometry> geometry = new osg::Geometry();
+		ref_ptr<Vec3Array> vertexArr = new Vec3Array;
+		ref_ptr<Vec3Array> normalArr = new Vec3Array;
+		geometry->setVertexArray(vertexArr);
+		geometry->setNormalArray(normalArr, osg::Array::BIND_PER_VERTEX);
+		osg::ref_ptr<osg::Vec4Array> colArr = new osg::Vec4Array();
+		colArr->push_back(color);
+		geometry->setColorArray(colArr, osg::Array::BIND_OVERALL);
 
+		// bottom
+		osg::Vec3 bottomNormal = edge2 ^ edge1;
+		bottomNormal.normalize();
+		GLint first = vertexArr->size();
+		vertexArr->push_back(org);
+		vertexArr->push_back(org + edge1);
+		vertexArr->push_back(org + edge2);
+		for (int i = 0; i < 3; ++i)
+			normalArr->push_back(bottomNormal);
+		geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::TRIANGLES, first, vertexArr->size() - first));
+
+		// top
+		osg::Vec3 topNormal = -bottomNormal;
+		first = vertexArr->size();
+		vertexArr->push_back(org + height);
+		vertexArr->push_back(org + edge1 + height);
+		vertexArr->push_back(org + edge2 + height);
+		for (int i = 0; i < 3; ++i)
+			normalArr->push_back(topNormal);
+		geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::TRIANGLES, first, vertexArr->size() - first));
+
+		// face1
+		osg::Vec3 normal = edge1 ^ height;
+		normal.normalize();
+		first = vertexArr->size();
+		vertexArr->push_back((*vertexArr)[0]);
+		vertexArr->push_back((*vertexArr)[1]);
+		vertexArr->push_back((*vertexArr)[3]);
+		vertexArr->push_back((*vertexArr)[4]);
+		for (int i = 0; i < 4; ++i)
+			normalArr->push_back(normal);
+		geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::QUADS, first, vertexArr->size() - first));
+
+		// face2
+		normal = height ^ edge2;
+		normal.normalize();
+		first = vertexArr->size();
+		vertexArr->push_back((*vertexArr)[2]);
+		vertexArr->push_back((*vertexArr)[0]);
+		vertexArr->push_back((*vertexArr)[3]);
+		vertexArr->push_back((*vertexArr)[5]);
+		for (int i = 0; i < 4; ++i)
+			normalArr->push_back(normal);
+		geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::QUADS, first, vertexArr->size() - first));
+
+		// face3
+		normal = (edge2 - edge1) ^ height;
+		normal.normalize();
+		first = vertexArr->size();
+		vertexArr->push_back((*vertexArr)[1]);
+		vertexArr->push_back((*vertexArr)[2]);
+		vertexArr->push_back((*vertexArr)[5]);
+		vertexArr->push_back((*vertexArr)[4]);
+		for (int i = 0; i < 4; ++i)
+			normalArr->push_back(normal);
+		geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::QUADS, first, vertexArr->size() - first));
+
+		return geometry;
+	}
 
 
 }

@@ -77,10 +77,10 @@ public:
 	virtual Acad::ErrorStatus   getGeomExtents(AcDbExtents& extents) const;
 #endif
 
-	AcGePoint3d getpointP1();
-	AcGePoint3d getpointP2();
-	AcGePoint3d getpointP3();
-	AcGePoint3d getpointP4();
+	const AcGePoint3d &getpointP1() const;
+	const AcGePoint3d &getpointP2() const;
+	const AcGePoint3d &getpointP3() const;
+	const AcGePoint3d &getpointP4() const;
 
     Acad::ErrorStatus setParameters(AcGePoint3d P1,AcGePoint3d P2,AcGePoint3d P3,
 		double height,int CorrType = 1/* 0: ｚ左手系，1: 右手系*/);

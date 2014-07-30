@@ -634,26 +634,26 @@ Acad::ErrorStatus PDWedge::dxfInFields(AcDbDxfFiler* filer)
 	return filer->filerStatus();
 }
 
-AcGePoint3d PDWedge::getpointP1()
+const AcGePoint3d & PDWedge::getpointP1() const
 {
 	assertReadEnabled();
 	return m_ptP1;
 }
 
 
-AcGePoint3d PDWedge::getpointP2()
+const AcGePoint3d & PDWedge::getpointP2() const
 {
 	assertReadEnabled();
 	return m_ptP2;
 }
 
-AcGePoint3d PDWedge::getpointP3()
+const AcGePoint3d & PDWedge::getpointP3() const
 {
 	assertReadEnabled();
 	return m_ptP3;
 }
 
-AcGePoint3d PDWedge::getpointP4()
+const AcGePoint3d & PDWedge::getpointP4() const
 {
 	assertReadEnabled();
 	return m_ptP4;
