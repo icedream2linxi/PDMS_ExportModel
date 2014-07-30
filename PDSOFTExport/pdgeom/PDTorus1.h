@@ -96,11 +96,11 @@ public:
 	virtual Acad::ErrorStatus	dxfOutFields(AcDbDxfFiler* filer) const;
 
 
-	AcGePoint3d getpointCenter();
-	AcGePoint3d getpointP1();
-	AcGePoint3d getpointP2();
-	double getDiameter1();
-	double getDiameter2();
+	const AcGePoint3d &getCenter() const;
+	const AcGePoint3d &getP1() const;
+	const AcGePoint3d &getP2() const;
+	double getDiameter1() const;
+	double getDiameter2() const;
 	double getAngle() const;  // 返回值为角度（[0,360]）
 	Adesk::UInt32 getprecisionArc();
 	Adesk::UInt32 getprecisionCir();

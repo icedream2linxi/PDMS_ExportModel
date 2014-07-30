@@ -73,16 +73,16 @@ public:
 	virtual Acad::ErrorStatus	dxfOutFields(AcDbDxfFiler* filer) const;
 
 
-	Acad::ErrorStatus getpointOrign(AcGePoint3d& ptorign);
-	Acad::ErrorStatus getLength1(double& length1);
-	Acad::ErrorStatus getLength2(double& length2);
-	Acad::ErrorStatus getWidth1(double& width1);
-	Acad::ErrorStatus getWidth2(double& width2);
-	Acad::ErrorStatus getHeight(double& height);
-	Acad::ErrorStatus getLean(double& lean);
-	Acad::ErrorStatus getVectH(AcGeVector3d& vectH);
-	Acad::ErrorStatus getVectL(AcGeVector3d& vectL);
-	Acad::ErrorStatus getVectV(AcGeVector3d& vectV);
+	const AcGePoint3d &getOrign() const;
+	double getLength1() const;
+	double getLength2() const;
+	double getWidth1() const;
+	double getWidth2() const;
+	double getHeight() const;
+	double getLean() const;
+	const AcGeVector3d &getVectH() const;
+	const AcGeVector3d &getVectL() const;
+	const AcGeVector3d &getVectV() const;
 
 	/*!
 	 * 获取顶面矩形中心点

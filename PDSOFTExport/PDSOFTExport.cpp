@@ -372,6 +372,121 @@ void ExportEntity(NHibernate::ISession^ session, const AcDbEntity *pEnt, const A
 	else if (pEnt->isKindOf(PDSqucone::desc()))
 	{
 		const PDSqucone &squcone = *PDSqucone::cast(pEnt);
+		AcGePoint3d org = squcone.getOrign();
+		org.transformBy(mtx);
+		AcGeVector3d height = squcone.getVectH() * squcone.getHeight();
+		height.transformBy(mtx);
+		AcGeVector3d xAxis = squcone.getVectL();
+		xAxis.transformBy(mtx).normalize();
+		AcGeVector3d offset = squcone.getVectV() * squcone.getLean();
+		offset.transformBy(mtx);
+
+		DbModel::Pyramid^ pyramid = gcnew DbModel::Pyramid();
+		pyramid->Org = ToPnt(org);
+		pyramid->Height = ToPnt(height);
+		pyramid->Offset = ToPnt(offset);
+		pyramid->BottomXLen = squcone.getLength1();
+		pyramid->BottomYLen = squcone.getWidth1();
+		pyramid->TopXLen = squcone.getLength2();
+		pyramid->TopYLen = squcone.getWidth2();
+		pyramid->Color = GetColor(pEnt);
+		session->Save(pyramid);
+	}
+	else if (pEnt->isKindOf(PDWedge::desc()))
+	{
+
+	}
+	else if (pEnt->isKindOf(PDSphere::desc()))
+	{
+
+	}
+	else if (pEnt->isKindOf(PDTorus::desc()))
+	{
+		const PDTorus &pdtorus = *PDTorus::cast(pEnt);
+		AcGePoint3d center = pdtorus.getCenter();
+		center.transformBy(mtx);
+		AcGePoint3d startPnt = pdtorus.getP1();
+		startPnt.transformBy(mtx);
+		AcGeVector3d normal = pdtorus.getNormal();
+		normal.transformBy(mtx).normalize();
+
+		DbModel::CircularTorus^ ct = gcnew DbModel::CircularTorus();
+		ct->Center = ToPnt(center);
+		ct->StartPnt = ToPnt(startPnt);
+		ct->Normal = ToPnt(normal);
+		ct->Radius = pdtorus.getDiameter1() / 2.0;
+		ct->Angle = pdtorus.getAngle();
+		ct->Color = GetColor(pEnt);
+		session->Save(ct);
+	}
+	else if (pEnt->isKindOf(PDTorus1::desc()))
+	{
+		const PDTorus1 &pdtorus = *PDTorus1::cast(pEnt);
+		AcGePoint3d center = pdtorus.getCenter();
+		center.transformBy(mtx);
+		AcGePoint3d startPnt = pdtorus.getP1();
+		startPnt.transformBy(mtx);
+		AcGePoint3d endPnt = pdtorus.getP2();
+		endPnt.transformBy(mtx);
+		AcGeVector3d normal = (startPnt - center).crossProduct(endPnt - center);
+		normal.normalize();
+
+		DbModel::CircularTorus^ ct = gcnew DbModel::CircularTorus();
+		ct->Center = ToPnt(center);
+		ct->StartPnt = ToPnt(startPnt);
+		ct->Normal = ToPnt(normal);
+		ct->Radius = pdtorus.getDiameter1() / 2.0;
+		ct->Angle = pdtorus.getAngle();
+		ct->Color = GetColor(pEnt);
+		session->Save(ct);
+	}
+	else if (pEnt->isKindOf(PDSqutorus::desc()))
+	{
+		const PDSqutorus &pdtorus = *PDSqutorus::cast(pEnt);
+		AcGePoint3d center = pdtorus.getCenter();
+		center.transformBy(mtx);
+		AcGePoint3d startPnt = pdtorus.getP1();
+		startPnt.transformBy(mtx);
+		AcGeVector3d normal = pdtorus.getNormal();
+		normal.transformBy(mtx).normalize();
+
+		DbModel::RectangularTorus^ rt = gcnew DbModel::RectangularTorus();
+		rt->Center = ToPnt(center);
+		rt->StartPnt = ToPnt(startPnt);
+		rt->Normal = ToPnt(normal);
+		rt->Width = pdtorus.getLength1();
+		rt->Height = pdtorus.getWidth1();
+		rt->Angle = pdtorus.getAngle();
+		rt->Color = GetColor(pEnt);
+		session->Save(rt);
+	}
+	else if (pEnt->isKindOf(PDSqutorus1::desc()))
+	{
+		const PDSqutorus1 &pdtorus = *PDSqutorus1::cast(pEnt);
+		AcGePoint3d center = pdtorus.getCenter();
+		center.transformBy(mtx);
+		AcGePoint3d startPnt = pdtorus.getP1();
+		startPnt.transformBy(mtx);
+		AcGeVector3d normal = (startPnt - center).crossProduct(pdtorus.getNormalP2());
+		normal.normalize();
+
+		DbModel::RectangularTorus^ rt = gcnew DbModel::RectangularTorus();
+		rt->Center = ToPnt(center);
+		rt->StartPnt = ToPnt(startPnt);
+		rt->Normal = ToPnt(normal);
+		rt->Width = pdtorus.getLength1();
+		rt->Height = pdtorus.getWidth1();
+		rt->Angle = pdtorus.getAngle();
+		rt->Color = GetColor(pEnt);
+		session->Save(rt);
+	}
+	else if (pEnt->isKindOf(PDSaddle::desc()))
+	{
+
+	}
+	else if (pEnt->isKindOf(PDSqucir::desc()))
+	{
+
 	}
 	else if (pEnt->isKindOf(AcDbBlockReference::desc()))
 	{

@@ -830,32 +830,32 @@ Acad::ErrorStatus PDTorus1::dxfInFields(AcDbDxfFiler* filer)
 }
 
 
-AcGePoint3d PDTorus1::getpointCenter()
+const AcGePoint3d & PDTorus1::getCenter() const
 {
 	assertReadEnabled();
 	return m_ptCenter;
 }
 
-AcGePoint3d PDTorus1::getpointP1()
+const AcGePoint3d & PDTorus1::getP1() const
 {
 	assertReadEnabled();
 	return m_ptP1;
 }
 
-AcGePoint3d PDTorus1::getpointP2()
+const AcGePoint3d & PDTorus1::getP2() const
 {
 	assertReadEnabled();
 	return m_ptP2;
 }
 
-double PDTorus1::getDiameter1()
+double PDTorus1::getDiameter1() const
 {
 	assertReadEnabled();
 	return m_dDiameter1;
 }
 
 
-double PDTorus1::getDiameter2()
+double PDTorus1::getDiameter2() const
 {
 	assertReadEnabled();
 	return m_dDiameter2;

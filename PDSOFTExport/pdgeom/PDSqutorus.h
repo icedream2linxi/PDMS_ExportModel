@@ -77,14 +77,14 @@ public:
 	virtual Acad::ErrorStatus explodeToSurface(AcDbVoidPtrArray& entitySet) const;
 
 
-	Acad::ErrorStatus getpointP(AcGePoint3d& ptP);
-	Acad::ErrorStatus getpointP1(AcGePoint3d& ptP1);
-	Acad::ErrorStatus getpointP2(AcGePoint3d& ptP2);
-	Acad::ErrorStatus getLength1(double& length1);
-	Acad::ErrorStatus getLength2(double& length2);
-	Acad::ErrorStatus getWidth1(double& width1);
-	Acad::ErrorStatus getWidth2(double& width2);
-	Acad::ErrorStatus getRadius(double& radius);
+	const AcGePoint3d &getCenter() const;
+	const AcGePoint3d &getP1() const;
+	const AcGePoint3d &getP2() const;
+	double getLength1() const;
+	double getLength2() const;
+	double getWidth1() const;
+	double getWidth2() const;
+	double getRadius() const;
 	Acad::ErrorStatus getDirection(Adesk::UInt32& direction);
 	Acad::ErrorStatus getN(Adesk::UInt32& n);
 

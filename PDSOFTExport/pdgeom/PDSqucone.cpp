@@ -779,11 +779,10 @@ Acad::ErrorStatus PDSqucone::dxfInFields(AcDbDxfFiler* filer)
 	return filer->filerStatus();
 }
 
-Acad::ErrorStatus PDSqucone::getpointOrign(AcGePoint3d& ptorign)
+const AcGePoint3d & PDSqucone::getOrign() const
 {
 	assertReadEnabled();
-	ptorign = m_ptorign;
-	return Acad::eOk;
+	return m_ptorign;
 }
 
 AcGePoint3d PDSqucone::getUpOrignPoint()const
@@ -804,67 +803,58 @@ double PDSqucone::getOffsetAlongWidth() const
 	return m_dlean * sin(m_VectV.angleTo(m_VectL)); //!< sin在第一、二象限都为正 
 }
 
-Acad::ErrorStatus PDSqucone::getLength1(double& length1)
+double PDSqucone::getLength1() const
 {
 	assertReadEnabled();
-	length1 = m_dlength1;
-	return Acad::eOk;
+	return m_dlength1;
 }
 
-Acad::ErrorStatus PDSqucone::getLength2(double& length2)
+double PDSqucone::getLength2() const
 {
 	assertReadEnabled();
-	length2 = m_dlength2;
-	return Acad::eOk;
+	return m_dlength2;
 }
 
-Acad::ErrorStatus PDSqucone::getWidth1(double& width1)
+double PDSqucone::getWidth1() const
 {
 	assertReadEnabled();
-	width1 = m_dwidth1;
-	return Acad::eOk;
+	return m_dwidth1;
 }
 
-Acad::ErrorStatus PDSqucone::getWidth2(double& width2)
+double PDSqucone::getWidth2() const
 {
 	assertReadEnabled();
-	width2 = m_dwidth2;
-	return Acad::eOk;
+	return m_dwidth2;
 }
 
-Acad::ErrorStatus PDSqucone::getHeight(double& height)
+double PDSqucone::getHeight() const
 {
 	assertReadEnabled();
-	height = m_dheight;
-	return Acad::eOk;
+	return m_dheight;
 }
 
-Acad::ErrorStatus PDSqucone::getLean(double& lean)
+double PDSqucone::getLean() const
 {
 	assertReadEnabled();
-	lean = m_dlean;
-	return Acad::eOk;
+	return m_dlean;
 }
 
-Acad::ErrorStatus PDSqucone::getVectH(AcGeVector3d& vectH)
+const AcGeVector3d & PDSqucone::getVectH() const
 {
 	assertReadEnabled();
-	vectH = m_VectH;
-	return Acad::eOk;
+	return m_VectH;
 }
 
-Acad::ErrorStatus PDSqucone::getVectL(AcGeVector3d& vectL)
+const AcGeVector3d & PDSqucone::getVectL() const
 {
 	assertReadEnabled();
-	vectL = m_VectL;
-	return Acad::eOk;
+	return m_VectL;
 }
 
-Acad::ErrorStatus PDSqucone::getVectV(AcGeVector3d& vectV)
+const AcGeVector3d & PDSqucone::getVectV() const
 {
 	assertReadEnabled();
-	vectV = m_VectV;
-	return Acad::eOk;
+	return m_VectV;
 }
 
 Acad::ErrorStatus PDSqucone:: setParameters(AcGePoint3d ptorign,double length1,double length2,

@@ -92,9 +92,9 @@ public:
     int getMaxPrecisionArc(AcGiWorldDraw *mode) const;
     int getMaxPrecisionCir(AcGiWorldDraw *mode) const;
 	AcGePoint3dArray getPtOnCentAix(int Precision);
-	AcGePoint3d getpointCenter() const;
-	AcGePoint3d getpointP1() const;
-	AcGePoint3d getpointP2() const;
+	const AcGePoint3d &getCenter() const;
+	const AcGePoint3d &getP1() const;
+	const AcGePoint3d &getP2() const;
 	double getDiameter1() const;
 	double getDiameter2() const;
 	Adesk::UInt32 getDirection() const;

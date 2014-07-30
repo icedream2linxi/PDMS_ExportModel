@@ -1314,19 +1314,19 @@ Acad::ErrorStatus PDTorus::setParameters(const AcGePoint3d &center,
     return Acad::eOk;
 }//added by linlin 20050920
 
-AcGePoint3d PDTorus::getpointCenter() const
+const AcGePoint3d & PDTorus::getCenter() const
 {
 	assertReadEnabled();
 	return m_ptCenter;
 }
 
-AcGePoint3d PDTorus::getpointP1() const
+const AcGePoint3d & PDTorus::getP1() const
 {
 	assertReadEnabled();
 	return m_ptP1;
 }
 
-AcGePoint3d PDTorus::getpointP2() const
+const AcGePoint3d & PDTorus::getP2() const
 {
 	assertReadEnabled();
 	return m_ptP2;

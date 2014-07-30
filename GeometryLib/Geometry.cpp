@@ -33,7 +33,11 @@ namespace Geometry
 		mainIncAng = angle / mainCount;
 		Quat mainQuat(mainIncAng, normal);
 
-		double subIncAng = 2 * acos((radius - g_deflection) / radius);
+		double subIncAng = 0.0;
+		if (g_deflection > radius)
+			subIncAng = M_PI_2;
+		else
+			subIncAng = 2.0 * acos((radius - g_deflection) / radius);
 		int subCount = (int)ceil(2 * M_PI / subIncAng);
 		subIncAng = 2 * M_PI / subCount;
 		Vec3 subNormal = normal ^ mainVec;

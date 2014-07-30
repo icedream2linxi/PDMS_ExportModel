@@ -1187,61 +1187,53 @@ Acad::ErrorStatus PDSqutorus::dxfInFields(AcDbDxfFiler* filer)
 }
 
 
-Acad::ErrorStatus PDSqutorus::getpointP(AcGePoint3d& ptP)
+const AcGePoint3d & PDSqutorus::getCenter() const
 {
 	assertReadEnabled();
-	ptP = m_ptP;
-	return Acad::eOk;
+	return m_ptP;
 }
 
 
-Acad::ErrorStatus PDSqutorus::getpointP1(AcGePoint3d& ptP1)
+const AcGePoint3d & PDSqutorus::getP1() const
 {
 	assertReadEnabled();
-	ptP1 = m_ptP1;
-	return Acad::eOk;
+	return m_ptP1;
 }
 
-Acad::ErrorStatus PDSqutorus::getpointP2(AcGePoint3d& ptP2)
+const AcGePoint3d & PDSqutorus::getP2() const
 {
 	assertReadEnabled();
-	ptP2 = m_ptP2;
-	return Acad::eOk;
+	return m_ptP2;
 }
 
-Acad::ErrorStatus PDSqutorus::getLength1(double& length1)
+double PDSqutorus::getLength1() const
 {
 	assertReadEnabled();
-	length1 = m_dLength1;
-	return Acad::eOk;
+	return m_dLength1;
 }
 
-Acad::ErrorStatus PDSqutorus::getLength2(double& length2)
+double PDSqutorus::getLength2() const
 {
 	assertReadEnabled();
-	length2 = m_dLength2;
-	return Acad::eOk;
+	return m_dLength2;
 }
 
-Acad::ErrorStatus PDSqutorus::getWidth1(double& width1)
+double PDSqutorus::getWidth1() const
 {
 	assertReadEnabled();
-	width1 = m_dWidth1;
-	return Acad::eOk;
+	return m_dWidth1;
 }
 
-Acad::ErrorStatus PDSqutorus::getWidth2(double& width2)
+double PDSqutorus::getWidth2() const
 {
 	assertReadEnabled();
-	width2 = m_dWidth2;
-	return Acad::eOk;
+	return m_dWidth2;
 }
 
-Acad::ErrorStatus PDSqutorus::getRadius(double& radius)
+double PDSqutorus::getRadius() const
 {
 	assertReadEnabled();
-	radius = m_dRadius;
-	return Acad::eOk;
+	return m_dRadius;
 }
 
 Acad::ErrorStatus PDSqutorus::getDirection(Adesk::UInt32& direction)
