@@ -1266,3 +1266,27 @@ void PDPrism::list() const
     ads_printf(LANGUAGE_DEFINE_MACRO_V25_4766/*" Àâ±ßÊý=%d\n\n"*/,m_nedgeNum); 
 	return ;
 }// added by linlin 20050810
+
+const AcGePoint3d & PDPrism::getBottomCenter() const
+{
+	assertReadEnabled();
+	return m_ptcenP1;
+}
+
+const AcGePoint3d & PDPrism::getTopCenter() const
+{
+	assertReadEnabled();
+	return m_ptcenP2;
+}
+
+const AcGePoint3d & PDPrism::getBottomStartPnt() const
+{
+	assertReadEnabled();
+	return m_ptP3;
+}
+
+Adesk::UInt32 PDPrism::getEdgeNum() const
+{
+	assertReadEnabled();
+	return m_nedgeNum;
+}

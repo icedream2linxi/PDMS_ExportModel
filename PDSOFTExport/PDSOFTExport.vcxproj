@@ -35,6 +35,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v100</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <CLRSupport>true</CLRSupport>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -49,6 +50,7 @@
     <PlatformToolset>v100</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <CLRSupport>true</CLRSupport>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -71,7 +73,6 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <TargetExt>.arx</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -100,7 +101,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_OBJECTARX2000_;_OBJECTARX2004_;_OBJECTARX2007_;_OBJECTARX2010_;_WINDOWS;_USRDLL;PDSOFTEXPORT_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>.\;.\pdgeom;e:\ObjectARX2014\inc\;e:\ObjectARX2014\inc-x64\;e:\ObjectARX2014\utils\amodeler\inc\;e:\ObjectARX2014\utils\brep\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;.\pdgeom;e:\ObjectARX2014\inc\;e:\ObjectARX2014\inc-x64\;e:\ObjectARX2014\utils\amodeler\inc\;e:\ObjectARX2014\utils\brep\inc\;e:\OpenSourceCode\boost_1_55_0\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <DisableSpecificWarnings>4819;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
@@ -138,7 +139,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;_OBJECTARX2000_;_OBJECTARX2004_;_OBJECTARX2007_;_OBJECTARX2010_;NDEBUG;_WINDOWS;_USRDLL;PDSOFTEXPORT_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>.\;.\pdgeom;e:\ObjectARX2014\inc\;e:\ObjectARX2014\inc-x64\;e:\ObjectARX2014\utils\amodeler\inc\;e:\ObjectARX2014\utils\brep\inc\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;.\pdgeom;e:\ObjectARX2014\inc\;e:\ObjectARX2014\inc-x64\;e:\ObjectARX2014\utils\amodeler\inc\;e:\ObjectARX2014\utils\brep\inc\;e:\OpenSourceCode\boost_1_55_0\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -225,6 +226,26 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DbModel\DbModel.csproj">
+      <Project>{59c95a5b-acb6-4cd1-bdbc-e53b7aee3be3}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="accoremgd">
+      <HintPath>D:\Program Files\Autodesk\AutoCAD 2014\accoremgd.dll</HintPath>
+    </Reference>
+    <Reference Include="Acdbmgd">
+      <HintPath>D:\Program Files\Autodesk\AutoCAD 2014\acdbmgd.dll</HintPath>
+    </Reference>
+    <Reference Include="Acmgd">
+      <HintPath>D:\Program Files\Autodesk\AutoCAD 2014\acmgd.dll</HintPath>
+    </Reference>
+    <Reference Include="NHibernate">
+      <HintPath>..\packages\NHibernate.3.3.3.4001\lib\Net35\NHibernate.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -79,9 +79,9 @@ public:
     Acad::ErrorStatus setParameters(const AcGePoint3d &ptP, const AcGeVector3d &vectL, 
         const AcGeVector3d &vectW, double l,double w,double h);
 
-	AcGeVector3d getVectLength() const;
-	AcGeVector3d getVectWidth() const;
-	AcGePoint3d getpointP() const;
+	const AcGeVector3d &getVectLength() const;
+	const AcGeVector3d &getVectWidth() const;
+	const AcGePoint3d &getpointP() const;
 	double getLength() const;
 	double getWidth() const;
 	double getHeight() const;

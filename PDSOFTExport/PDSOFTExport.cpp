@@ -4,7 +4,16 @@
 #include "stdafx.h"
 #include <rxclass.h>
 #include <rxregsvc.h>
+#include <aced.h>
 #include <accmd.h>
+#include <acedads.h>
+#include <acestext.h>
+#include <adscodes.h>
+#include <dbobjptr2.h>
+#include <migrtion.h>
+#include <dbapserv.h>
+
+#include <boost/scope_exit.hpp>
 
 #include "PDBox.h"
 #include "PDBox1.h"
@@ -26,6 +35,9 @@
 #include "PDSqucir.h"
 #include "PDSPolygon.h"
 #include "PDRevolve.h"
+
+using namespace Autodesk::AutoCAD::Runtime;
+using namespace Autodesk::AutoCAD::ApplicationServices;
 
 void Export();
 
@@ -184,7 +196,358 @@ extern "C" AcRx::AppRetCode acrxEntryPoint(AcRx::AppMsgCode msg, void* ptr) {
 	return AcRx::kRetOK;
 }
 
+DbModel::Point^ ToPnt(const AcGePoint3d &pnt)
+{
+	return gcnew DbModel::Point(pnt.x, pnt.y, pnt.z);
+}
+
+DbModel::Point^ ToPnt(const AcGeVector3d &vec)
+{
+	return gcnew DbModel::Point(vec.x, vec.y, vec.z);
+}
+
+int GetColor(const AcDbEntity *pEnt)
+{
+	AcCmColor color = pEnt->color();
+	switch (color.colorMethod())
+	{
+	case AcCmEntityColor::kByColor:
+	{
+		return (int)color.color();
+	}
+	case AcCmEntityColor::kByACI:
+	{
+		return (int)acedGetRGB(color.colorIndex());
+	}
+	case AcCmEntityColor::kByLayer:
+	{
+		AcDbObjectId layerId = pEnt->layerId();
+		AcDbSmartObjectPointer<AcDbLayerTableRecord> ltr(layerId, AcDb::kForRead);
+		color = ltr->color();
+		if (color.isByACI())
+			return (int)acedGetRGB(color.colorIndex());
+		else
+			return (int)color.color();
+	}
+	case AcCmEntityColor::kByBlock:
+	{
+		return 0;
+	}
+	default:
+		return 0;
+	}
+}
+
+void ExportEntity(NHibernate::ISession^ session, const AcDbEntity *pEnt, const AcGeMatrix3d &mtx)
+{
+	if (pEnt->isKindOf(PDCylinder::desc()))
+	{
+		const PDCylinder &pdcyl = *PDCylinder::cast(pEnt);
+		AcGePoint3d org = pdcyl.getPtStart();
+		org.transformBy(mtx);
+		AcGeVector3d height = (pdcyl.getPtEnd() - pdcyl.getPtStart());
+		height.transformBy(mtx);
+
+		DbModel::Cylinder^ cyl = gcnew DbModel::Cylinder();
+		cyl->Org = ToPnt(org);
+		cyl->Height = ToPnt(height);
+		cyl->Radius = pdcyl.getDiameter() / 2.0;
+		cyl->Color = GetColor(pEnt);
+		session->Save(cyl);
+	}
+	else if (pEnt->isKindOf(PDBox::desc()))
+	{
+		const PDBox &pdbox = *PDBox::cast(pEnt);
+		DbModel::Box^ box = gcnew DbModel::Box();
+		AcGePoint3d org = pdbox.getOrign();
+		box->Org = ToPnt(org.transformBy(mtx));
+		box->XLen = ToPnt((pdbox.getXvec() * pdbox.getlength()).transformBy(mtx));
+		box->YLen = ToPnt((pdbox.getYvec() * pdbox.getwidth()).transformBy(mtx));
+		box->ZLen = ToPnt((pdbox.getZvec() * pdbox.getheight()).transformBy(mtx));
+		box->Color = GetColor(pEnt);
+		session->Save(box);
+	}
+	else if (pEnt->isKindOf(PDBox1::desc()))
+	{
+		const PDBox1 &pdbox = *PDBox1::cast(pEnt);
+		AcGeVector3d xLen = pdbox.getVectLength();
+		xLen.transformBy(mtx);
+		AcGeVector3d yLen = pdbox.getVectWidth();
+		yLen.transformBy(mtx);
+		AcGeVector3d zLen = xLen.crossProduct(yLen);
+		zLen.normalize();
+		zLen *= pdbox.getHeight();
+		AcGePoint3d org = pdbox.getpointP();
+		org.transformBy(mtx);
+		org -= (xLen + yLen + zLen) / 2.0;
+
+		DbModel::Box^ box = gcnew DbModel::Box();
+		box->Org = ToPnt(org);
+		box->XLen = ToPnt(xLen);
+		box->YLen = ToPnt(yLen);
+		box->ZLen = ToPnt(zLen);
+		box->Color = GetColor(pEnt);
+		session->Save(box);
+	}
+	else if (pEnt->isKindOf(PDConcone::desc()))
+	{
+		const PDConcone &pdcone = *PDConcone::cast(pEnt);
+		AcGePoint3d org = pdcone.getpointStart();
+		org.transformBy(mtx);
+		AcGeVector3d height = pdcone.getpointEnd() - pdcone.getpointStart();
+		height.transformBy(mtx);
+
+		DbModel::Cone^ cone = gcnew DbModel::Cone();
+		cone->Org = ToPnt(org);
+		cone->Height = ToPnt(height);
+		cone->BottomRadius = pdcone.getDiameter1();
+		cone->TopRadius = pdcone.getDiameter2();
+		cone->Color = GetColor(pEnt);
+		session->Save(cone);
+	}
+	else if (pEnt->isKindOf(PDEcone::desc()))
+	{
+		const PDEcone &pdcone = *PDEcone::cast(pEnt);
+		AcGePoint3d org = pdcone.getpointStart();
+		org.transformBy(mtx);
+		AcGeVector3d height = pdcone.getpointEnd() - pdcone.getpointStart();
+		height.transformBy(mtx);
+		AcGeVector3d offset = pdcone.getVect();
+		offset.transformBy(mtx);
+
+		DbModel::Snout^ cone = gcnew DbModel::Snout();
+		cone->Org = ToPnt(org);
+		cone->Height = ToPnt(height);
+		cone->BottomRadius = pdcone.getDiameter1();
+		cone->TopRadius = pdcone.getDiameter2();
+		cone->Offset = ToPnt(offset);
+		cone->Color = GetColor(pEnt);
+		session->Save(cone);
+	}
+	else if (pEnt->isKindOf(PDOval::desc()))
+	{
+	}
+	else if (pEnt->isKindOf(PDPrism::desc()))
+	{
+		const PDPrism &pdprism = *PDPrism::cast(pEnt);
+		AcGePoint3d org = pdprism.getBottomCenter();
+		org.transformBy(mtx);
+		AcGeVector3d height = pdprism.getTopCenter() - pdprism.getBottomCenter();
+		height.transformBy(mtx);
+		AcGePoint3d bottomStartPnt = pdprism.getBottomStartPnt();
+		bottomStartPnt.transformBy(mtx);
+
+		DbModel::Prism^ prism = gcnew DbModel::Prism();
+		prism->Org = ToPnt(org);
+		prism->Height = ToPnt(height);
+		prism->BottomStartPnt = ToPnt(bottomStartPnt);
+		prism->EdgeNum = (int)pdprism.getEdgeNum();
+		prism->Color = GetColor(pEnt);
+		session->Save(prism);
+	}
+	else if (pEnt->isKindOf(PDPrism1::desc()))
+	{
+		const PDPrism1 &pdprism = *PDPrism1::cast(pEnt);
+		AcGePoint3d org = pdprism.getBottomCenter();
+		org.transformBy(mtx);
+		AcGeVector3d height = pdprism.getTopCenter() - pdprism.getBottomCenter();
+		height.transformBy(mtx);
+		AcGePoint3d bottomEdgeCenter = pdprism.getBottomEdgeCenter();
+		bottomEdgeCenter.transformBy(mtx);
+		AcGeVector3d vect = bottomEdgeCenter - org;
+		double angle = M_PI / pdprism.getEdgeNum();
+		double radius = vect.length() / cos(angle);
+		vect.normalize();
+		AcGeMatrix3d xform = AcGeMatrix3d::rotation(angle, height);
+		AcGePoint3d bottomStartPnt = org + vect.transformBy(xform);
+
+		DbModel::Prism^ prism = gcnew DbModel::Prism();
+		prism->Org = ToPnt(org);
+		prism->Height = ToPnt(height);
+		prism->BottomStartPnt = ToPnt(bottomStartPnt);
+		prism->EdgeNum = (int)pdprism.getEdgeNum();
+		prism->Color = GetColor(pEnt);
+		session->Save(prism);
+	}
+	else if (pEnt->isKindOf(PDSqucone::desc()))
+	{
+		const PDSqucone &squcone = *PDSqucone::cast(pEnt);
+	}
+	else if (pEnt->isKindOf(AcDbBlockReference::desc()))
+	{
+		Acad::ErrorStatus es = Acad::eOk;
+		const AcDbBlockReference &blockRef = *AcDbBlockReference::cast(pEnt);
+		AcGeMatrix3d blockTransform = blockRef.blockTransform();
+		AcDbSmartObjectPointer<AcDbBlockTableRecord> pBtr(blockRef.blockTableRecord(), AcDb::kForRead);
+		if ((es = pBtr.openStatus()) != Acad::eOk)
+		{
+			acutPrintf(L"es = %s, function = %s:%d\n", acadErrorStatusText(es), __FUNCTIONW__, __LINE__);
+			return;
+		}
+		AcDbBlockTableRecordIterator *pBtri = NULL;
+		es = pBtr->newIterator(pBtri);
+		if (es != Acad::eOk)
+		{
+			acutPrintf(L"es = %s, function = %s:%d\n", acadErrorStatusText(es), __FUNCTIONW__, __LINE__);
+			return;
+		}
+
+		BOOST_SCOPE_EXIT(pBtri)
+		{
+			if (pBtri != NULL)
+				delete pBtri;
+		}
+		BOOST_SCOPE_EXIT_END;
+
+		for (; !pBtri->done(); pBtri->step())
+		{
+			AcDbObjectId id;
+			if ((es = pBtri->getEntityId(id)) != Acad::eOk)
+			{
+				acutPrintf(L"es = %s, function = %s:%d\n", acadErrorStatusText(es), __FUNCTIONW__, __LINE__);
+				continue;
+			}
+			AcDbSmartObjectPointer<AcDbEntity> pBlockEnt(id, AcDb::kForRead);
+			if ((es = pBlockEnt.openStatus()) != Acad::eOk)
+			{
+				acutPrintf(L"es = %s, function = %s:%d\n", acadErrorStatusText(es), __FUNCTIONW__, __LINE__);
+				continue;
+			}
+			ExportEntity(session, pBlockEnt, blockTransform);
+		}
+	}
+}
+
+void ExportModel(NHibernate::ISession^ session)
+{
+	Acad::ErrorStatus es = Acad::eOk;
+	AcDbSmartObjectPointer<AcDbBlockTable> pBt(acdbCurDwg()->blockTableId(), AcDb::kForRead);
+	if ((es = pBt.openStatus()) != Acad::eOk)
+	{
+		acutPrintf(L"es = %s, function = %s:%d\n", acadErrorStatusText(es), __FUNCTIONW__, __LINE__);
+		return;
+	}
+
+	AcDbObjectId recordId;
+	if ((es = pBt->getAt(ACDB_MODEL_SPACE, recordId)) != Acad::eOk)
+	{
+		acutPrintf(L"es = %s, function = %s:%d\n", acadErrorStatusText(es), __FUNCTIONW__, __LINE__);
+		return;
+	}
+
+	AcDbSmartObjectPointer<AcDbBlockTableRecord> pBtr(recordId, AcDb::kForRead);
+	if ((es = pBtr.openStatus()) != Acad::eOk)
+	{
+		acutPrintf(L"es = %s, function = %s:%d\n", acadErrorStatusText(es), __FUNCTIONW__, __LINE__);
+		return;
+	}
+
+	AcDbBlockTableRecordIterator *pBtri = NULL;
+	if ((es = pBtr->newIterator(pBtri)) != Acad::eOk)
+	{
+		acutPrintf(L"es = %s, function = %s:%d\n", acadErrorStatusText(es), __FUNCTIONW__, __LINE__);
+		return;
+	}
+	BOOST_SCOPE_EXIT(pBtri)
+	{
+		if (pBtri != NULL)
+			delete pBtri;
+	}
+	BOOST_SCOPE_EXIT_END;
+
+	AcGeMatrix3d mtx;
+	for (; !pBtri->done(); pBtri->step())
+	{
+		AcDbObjectId id;
+		if ((es = pBtri->getEntityId(id)) != Acad::eOk)
+		{
+			acutPrintf(L"es = %s, function = %s:%d\n", acadErrorStatusText(es), __FUNCTIONW__, __LINE__);
+			continue;
+		}
+		AcDbSmartObjectPointer<AcDbEntity> pBlockEnt(id, AcDb::kForRead);
+		if ((es = pBlockEnt.openStatus()) != Acad::eOk)
+		{
+			acutPrintf(L"es = %s, function = %s:%d\n", acadErrorStatusText(es), __FUNCTIONW__, __LINE__);
+			continue;
+		}
+		ExportEntity(session, pBlockEnt, mtx);
+	}
+}
+
+//void ExportModel(NHibernate::ISession^ session)
+//{
+//	AcGeMatrix3d mtx;
+//	ads_name ss, entName;
+//	int nRet = acedSSGet(L"A", NULL, NULL, NULL, ss);
+//	long len = 0;
+//	nRet = acedSSLength(ss, &len);
+//	for (long i = 0; i < len; ++i)
+//	{
+//		if ((nRet = acedSSName(ss, i, entName)) != RTNORM)
+//			continue;
+//		AcDbObjectId id;
+//		Acad::ErrorStatus es = Acad::eOk;
+//		if ((es = acdbGetObjectId(id, entName)) != Acad::eOk)
+//		{
+//			acutPrintf(L"es = %s, function = %s:%d\n", acadErrorStatusText(es), __FUNCTIONW__, __LINE__);
+//			continue;
+//		}
+//
+//		AcDbSmartObjectPointer<AcDbEntity> pEnt(id, AcDb::kForRead);
+//		if ((es = pEnt.openStatus()) != Acad::eOk)
+//		{
+//			acutPrintf(L"es = %s, function = %s:%d\n", acadErrorStatusText(es), __FUNCTIONW__, __LINE__);
+//			continue;
+//		}
+//		ExportEntity(session, pEnt, mtx);
+//	}
+//	nRet = acedSSFree(ss);
+//}
+
+void DoExport()
+{
+	DbModel::Util^ util = gcnew DbModel::Util();
+	try {
+		util->init(gcnew System::String(L"d:/pdsoft.db"), false);
+		NHibernate::ISession^ session = util->SessionFactory->OpenSession();
+		try {
+			NHibernate::ITransaction^ tx = session->BeginTransaction();
+			try {
+				ExportModel(session);
+				tx->Commit();
+			}
+			catch (System::Exception ^e) {
+				tx->Rollback();
+				
+				System::String^ msg = e->Message;
+				msg += L"\n" + e->StackTrace;
+				Document^ doc = Application::DocumentManager->MdiActiveDocument;
+				doc->Editor->WriteMessage(msg);
+			}
+		}
+		finally {
+			session->Close();
+		}
+	}
+	finally {
+		util->~Util();
+	}
+}
+
+public ref class Cmd
+{
+public:
+	[CommandMethod("PDNETExport", CommandFlags::Session)]
+	static void NetExport()
+	{
+		acutPrintf(L"PDSOFT Export ...\n");
+		DoExport();
+	}
+};
+
+
 void Export()
 {
 	acutPrintf(L"PDSOFT Export ...\n");
+	DoExport();
 }

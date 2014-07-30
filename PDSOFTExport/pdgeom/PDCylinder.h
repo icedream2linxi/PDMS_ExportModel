@@ -77,8 +77,8 @@ public:
                                     int Precision = PRIMARY3D_DEFAULT_PRECISION);
 
 	double getDiameter() const;
-	AcGePoint3d getPtEnd() const;
-	AcGePoint3d getPtStart() const;
+	const AcGePoint3d &getPtEnd() const;
+	const AcGePoint3d &getPtStart() const;
 	//}}AFX_ARX_DATA_ACCESS
 	////// adding function///
 	Acad::ErrorStatus getgrippoints(AcGePoint3dArray& gripArray) const;

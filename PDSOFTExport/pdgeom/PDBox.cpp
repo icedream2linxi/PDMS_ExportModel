@@ -580,7 +580,7 @@ double PDBox::getwidth() const
 	return m_dwidth;
 }
 
-AcGePoint3d PDBox::getOrign() const
+const AcGePoint3d & PDBox::getOrign() const
 {
 	assertReadEnabled();
 	return m_porign;
@@ -596,19 +596,19 @@ AcGePoint3d PDBox::getCenter()const
 	return result;
 }
 
-AcGeVector3d PDBox::getXvec() const
+const AcGeVector3d & PDBox::getXvec() const
 {
 	assertReadEnabled();
 	return m_Vectx;
 }
 
-AcGeVector3d PDBox::getYvec() const
+const AcGeVector3d & PDBox::getYvec() const
 {
 	assertReadEnabled();
 	return m_Vecty;
 }
 
-AcGeVector3d PDBox::getZvec() const
+const AcGeVector3d & PDBox::getZvec() const
 {
     assertReadEnabled();
     return m_Vectz;

@@ -115,10 +115,10 @@ public:
                                     const AcGeVector3d &yVec, 
                                     int CorrType = 1/* 0: ｚ左手系，1: 右手系*/);
  
-	AcGeVector3d getXvec() const;
-	AcGeVector3d getYvec() const;
-    AcGeVector3d getZvec() const;
-	AcGePoint3d getOrign() const;
+	const AcGeVector3d &getXvec() const;
+	const AcGeVector3d &getYvec() const;
+    const AcGeVector3d &getZvec() const;
+	const AcGePoint3d &getOrign() const;
 
 	/*!
 	 * 获取BOX中心点

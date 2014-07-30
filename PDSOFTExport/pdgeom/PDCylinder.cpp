@@ -354,13 +354,13 @@ Acad::ErrorStatus PDCylinder::setParameters(const AcGePoint3d &ptStart,
     return Acad::eOk;
 }//added by linlin 20050929
 
-AcGePoint3d PDCylinder::getPtStart() const
+const AcGePoint3d & PDCylinder::getPtStart() const
 {
 	assertReadEnabled();
 	return m_ptStart;
 }
 
-AcGePoint3d PDCylinder::getPtEnd() const
+const AcGePoint3d & PDCylinder::getPtEnd() const
 {
 	assertReadEnabled();
 	return m_ptEnd;

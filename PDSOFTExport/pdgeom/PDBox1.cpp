@@ -714,19 +714,19 @@ double PDBox1::getWidth() const
 	return m_dWidth;
 }
 
-AcGePoint3d PDBox1::getpointP() const
+const AcGePoint3d & PDBox1::getpointP() const
 {
 	assertReadEnabled();
 	return m_ptP;
 }
 
-AcGeVector3d PDBox1::getVectLength() const
+const AcGeVector3d & PDBox1::getVectLength() const
 {
 	assertReadEnabled();
 	return m_VectLength;
 }
 
-AcGeVector3d PDBox1::getVectWidth() const
+const AcGeVector3d & PDBox1::getVectWidth() const
 {
 	assertReadEnabled();
 	return m_VectWidth;

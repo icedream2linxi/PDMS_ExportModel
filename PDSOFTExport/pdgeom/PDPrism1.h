@@ -82,6 +82,11 @@ public:
 	Acad::ErrorStatus getpointEdgP3(AcGePoint3d& ptedgP3);
 	Acad::ErrorStatus getedgeNum(Adesk::UInt32& edgeNum);
 
+	const AcGePoint3d &getBottomCenter() const;
+	const AcGePoint3d &getTopCenter() const;
+	const AcGePoint3d &getBottomEdgeCenter() const;
+	Adesk::UInt32 getEdgeNum() const;
+
 	Acad::ErrorStatus setParameters(AcGePoint3d ptcenP1,AcGePoint3d ptcenP2,
 		                            AcGePoint3d ptedgP3,Adesk::UInt32 edgeNum);
 
