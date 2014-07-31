@@ -291,7 +291,7 @@ osg::Geode* BuildCircularTorus(DbModel::CircularTorus^ ct)
 	vec.Normalize();
 	axis.SetXDirection(vec);
 
-	TopoDS_Shape shape = BRepPrimAPI_MakeTorus(axis, mainRadius, ct->Radius, ct->Angle).Shape();
+	TopoDS_Shape shape = BRepPrimAPI_MakeTorus(axis, mainRadius, ct->StartRadius, ct->Angle).Shape();
 	osg::ref_ptr<osg::Geode> geode = new osg::Geode();
 	BuildShapeMesh(geode, shape, CvtColor(ct->Color));
 	return geode.release();
@@ -431,10 +431,10 @@ osg::Node* BuildRectangularTorus(DbModel::RectangularTorus^ rt)
 	double radius = xDir.Magnitude();
 	xDir.Normalize();
 
-	gp_Pnt p1 = startPnt.Translated(- xDir * rt->Width / 2.0 - normal * rt->Height / 2.0);
-	gp_Pnt p2 = startPnt.Translated(xDir * rt->Width / 2.0 - normal * rt->Height / 2.0);
-	gp_Pnt p3 = startPnt.Translated(xDir * rt->Width / 2.0 + normal * rt->Height / 2.0);
-	gp_Pnt p4 = startPnt.Translated(- xDir * rt->Width / 2.0 + normal * rt->Height / 2.0);
+	gp_Pnt p1 = startPnt.Translated(-xDir * rt->StartWidth / 2.0 - normal * rt->StartHeight / 2.0);
+	gp_Pnt p2 = startPnt.Translated(xDir * rt->StartWidth / 2.0 - normal * rt->StartHeight / 2.0);
+	gp_Pnt p3 = startPnt.Translated(xDir * rt->StartWidth / 2.0 + normal * rt->StartHeight / 2.0);
+	gp_Pnt p4 = startPnt.Translated(-xDir * rt->StartWidth / 2.0 + normal * rt->StartHeight / 2.0);
 
 	TopoDS_Edge edge1 = BRepBuilderAPI_MakeEdge(p1, p2);
 	TopoDS_Edge edge2 = BRepBuilderAPI_MakeEdge(p2, p3);

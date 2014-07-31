@@ -445,7 +445,8 @@ void ExportEntity(NHibernate::ISession^ session, const AcDbEntity *pEnt, const A
 		ct->Center = ToPnt(center);
 		ct->StartPnt = ToPnt(startPnt);
 		ct->Normal = ToPnt(normal);
-		ct->Radius = pdtorus.getDiameter1() / 2.0;
+		ct->StartRadius = pdtorus.getDiameter1() / 2.0;
+		ct->EndRadius = pdtorus.getDiameter2() / 2.0;
 		ct->Angle = pdtorus.getAngle();
 		ct->Color = GetColor(pEnt);
 		session->Save(ct);
@@ -457,17 +458,17 @@ void ExportEntity(NHibernate::ISession^ session, const AcDbEntity *pEnt, const A
 		center.transformBy(mtx);
 		AcGePoint3d startPnt = pdtorus.getP1();
 		startPnt.transformBy(mtx);
-		AcGePoint3d endPnt = pdtorus.getP2();
-		endPnt.transformBy(mtx);
-		AcGeVector3d normal = (startPnt - center).crossProduct(endPnt - center);
+		AcGeVector3d normal = pdtorus.getP2().asVector();
+		normal.transformBy(mtx);
 		normal.normalize();
 
 		DbModel::CircularTorus^ ct = gcnew DbModel::CircularTorus();
 		ct->Center = ToPnt(center);
 		ct->StartPnt = ToPnt(startPnt);
 		ct->Normal = ToPnt(normal);
-		ct->Radius = pdtorus.getDiameter1() / 2.0;
-		ct->Angle = pdtorus.getAngle();
+		ct->StartRadius = pdtorus.getDiameter1() / 2.0;
+		ct->EndRadius = pdtorus.getDiameter2() / 2.0;
+		ct->Angle = pdtorus.getAngle() * M_PI / 180.0;
 		ct->Color = GetColor(pEnt);
 		session->Save(ct);
 	}
@@ -485,8 +486,10 @@ void ExportEntity(NHibernate::ISession^ session, const AcDbEntity *pEnt, const A
 		rt->Center = ToPnt(center);
 		rt->StartPnt = ToPnt(startPnt);
 		rt->Normal = ToPnt(normal);
-		rt->Width = pdtorus.getLength1();
-		rt->Height = pdtorus.getWidth1();
+		rt->StartWidth = pdtorus.getLength1();
+		rt->StartHeight = pdtorus.getWidth1();
+		rt->EndWidth = pdtorus.getLength2();
+		rt->EndHeight = pdtorus.getWidth2();
 		rt->Angle = pdtorus.getAngle();
 		rt->Color = GetColor(pEnt);
 		session->Save(rt);
@@ -506,8 +509,10 @@ void ExportEntity(NHibernate::ISession^ session, const AcDbEntity *pEnt, const A
 		rt->Center = ToPnt(center);
 		rt->StartPnt = ToPnt(startPnt);
 		rt->Normal = ToPnt(normal);
-		rt->Width = pdtorus.getLength1();
-		rt->Height = pdtorus.getWidth1();
+		rt->StartWidth = pdtorus.getLength1();
+		rt->StartHeight = pdtorus.getWidth1();
+		rt->EndWidth = pdtorus.getLength2();
+		rt->EndHeight = pdtorus.getWidth2();
 		rt->Angle = pdtorus.getAngle();
 		rt->Color = GetColor(pEnt);
 		session->Save(rt);
@@ -655,7 +660,7 @@ void DoExport()
 {
 	DbModel::Util^ util = gcnew DbModel::Util();
 	try {
-		util->init(gcnew System::String(L"d:/pdsoft.db"), false);
+		util->init(gcnew System::String(L"d:/pdsoft.db"), true);
 		NHibernate::ISession^ session = util->SessionFactory->OpenSession();
 		try {
 			NHibernate::ITransaction^ tx = session->BeginTransaction();

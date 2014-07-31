@@ -23,8 +23,11 @@ namespace DbModel
 		[Point(After = typeof(IdAttribute), Name = "Normal")]
 		public virtual Point Normal { get; set; }
 
-		[Property(Column = "radius")]
-		public virtual double Radius { get; set; }
+		[Property(Column = "start_radius")]
+		public virtual double StartRadius { get; set; }
+
+		[Property(Column = "end_radius")]
+		public virtual double EndRadius { get; set; }
 
 		[Property(Column = "angle")]
 		public virtual double Angle { get; set; }

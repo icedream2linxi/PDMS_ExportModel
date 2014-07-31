@@ -9,10 +9,11 @@ osg::ref_ptr<osg::Geode> TestCircularTorus()
 	osg::Vec3 center(0, 0, 0);
 	osg::Vec3 startPnt(300, 0, 0);
 	osg::Vec3 normal(0, 0, 1);
-	double radius = 50.0, angle = M_PI / 2;
+	double startRadius = 50.0, endRadius = 25.0, angle = M_PI / 2;
 
 	osg::ref_ptr<osg::Geode> geode = new osg::Geode;
-	geode->addDrawable(Geometry::BuildCircularTorus(center, startPnt, normal, radius, angle, osg::Vec4(1, 1, 1, 0)));
+	geode->addDrawable(Geometry::BuildCircularTorus(center, startPnt, normal,
+		startRadius, endRadius, angle, osg::Vec4(1, 1, 1, 0)));
 	return geode;
 }
 
@@ -168,7 +169,7 @@ int main(int argc, char* argv[])
 
 	//root->addChild(TestCasCadeByMakeRevol());
 	//root->addChild(TestCasCadeByMakeTorus());
-	//root->addChild(TestCircularTorus());
+	root->addChild(TestCircularTorus());
 	//root->addChild(TestRectangularTorus());
 	//root->addChild(TestCone());
 	//root->addChild(TestSnout());
@@ -182,11 +183,11 @@ int main(int argc, char* argv[])
 	//pe->rain(0.5f);
 	//myViewer.getCamera()->setClearColor(pe->getFog()->getColor());
 
-	osg::ref_ptr<osg::Node> node = TestCone();
+	//osg::ref_ptr<osg::Node> node = TestCone();
 	//node->getOrCreateStateSet()->setAttributeAndModes(pe->getFog());
 	//root->addChild(node);
 	//root->addChild(pe);
-	root->addChild(TestExplode());
+	//root->addChild(TestExplode());
 
 	osgUtil::Optimizer optimizer;
 	optimizer.optimize(root);

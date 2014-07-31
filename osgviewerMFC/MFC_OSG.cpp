@@ -375,7 +375,8 @@ osg::Node* cOSG::CreateCircularTorus(NHibernate::ISession^ session)
 		Point2Vec3(ct->Center, center);
 		Point2Vec3(ct->StartPnt, startPnt);
 		Point2Vec3(ct->Normal, normal);
-		pCts->addDrawable(Geometry::BuildCircularTorus(center, startPnt, normal, ct->Radius, ct->Angle, CvtColor(ct->Color)));
+		pCts->addDrawable(Geometry::BuildCircularTorus(center, startPnt, normal,
+			ct->StartRadius, ct->EndRadius, ct->Angle, CvtColor(ct->Color)));
 	}
 	return pCts;
 }
@@ -444,7 +445,7 @@ osg::Node* cOSG::CreateRectangularTorus(NHibernate::ISession^ session)
 		Point2Vec3(rt->StartPnt, startPnt);
 		Point2Vec3(rt->Normal, normal);
 		pRt->addDrawable(Geometry::BuildRectangularTorus(center, startPnt, normal,
-			rt->Width, rt->Height, rt->Angle, CvtColor(rt->Color)));
+			rt->StartWidth, rt->StartHeight, rt->Angle, CvtColor(rt->Color)));
 	}
 	return pRt;
 }

@@ -23,11 +23,17 @@ namespace DbModel
 		[Point(After = typeof(IdAttribute), Name = "Normal")]
 		public virtual Point Normal { get; set; }
 
-		[Property(Column = "width")]
-		public virtual double Width { get; set; }
+		[Property(Column = "start_width")]
+		public virtual double StartWidth { get; set; }
 
-		[Property(Column = "height")]
-		public virtual double Height { get; set; }
+		[Property(Column = "start_height")]
+		public virtual double StartHeight { get; set; }
+
+		[Property(Column = "end_width")]
+		public virtual double EndWidth { get; set; }
+
+		[Property(Column = "end_height")]
+		public virtual double EndHeight { get; set; }
 
 		[Property(Column = "angle")]
 		public virtual double Angle { get; set; }

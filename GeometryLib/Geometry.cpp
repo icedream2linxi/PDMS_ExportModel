@@ -7,6 +7,7 @@ namespace Geometry
 {
 	const double g_epsilon = 0.00001;
 	const double g_deflection = 0.5;
+	const double g_defaultIncAngle = 10.0 * M_PI / 180.0;
 
 	osg::ref_ptr<osg::Geometry> BuildCircularTorus(const osg::Vec3 &center, const osg::Vec3 &startPnt, const osg::Vec3 &normal,
 		double radius, double angle, const osg::Vec4 &color, bool topVis /*= true*/, bool bottomVis /*= true*/)
@@ -174,6 +175,149 @@ namespace Geometry
 			}
 			vertexArr->push_back(postCircArr[0]);
 			normalArr->push_back(topNormal);
+			geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::TRIANGLE_FAN, first, vertexArr->size() - first));
+		}
+
+		return geometry;
+	}
+
+	osg::ref_ptr<osg::Geometry> BuildCircularTorus(const osg::Vec3 &center, const osg::Vec3 &startPnt, const osg::Vec3 &normal,
+		double startRadius, double endRadius, double angle, const osg::Vec4 &color, bool topVis /*= true*/, bool bottomVis /*= true*/)
+	{
+		if (equivalent(startRadius, endRadius, g_epsilon))
+		{
+			return BuildCircularTorus(center, startPnt, normal, startRadius, angle, color, topVis, bottomVis);
+		}
+
+		ref_ptr<osg::Geometry> geometry = new osg::Geometry();
+		ref_ptr<Vec3Array> vertexArr = new Vec3Array;
+		ref_ptr<Vec3Array> normalArr = new Vec3Array;
+		geometry->setVertexArray(vertexArr);
+		geometry->setNormalArray(normalArr, osg::Array::BIND_PER_VERTEX);
+		osg::ref_ptr<osg::Vec4Array> colArr = new osg::Vec4Array();
+		colArr->push_back(color);
+		geometry->setColorArray(colArr, osg::Array::BIND_OVERALL);
+
+		bool isFull = equivalent(angle, 2 * M_PI, g_epsilon);
+		if (isFull)
+		{
+			angle = 2 * M_PI;
+		}
+
+		int mainCount = (int)ceil(angle / g_defaultIncAngle);
+		double mainIncAngle = angle / mainCount;
+
+		double subIncAngle = g_defaultIncAngle;
+		int subCount = (int)(2.0 * M_PI / subIncAngle);
+
+		osg::Vec3 mainVec = startPnt - center;
+		osg::Quat mainQuat(mainIncAngle, normal);
+
+		osg::Vec3 torusNormal = mainVec;
+		torusNormal.normalize();
+
+		// 第一圈
+		osg::Vec3 faceNormal = torusNormal ^ normal;
+		osg::Quat torusQuat(subIncAngle, faceNormal);
+		osg::Vec3 subVec = torusNormal;
+		double subRadius = startRadius;
+		osg::Vec3 subCenter = startPnt;
+		osg::Vec3 tmpSubVec = subVec * subRadius;
+		for (int i = 0; i < subCount; ++i)
+		{
+			vertexArr->push_back(subCenter + tmpSubVec);
+			tmpSubVec = torusQuat * tmpSubVec;
+		}
+
+		// 中间
+		osg::DrawElementsUShort *pDrawEle = new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLE_STRIP, 0);
+		pDrawEle->push_back(subCount - 1);
+		double factor = (endRadius - startRadius) / mainCount;
+		for (int i = 1; i < mainCount; ++i)
+		{
+			faceNormal = mainQuat * faceNormal;
+			mainVec = mainQuat * mainVec;
+			subVec = mainQuat * subVec;
+			subCenter = center + mainVec;
+			torusQuat.makeRotate(subIncAngle, faceNormal);
+			subRadius += factor;
+
+			tmpSubVec = subVec * subRadius;
+			osg::Vec3 tangNormal = normal;
+			for (int j = 0; j < subCount; ++j)
+			{
+				vertexArr->push_back(subCenter + tmpSubVec);
+				tmpSubVec = torusQuat * tmpSubVec;
+
+				int size = vertexArr->size();
+				normalArr->push_back(tangNormal ^ ((*vertexArr)[size - subCount - 1] - vertexArr->back()));
+				normalArr->back().normalize();
+				tangNormal = torusQuat * tangNormal;
+
+				pDrawEle->push_back(size - subCount - 1);
+				pDrawEle->push_back(size - 1);
+			}
+		}
+
+		// 最后一圈
+		osg::Quat fullQuat(angle, normal);
+		faceNormal = fullQuat * (torusNormal ^ normal);
+		mainVec = fullQuat * (startPnt - center);
+		subVec = fullQuat * (torusNormal * endRadius);
+		subCenter = center + mainVec;
+
+		torusQuat.makeRotate(subIncAngle, faceNormal);
+		tmpSubVec = subVec;
+		osg::Vec3 tangNormal = normal;
+		for (int j = 0; j < subCount; ++j)
+		{
+			vertexArr->push_back(subCenter + tmpSubVec);
+			tmpSubVec = torusQuat * tmpSubVec;
+
+			int size = vertexArr->size();
+			normalArr->push_back(tangNormal ^ ((*vertexArr)[size - subCount - 1] - vertexArr->back()));
+			normalArr->back().normalize();
+			tangNormal = torusQuat * tangNormal;
+
+			pDrawEle->push_back(size - subCount - 1);
+			pDrawEle->push_back(size - 1);
+		}
+		pDrawEle->push_back(vertexArr->size() - subCount);
+		// 最后一圈法向
+		for (int i = 0; i < subCount; ++i)
+			normalArr->push_back((*normalArr)[normalArr->size() - subCount]);
+		geometry->addPrimitiveSet(pDrawEle);
+
+		if (topVis)
+		{
+			size_t first = vertexArr->size();
+			size_t base = first - subCount;
+			osg::Vec3 topNormal = -faceNormal;
+			vertexArr->push_back(subCenter);
+			normalArr->push_back(topNormal);
+			for (int i = 0; i < subCount; ++i)
+			{
+				vertexArr->push_back((*vertexArr)[base + i]);
+				normalArr->push_back(topNormal);
+			}
+			vertexArr->push_back((*vertexArr)[vertexArr->size() - subCount]);
+			normalArr->push_back(topNormal);
+			geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::TRIANGLE_FAN, first, vertexArr->size() - first));
+		}
+
+		if (bottomVis)
+		{
+			size_t first = vertexArr->size();
+			osg::Vec3 bottomNormal = torusNormal ^ normal;
+			vertexArr->push_back(startPnt);
+			normalArr->push_back(bottomNormal);
+			for (int i = 0; i < subCount; ++i)
+			{
+				vertexArr->push_back((*vertexArr)[i]);
+				normalArr->push_back(bottomNormal);
+			}
+			vertexArr->push_back((*vertexArr)[vertexArr->size() - subCount]);
+			normalArr->push_back(bottomNormal);
 			geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::TRIANGLE_FAN, first, vertexArr->size() - first));
 		}
 
