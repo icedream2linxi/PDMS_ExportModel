@@ -22,10 +22,12 @@ osg::ref_ptr<osg::Geode> TestRectangularTorus()
 	osg::Vec3 center(0, 0, 0);
 	osg::Vec3 startPnt(300, 0, 0);
 	osg::Vec3 normal(0, 0, 1);
-	double width = 100.0, height = 50.0, angle = M_PI * 2;
+	double startWidth = 100.0, startHeight = 50.0, angle = M_PI * 2;
+	double endWidth = 50.0, endHeight = 25.0;
 
 	osg::ref_ptr<osg::Geode> geode = new osg::Geode;
-	geode->addDrawable(Geometry::BuildRectangularTorus(center, startPnt, normal, width, height, angle, osg::Vec4(1, 1, 1, 0)));
+	geode->addDrawable(Geometry::BuildRectangularTorus(center, startPnt, normal,
+		startWidth, startHeight, endWidth, endHeight, angle, osg::Vec4(1, 1, 1, 0)));
 	return geode;
 }
 
@@ -169,8 +171,8 @@ int main(int argc, char* argv[])
 
 	//root->addChild(TestCasCadeByMakeRevol());
 	//root->addChild(TestCasCadeByMakeTorus());
-	root->addChild(TestCircularTorus());
-	//root->addChild(TestRectangularTorus());
+	//root->addChild(TestCircularTorus());
+	root->addChild(TestRectangularTorus());
 	//root->addChild(TestCone());
 	//root->addChild(TestSnout());
 	//root->addChild(TestPyramid());

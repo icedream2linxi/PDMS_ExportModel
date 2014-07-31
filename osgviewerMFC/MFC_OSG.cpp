@@ -445,7 +445,7 @@ osg::Node* cOSG::CreateRectangularTorus(NHibernate::ISession^ session)
 		Point2Vec3(rt->StartPnt, startPnt);
 		Point2Vec3(rt->Normal, normal);
 		pRt->addDrawable(Geometry::BuildRectangularTorus(center, startPnt, normal,
-			rt->StartWidth, rt->StartHeight, rt->Angle, CvtColor(rt->Color)));
+			rt->StartWidth, rt->StartHeight, rt->EndWidth, rt->EndHeight, rt->Angle, CvtColor(rt->Color)));
 	}
 	return pRt;
 }

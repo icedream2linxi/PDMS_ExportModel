@@ -432,7 +432,7 @@ namespace Geometry
 		normalArr->push_back(postOutNormal);
 		geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::QUAD_STRIP, first, vertexArr->size() - first));
 
-		// 订
+		// 顶
 		vec1 = prevPntArr[2] - center;
 		vec2 = prevPntArr[3] - center;
 		subNormal = normal;
@@ -486,6 +486,239 @@ namespace Geometry
 			{
 				vertexArr->push_back(postPntArr[i]);
 				normalArr->push_back(topNormal);
+			}
+			geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::QUADS, first, vertexArr->size() - first));
+		}
+
+		return geometry;
+	}
+
+	osg::ref_ptr<osg::Geometry> BuildRectangularTorus(const osg::Vec3 &center, const osg::Vec3 &startPnt, const osg::Vec3 &normal,
+		double startWidth, double startHeight, double endWidth, double endHeight, double angle, const osg::Vec4 &color,
+		bool topVis /*= true*/, bool bottomVis /*= true*/)
+	{
+		if (equivalent(startWidth, endWidth, g_epsilon)
+			&& equivalent(startHeight, endHeight, g_epsilon))
+		{
+			return BuildRectangularTorus(center, startPnt, normal, startWidth, startHeight, angle, color, topVis, bottomVis);
+		}
+
+		ref_ptr<osg::Geometry> geometry = new osg::Geometry();
+		ref_ptr<Vec3Array> vertexArr = new Vec3Array;
+		ref_ptr<Vec3Array> normalArr = new Vec3Array;
+		geometry->setVertexArray(vertexArr);
+		geometry->setNormalArray(normalArr, osg::Array::BIND_PER_VERTEX);
+		osg::ref_ptr<osg::Vec4Array> colArr = new osg::Vec4Array();
+		colArr->push_back(color);
+		geometry->setColorArray(colArr, osg::Array::BIND_OVERALL);
+
+		bool isFull = equivalent(angle, 2 * M_PI, g_epsilon);
+		if (isFull)
+		{
+			angle = 2 * M_PI;
+		}
+
+		int mainCount = (int)ceil(angle / g_defaultIncAngle);
+		double mainIncAngle = angle / mainCount;
+
+		osg::Vec3 mainVec = startPnt - center;
+		osg::Quat mainQuat(mainIncAngle, normal);
+
+		osg::Vec3 torusNormal = mainVec;
+		torusNormal.normalize();
+
+		// 第一圈
+		osg::DrawElementsUShort *pOutSideDrawEle = new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLE_STRIP, 0);
+		osg::DrawElementsUShort *pTopDrawEle = new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLE_STRIP, 0);
+		osg::DrawElementsUShort *pInSideDrawEle = new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLE_STRIP, 0);
+		osg::DrawElementsUShort *pBottomDrawEle = new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLE_STRIP, 0);
+		double width = startWidth, height = startHeight;
+		osg::Vec3 subCenter = startPnt;
+		osg::Vec3 halfWidthVec = torusNormal * width / 2.0;
+		osg::Vec3 halfHeightVec = normal * height / 2.0;
+
+		vertexArr->push_back(subCenter - halfWidthVec - halfHeightVec);
+		pBottomDrawEle->push_back(vertexArr->size() - 1);
+
+		vertexArr->push_back(vertexArr->back());
+		pInSideDrawEle->push_back(vertexArr->size() - 1);
+
+		vertexArr->push_back(subCenter + halfWidthVec - halfHeightVec);
+		pBottomDrawEle->push_back(vertexArr->size() - 1);
+
+		vertexArr->push_back(vertexArr->back());
+		pOutSideDrawEle->push_back(vertexArr->size() - 1);
+
+		vertexArr->push_back(subCenter + halfWidthVec + halfHeightVec);
+		pOutSideDrawEle->push_back(vertexArr->size() - 1);
+
+		vertexArr->push_back(vertexArr->back());
+		pTopDrawEle->push_back(vertexArr->size() - 1);
+
+		vertexArr->push_back(subCenter - halfWidthVec + halfHeightVec);
+		pTopDrawEle->push_back(vertexArr->size() - 1);
+
+		vertexArr->push_back(vertexArr->back());
+		pInSideDrawEle->push_back(vertexArr->size() - 1);
+
+		double widthFactor = (endWidth - startWidth) / mainCount;
+		double heightFactor = (endHeight - startHeight) / mainCount;
+		for (int i = 1; i < mainCount; ++i)
+		{
+			mainVec = mainQuat * mainVec;
+			torusNormal = mainQuat * torusNormal;
+			subCenter = center + mainVec;
+
+			width += widthFactor;
+			height += heightFactor;
+			halfWidthVec = torusNormal * width / 2.0;
+			halfHeightVec = normal * height / 2.0;
+
+			vertexArr->push_back(subCenter - halfWidthVec - halfHeightVec);
+			size_t size = vertexArr->size();
+			pBottomDrawEle->push_back(size - 1);
+			osg::Vec3 bottomNormal = ((*vertexArr)[size - 9] - vertexArr->back()) ^ ((*vertexArr)[size - 9] - (*vertexArr)[size - 9 + 2]);
+			bottomNormal.normalize();
+			normalArr->push_back(bottomNormal);
+
+			vertexArr->push_back(vertexArr->back());
+			size = vertexArr->size();
+			pInSideDrawEle->push_back(size - 1);
+			osg::Vec3 inSideNormal = (vertexArr->back() - (*vertexArr)[size - 9]) ^ ((*vertexArr)[size - 9] - (*vertexArr)[size - 9 + 6]);
+			inSideNormal.normalize();
+			normalArr->push_back(inSideNormal);
+
+			vertexArr->push_back(subCenter + halfWidthVec - halfHeightVec);
+			size = vertexArr->size();
+			pBottomDrawEle->push_back(size - 1);
+			normalArr->push_back(bottomNormal);
+
+			vertexArr->push_back(vertexArr->back());
+			size = vertexArr->size();
+			pOutSideDrawEle->push_back(size - 1);
+			osg::Vec3 outSideNormal = ((*vertexArr)[size - 9] - vertexArr->back()) ^ ((*vertexArr)[size - 9] - (*vertexArr)[size - 9 + 1]);
+			outSideNormal.normalize();
+			normalArr->push_back(outSideNormal);
+
+			vertexArr->push_back(subCenter + halfWidthVec + halfHeightVec);
+			size = vertexArr->size();
+			pOutSideDrawEle->push_back(size - 1);
+			normalArr->push_back(outSideNormal);
+
+			vertexArr->push_back(vertexArr->back());
+			size = vertexArr->size();
+			pTopDrawEle->push_back(size - 1);
+			osg::Vec3 topNormal = ((*vertexArr)[size - 9] - vertexArr->back()) ^ ((*vertexArr)[size - 9] - (*vertexArr)[size - 9 + 1]);
+			topNormal.normalize();
+			normalArr->push_back(topNormal);
+
+			vertexArr->push_back(subCenter - halfWidthVec + halfHeightVec);
+			size = vertexArr->size();
+			pTopDrawEle->push_back(size - 1);
+			normalArr->push_back(topNormal);
+
+			vertexArr->push_back(vertexArr->back());
+			size = vertexArr->size();
+			pInSideDrawEle->push_back(size - 1);
+			normalArr->push_back(inSideNormal);
+		}
+
+		// 最后一圈
+		osg::Quat fullQuat(angle, normal);
+		mainVec = fullQuat * (startPnt - center);
+		torusNormal = mainVec;
+		torusNormal.normalize();
+		subCenter = center + mainVec;
+
+		halfWidthVec = torusNormal * endWidth / 2.0;
+		halfHeightVec = normal * endHeight / 2.0;
+
+		vertexArr->push_back(subCenter - halfWidthVec - halfHeightVec);
+		size_t size = vertexArr->size();
+		pBottomDrawEle->push_back(size - 1);
+		osg::Vec3 bottomNormal = ((*vertexArr)[size - 9] - vertexArr->back()) ^ ((*vertexArr)[size - 9] - (*vertexArr)[size - 9 + 2]);
+		bottomNormal.normalize();
+		normalArr->push_back(bottomNormal);
+
+		vertexArr->push_back(vertexArr->back());
+		size = vertexArr->size();
+		pInSideDrawEle->push_back(size - 1);
+		osg::Vec3 inSideNormal = (vertexArr->back() - (*vertexArr)[size - 9]) ^ ((*vertexArr)[size - 9] - (*vertexArr)[size - 9 + 6]);
+		inSideNormal.normalize();
+		normalArr->push_back(inSideNormal);
+
+		vertexArr->push_back(subCenter + halfWidthVec - halfHeightVec);
+		size = vertexArr->size();
+		pBottomDrawEle->push_back(size - 1);
+		normalArr->push_back(bottomNormal);
+
+		vertexArr->push_back(vertexArr->back());
+		size = vertexArr->size();
+		pOutSideDrawEle->push_back(size - 1);
+		osg::Vec3 outSideNormal = ((*vertexArr)[size - 9] - vertexArr->back()) ^ ((*vertexArr)[size - 9] - (*vertexArr)[size - 9 + 1]);
+		outSideNormal.normalize();
+		normalArr->push_back(outSideNormal);
+
+		vertexArr->push_back(subCenter + halfWidthVec + halfHeightVec);
+		size = vertexArr->size();
+		pOutSideDrawEle->push_back(size - 1);
+		normalArr->push_back(outSideNormal);
+
+		vertexArr->push_back(vertexArr->back());
+		size = vertexArr->size();
+		pTopDrawEle->push_back(size - 1);
+		osg::Vec3 topNormal = ((*vertexArr)[size - 9] - vertexArr->back()) ^ ((*vertexArr)[size - 9] - (*vertexArr)[size - 9 + 1]);
+		topNormal.normalize();
+		normalArr->push_back(topNormal);
+
+		vertexArr->push_back(subCenter - halfWidthVec + halfHeightVec);
+		size = vertexArr->size();
+		pTopDrawEle->push_back(size - 1);
+		normalArr->push_back(topNormal);
+
+		vertexArr->push_back(vertexArr->back());
+		size = vertexArr->size();
+		pInSideDrawEle->push_back(size - 1);
+		normalArr->push_back(inSideNormal);
+
+		// 最后一圈法向
+		normalArr->push_back(bottomNormal);
+		normalArr->push_back(inSideNormal);
+		normalArr->push_back(bottomNormal);
+		normalArr->push_back(outSideNormal);
+		normalArr->push_back(outSideNormal);
+		normalArr->push_back(topNormal);
+		normalArr->push_back(topNormal);
+		normalArr->push_back(inSideNormal);
+
+		geometry->addPrimitiveSet(pOutSideDrawEle);
+		geometry->addPrimitiveSet(pTopDrawEle);
+		geometry->addPrimitiveSet(pInSideDrawEle);
+		geometry->addPrimitiveSet(pBottomDrawEle);
+
+		if (topVis)
+		{
+			size_t first = vertexArr->size();
+			size_t base = first - 8;
+			osg::Vec3 topNormal = normal ^ torusNormal;
+			topNormal.normalize();
+			for (int i = 0; i < 8; i += 2)
+			{
+				vertexArr->push_back((*vertexArr)[base + i]);
+				normalArr->push_back(topNormal);
+			}
+			geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::QUADS, first, vertexArr->size() - first));
+		}
+
+		if (bottomVis)
+		{
+			size_t first = vertexArr->size();
+			osg::Vec3 bottomNormal = (startPnt - center) ^ normal;
+			bottomNormal.normalize();
+			for (int i = 0; i < 8; i += 2)
+			{
+				vertexArr->push_back((*vertexArr)[i]);
+				normalArr->push_back(bottomNormal);
 			}
 			geometry->addPrimitiveSet(new DrawArrays(osg::PrimitiveSet::QUADS, first, vertexArr->size() - first));
 		}

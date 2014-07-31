@@ -501,7 +501,6 @@ void ExportEntity(NHibernate::ISession^ session, const AcDbEntity *pEnt, const A
 		center.transformBy(mtx);
 		AcGePoint3d startPnt = pdtorus.getP1();
 		startPnt.transformBy(mtx);
-		//AcGeVector3d normal = (startPnt - center).crossProduct(pdtorus.getNormalP2());
 		AcGeVector3d normal = pdtorus.getNormalP2();
 		normal.normalize();
 
@@ -513,7 +512,7 @@ void ExportEntity(NHibernate::ISession^ session, const AcDbEntity *pEnt, const A
 		rt->StartHeight = pdtorus.getWidth1();
 		rt->EndWidth = pdtorus.getLength2();
 		rt->EndHeight = pdtorus.getWidth2();
-		rt->Angle = pdtorus.getAngle();
+		rt->Angle = pdtorus.getAngle() * M_PI / 180.0;
 		rt->Color = GetColor(pEnt);
 		session->Save(rt);
 	}
