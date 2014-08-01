@@ -63,6 +63,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Sphere.cs" />
     <Compile Include="Wedge.cs" />
     <Compile Include="Box.cs" />
     <Compile Include="Prism.cs" />

@@ -85,8 +85,8 @@ public:
 	//////////// adding function
 	Acad::ErrorStatus getgrippoints(AcGePoint3dArray& gripArray) const;
 
-	Acad::ErrorStatus getRadius(double& radius);
-	Acad::ErrorStatus getpointCenter(AcGePoint3d& ptcenter);
+	double getRadius() const;
+	const AcGePoint3d &getCenter() const;
 	Acad::ErrorStatus getprecision(Adesk::UInt32& precision);
 
 	Acad::ErrorStatus setParameters(AcGePoint3d ptcenter, double radius,Adesk::UInt32 precision);

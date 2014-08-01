@@ -261,6 +261,7 @@ osg::Group *cOSG::InitOSGFromDb()
 				group->addChild(CreateRectangularTorus(session));
 				group->addChild(CreateWedge(session));
 				group->addChild(CreatePrism(session));
+				group->addChild(CreateSphere(session));
 				tx->Commit();
 				return group;
 			}
@@ -479,6 +480,20 @@ osg::Node* cOSG::CreatePrism(NHibernate::ISession^ session)
 		pPrism->addDrawable(Geometry::BuildPrism(org, height, bottomStartPnt, prism->EdgeNum, CvtColor(prism->Color)));
 	}
 	return pPrism;
+}
+
+osg::Node* cOSG::CreateSphere(NHibernate::ISession^ session)
+{
+	osg::Geode *pSphere = new osg::Geode();
+	IList<Sphere^>^ sphereList = session->CreateQuery("from Sphere")->List<Sphere^>();
+	osg::Vec3 center, bottomNormal;
+	for each (Sphere^ sphere in sphereList)
+	{
+		Point2Vec3(sphere->Center, center);
+		Point2Vec3(sphere->BottomNormal, bottomNormal);
+		pSphere->addDrawable(Geometry::BuildSphere(center, bottomNormal, sphere->Radius, sphere->Angle, CvtColor(sphere->Color)));
+	}
+	return pSphere;
 }
 
 void cOSG::CreatePoint(const osg::Vec3 &pos, int idx)

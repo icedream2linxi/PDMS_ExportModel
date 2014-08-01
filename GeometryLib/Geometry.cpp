@@ -1014,9 +1014,15 @@ namespace Geometry
 		colArr->push_back(color);
 		geometry->setColorArray(colArr, osg::Array::BIND_OVERALL);
 
-		Vec3 xVec = bottomNormal ^ osg::Z_AXIS;
-		if (xVec.length2() < g_epsilon)
-			xVec = osg::X_AXIS;
+		bool isFull = equivalent(angle, 2 * M_PI, g_epsilon);
+		if (isFull)
+		{
+			angle = 2 * M_PI;
+		}
+
+		Quat quat;
+		quat.makeRotate(osg::Z_AXIS, bottomNormal);
+		Vec3 xVec = quat * osg::X_AXIS;
 		Vec3 yVec = xVec ^ bottomNormal;
 		double incAng = 2 * acos((sphereRadius - g_deflection) / sphereRadius);
 		int hCount = (int)ceil(2 * M_PI / incAng);
@@ -1029,10 +1035,10 @@ namespace Geometry
 		double vIncAng = angle / vCount;
 		Quat vQuat(vIncAng, yVec);
 
-		Quat quat(-angle / 2.0, yVec);
+		quat.makeRotate(-angle / 2.0, yVec);
 		Vec3 vec1 = quat * (-bottomNormal) * sphereRadius;
 		Vec3 vec2 = vQuat * vec1;
-		if (bottomVis)
+		if (!isFull && bottomVis)
 		{
 			const GLint first = vertexArr->size();
 			Vec3 bVec = vec1;

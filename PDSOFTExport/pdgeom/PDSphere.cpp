@@ -668,18 +668,16 @@ Acad::ErrorStatus PDSphere::dxfInFields(AcDbDxfFiler* filer)
 	return filer->filerStatus();
 }
 
-Acad::ErrorStatus PDSphere::getpointCenter(AcGePoint3d& ptcenter)
+const AcGePoint3d & PDSphere::getCenter() const
 {
 	assertReadEnabled();
-	ptcenter = m_ptCenter;
-	return Acad::eOk;
+	return m_ptCenter;
 }
 
-Acad::ErrorStatus PDSphere::getRadius(double& radius)
+double PDSphere::getRadius() const
 {
 	assertReadEnabled();
-	radius = m_dRadius;
-	return Acad::eOk;
+	return m_dRadius;
 }
 
 Acad::ErrorStatus PDSphere::getprecision(Adesk::UInt32& precision)

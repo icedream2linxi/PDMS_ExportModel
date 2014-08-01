@@ -429,7 +429,17 @@ void ExportEntity(NHibernate::ISession^ session, const AcDbEntity *pEnt, const A
 	}
 	else if (pEnt->isKindOf(PDSphere::desc()))
 	{
+		const PDSphere &pdsphere = *PDSphere::cast(pEnt);
+		AcGePoint3d center = pdsphere.getCenter();
+		center.transformBy(mtx);
 
+		DbModel::Sphere^ sphere = gcnew DbModel::Sphere();
+		sphere->Center = ToPnt(center);
+		sphere->Radius = pdsphere.getRadius();
+		sphere->BottomNormal = ToPnt(-AcGeVector3d::kZAxis);
+		sphere->Angle = 2.0 * M_PI;
+		sphere->Color = GetColor(pEnt);
+		session->Save(sphere);
 	}
 	else if (pEnt->isKindOf(PDTorus::desc()))
 	{
