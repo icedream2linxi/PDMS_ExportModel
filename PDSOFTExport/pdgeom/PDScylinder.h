@@ -76,6 +76,7 @@ public:
 
 	Acad::ErrorStatus vect(AcGeVector3d& vect);
 	Acad::ErrorStatus setVect(AcGeVector3d vect);
+	const AcGeVector3d &getBottomNormal() const;
 
 	/*!
 	 * 获取P2指向P1向量与m_vect的夹角

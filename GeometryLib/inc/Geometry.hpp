@@ -30,4 +30,6 @@ namespace Geometry
 		const osg::Vec3 &edge2, const osg::Vec3 &height, const osg::Vec4 &color);
 	osg::ref_ptr<osg::Geometry> BuildPrism(const osg::Vec3 &org, const osg::Vec3 &height,
 		const osg::Vec3 &bottomStartPnt, int edgeNum, const osg::Vec4 &color);
+	osg::ref_ptr<osg::Geometry> BuildSCylinder(const osg::Vec3 &org, const osg::Vec3 &height, const osg::Vec3 &bottomNormal,
+		double radius, const osg::Vec4 &color, bool bottomVis = true, bool topVis = true);
 }

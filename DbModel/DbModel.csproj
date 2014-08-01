@@ -63,6 +63,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SCylinder.cs" />
     <Compile Include="Ellipsoid.cs" />
     <Compile Include="Sphere.cs" />
     <Compile Include="Wedge.cs" />

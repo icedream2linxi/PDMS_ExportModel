@@ -220,7 +220,10 @@ int GetColor(const AcDbEntity *pEnt)
 	}
 	case AcCmEntityColor::kByACI:
 	{
-		return (int)acedGetRGB(color.colorIndex());
+		int col = acedGetRGB(color.colorIndex());
+		char *p = (char*)(void*)&col;
+		std::swap(p[0], p[2]);
+		return col;
 	}
 	case AcCmEntityColor::kByLayer:
 	{
@@ -228,22 +231,44 @@ int GetColor(const AcDbEntity *pEnt)
 		AcDbSmartObjectPointer<AcDbLayerTableRecord> ltr(layerId, AcDb::kForRead);
 		color = ltr->color();
 		if (color.isByACI())
-			return (int)acedGetRGB(color.colorIndex());
+		{
+			int col = acedGetRGB(color.colorIndex());
+			char *p = (char*)(void*)&col;
+			std::swap(p[0], p[2]);
+			return col;
+		}
 		else
 			return (int)color.color();
 	}
 	case AcCmEntityColor::kByBlock:
 	{
-		return 0;
+		return 0xffffff;
 	}
 	default:
-		return 0;
+		return 0xffffff;
 	}
 }
 
 void ExportEntity(NHibernate::ISession^ session, const AcDbEntity *pEnt, const AcGeMatrix3d &mtx)
 {
-	if (pEnt->isKindOf(PDCylinder::desc()))
+	if (pEnt->isKindOf(PDScylinder::desc()))
+	{
+		const PDScylinder &pdscylinder = *PDScylinder::cast(pEnt);
+		AcGePoint3d org = pdscylinder.getPtStart();
+		org.transformBy(mtx);
+		AcGeVector3d height = pdscylinder.getPtEnd() - pdscylinder.getPtStart();
+		height.transformBy(mtx);
+		AcGeVector3d bottomNormal = pdscylinder.getBottomNormal();
+
+		DbModel::SCylinder^ scylinder = gcnew DbModel::SCylinder();
+		scylinder->Org = ToPnt(org);
+		scylinder->Height = ToPnt(height);
+		scylinder->BottomNormal = ToPnt(bottomNormal);
+		scylinder->Radius = pdscylinder.getDiameter() / 2.0;
+		scylinder->Color = GetColor(pEnt);
+		session->Save(scylinder);
+	}
+	else if (pEnt->isKindOf(PDCylinder::desc()))
 	{
 		const PDCylinder &pdcyl = *PDCylinder::cast(pEnt);
 		AcGePoint3d org = pdcyl.getPtStart();
@@ -685,7 +710,7 @@ void DoExport()
 {
 	DbModel::Util^ util = gcnew DbModel::Util();
 	try {
-		util->init(gcnew System::String(L"d:/pdsoft.db"), true);
+		util->init(gcnew System::String(L"d:/pdsoft.db"), false);
 		NHibernate::ISession^ session = util->SessionFactory->OpenSession();
 		try {
 			NHibernate::ITransaction^ tx = session->BeginTransaction();

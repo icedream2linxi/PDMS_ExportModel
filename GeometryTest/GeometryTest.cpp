@@ -94,6 +94,20 @@ osg::ref_ptr<osg::Geode> TestEllipsoid()
 	return geode;
 }
 
+osg::ref_ptr<osg::Geode> TestSCylinder()
+{
+	osg::Vec3 org(0, 0, 0);
+	osg::Vec3 height(0, 0, 200);
+	osg::Vec3 bottomNormal(0, -1, -1);
+	bottomNormal.normalize();
+	double radius = 50;
+	osg::Vec4 color(1, 1, 1, 0);
+
+	osg::ref_ptr<osg::Geode> geode = new osg::Geode;
+	geode->addDrawable(Geometry::BuildSCylinder(org, height, bottomNormal, radius, color));
+	return geode;
+}
+
 osg::ref_ptr<osg::Fog> TestFog()
 {
 	bool bLinear = true;
@@ -178,7 +192,8 @@ int main(int argc, char* argv[])
 	//root->addChild(TestSnout());
 	//root->addChild(TestPyramid());
 	//root->addChild(TestSphere());
-	root->addChild(TestEllipsoid());
+	//root->addChild(TestEllipsoid());
+	root->addChild(TestSCylinder());
 	//root->getOrCreateStateSet()->setAttributeAndModes(TestFog(), osg::StateAttribute::ON);
 
 	//osg::ref_ptr<osgParticle::PrecipitationEffect> pe = new osgParticle::PrecipitationEffect();

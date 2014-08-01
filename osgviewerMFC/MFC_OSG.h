@@ -49,6 +49,7 @@ private:
 	osg::Node* CreatePrism(NHibernate::ISession^ session);
 	osg::Node* CreateSphere(NHibernate::ISession^ session);
 	osg::Node* CreateEllipsoid(NHibernate::ISession^ session);
+	osg::Node* CreateSCylinder(NHibernate::ISession^ session);
 private:
     bool mDone;
     std::string m_ModelName;

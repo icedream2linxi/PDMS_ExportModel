@@ -1064,4 +1064,9 @@ void PDScylinder::list() const
 	return ;
 }// added by linlin 20050810
 
+const AcGeVector3d & PDScylinder::getBottomNormal() const
+{
+	assertReadEnabled();
+	return m_vect;
+}
 

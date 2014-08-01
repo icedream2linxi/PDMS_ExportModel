@@ -252,6 +252,7 @@ osg::Group *cOSG::InitOSGFromDb()
 			try {
 				osg::Group* group = new osg::Group;
 				group->addChild(CreateCylinders(session));
+				group->addChild(CreateSCylinder(session));
 				group->addChild(CreateCone(session));
 				group->addChild(CreateBoxs(session));
 				group->addChild(CreateCircularTorus(session));
@@ -320,6 +321,21 @@ osg::Node* cOSG::CreateCylinders(NHibernate::ISession^ session)
 	//}
 
 	return pCylinders;
+}
+
+osg::Node* cOSG::CreateSCylinder(NHibernate::ISession^ session)
+{
+	osg::Geode *pSCylinder = new osg::Geode();
+	IList<SCylinder^>^ cylList = session->CreateQuery("from SCylinder")->List<SCylinder^>();
+	osg::Vec3 org, height, bottomNormal;
+	for each (SCylinder^ scylinder in cylList)
+	{
+		Point2Vec3(scylinder->Org, org);
+		Point2Vec3(scylinder->Height, height);
+		Point2Vec3(scylinder->BottomNormal, bottomNormal);
+		pSCylinder->addDrawable(Geometry::BuildSCylinder(org, height, bottomNormal, scylinder->Radius, CvtColor(scylinder->Color)));
+	}
+	return pSCylinder;
 }
 
 osg::Node* cOSG::CreateCone(NHibernate::ISession^ session)

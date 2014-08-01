@@ -1341,4 +1341,90 @@ namespace Geometry
 		return geometry;
 	}
 
+	osg::ref_ptr<osg::Geometry> BuildSCylinder(const osg::Vec3 &org, const osg::Vec3 &height, const osg::Vec3 &bottomNormal,
+		double radius, const osg::Vec4 &color, bool bottomVis /*= true*/, bool topVis /*= true*/)
+	{
+		ref_ptr<osg::Geometry> geometry = new osg::Geometry();
+		ref_ptr<Vec3Array> vertexArr = new Vec3Array;
+		ref_ptr<Vec3Array> normalArr = new Vec3Array;
+		geometry->setVertexArray(vertexArr);
+		geometry->setNormalArray(normalArr, osg::Array::BIND_PER_VERTEX);
+		osg::ref_ptr<osg::Vec4Array> colArr = new osg::Vec4Array();
+		colArr->push_back(color);
+		geometry->setColorArray(colArr, osg::Array::BIND_OVERALL);
+
+		int count = (int)ceil(2 * M_PI / g_defaultIncAngle);
+		osg::Vec3 topNormal = height;
+		topNormal.normalize();
+		double angleCos = bottomNormal * (-topNormal) / bottomNormal.length() / topNormal.length();
+		double angle = acos(angleCos);
+		double a = radius;
+		double b = radius / sin(M_PI_2 - angle);
+		osg::Vec3 vec = bottomNormal ^ topNormal;
+		vec.normalize();
+		osg::Quat bottomQuat(g_defaultIncAngle, bottomNormal);
+		double currAngle = 0;
+		osg::Quat localToWorldQuat;
+		localToWorldQuat.makeRotate(osg::Z_AXIS, bottomNormal);
+		osg::Vec3 yAxis = localToWorldQuat * osg::Y_AXIS;
+		osg::Quat localToWorldQuat2;
+		localToWorldQuat2.makeRotate(yAxis, vec);
+		localToWorldQuat *= localToWorldQuat2;
+		osg::Vec3 bottomVec(b * sin(currAngle), a * cos(currAngle), 0);
+		bottomVec = localToWorldQuat * bottomVec;
+		//bottomVec = localToWorldQuat2 * bottomVec;
+
+		osg::Quat topQuat(g_defaultIncAngle, topNormal);
+		osg::Vec3 topVec = vec * radius;
+		osg::Vec3 topCenter = org + height;
+		size_t first = vertexArr->size();
+		for (int i = 0; i < count; ++i)
+		{
+			vertexArr->push_back(topCenter + topVec);
+			vertexArr->push_back(org + bottomVec);
+			normalArr->push_back(topVec);
+			normalArr->back().normalize();
+			normalArr->push_back(normalArr->back());
+
+			currAngle += g_defaultIncAngle;
+			bottomVec.set(b * sin(currAngle), a * cos(currAngle), 0);
+			bottomVec = localToWorldQuat * bottomVec;
+			//bottomVec = localToWorldQuat2 * bottomVec;
+			topVec = topQuat * topVec;
+		}
+		vertexArr->push_back((*vertexArr)[first]);
+		vertexArr->push_back((*vertexArr)[first+1]);
+		normalArr->push_back((*normalArr)[first]);
+		normalArr->push_back((*normalArr)[first+1]);
+		geometry->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::TRIANGLE_STRIP, first, vertexArr->size() - first));
+
+		if (bottomVis)
+		{
+			first = vertexArr->size();
+			vertexArr->push_back(org);
+			normalArr->push_back(bottomNormal);
+			for (int i = 0; i < count + 1; ++i)
+			{
+				vertexArr->push_back((*vertexArr)[i * 2 + 1]);
+				normalArr->push_back(bottomNormal);
+			}
+			geometry->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::TRIANGLE_FAN, first, vertexArr->size() - first));
+		}
+
+		if (topVis)
+		{
+			first = vertexArr->size();
+			vertexArr->push_back(topCenter);
+			normalArr->push_back(topNormal);
+			for (int i = 0; i < count + 1; ++i)
+			{
+				vertexArr->push_back((*vertexArr)[i * 2]);
+				normalArr->push_back(topNormal);
+			}
+			geometry->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::TRIANGLE_FAN, first, vertexArr->size() - first));
+		}
+
+		return geometry;
+	}
+
 }
