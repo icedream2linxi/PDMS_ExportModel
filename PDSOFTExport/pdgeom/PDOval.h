@@ -110,13 +110,13 @@ public:
         Adesk::UInt32 precisionA = PRIMARY3D_DEFAULT_PRECISION, 
         Adesk::UInt32 precisionB = PRIMARY3D_DEFAULT_PRECISION);
 
-	AcGePoint3d getpointCenter() const;
+	const AcGePoint3d &getCenter() const;
 	double getlengthA() const;
 	double getlengthB() const;
 	double getlengthR() const;
 	Adesk::UInt32 getprecisionA() const;
 	Adesk::UInt32 getprecisionB() const;
-	AcGeVector3d getVect() const;
+	const AcGeVector3d &getVect() const;
     // 取得椭球封头的高度
     double getOvalHeight() const;
     // 取得椭圆的圆心

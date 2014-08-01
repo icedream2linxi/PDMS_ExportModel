@@ -339,6 +339,22 @@ void ExportEntity(NHibernate::ISession^ session, const AcDbEntity *pEnt, const A
 	}
 	else if (pEnt->isKindOf(PDOval::desc()))
 	{
+		const PDOval &pdoval = *PDOval::cast(pEnt);
+		AcGePoint3d center = pdoval.getEllipseCen();
+		center.transformBy(mtx);
+		AcGeVector3d aLen = pdoval.getVect();
+		aLen.normalize();
+		aLen *= pdoval.getlengthA();
+		aLen.transformBy(mtx);
+		double angle = atan((pdoval.getlengthA() - pdoval.getOvalHeight()) / pdoval.getlengthR());
+
+		DbModel::Ellipsoid^ ellipsoid = gcnew DbModel::Ellipsoid();
+		ellipsoid->Center = ToPnt(center);
+		ellipsoid->ALen = ToPnt(aLen);
+		ellipsoid->BRadius = pdoval.getlengthB();
+		ellipsoid->Angle = (M_PI_2 - angle) * 2.0;
+		ellipsoid->Color = GetColor(pEnt);
+		session->Save(ellipsoid);
 	}
 	else if (pEnt->isKindOf(PDPrism::desc()))
 	{

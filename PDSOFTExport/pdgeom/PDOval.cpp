@@ -847,7 +847,7 @@ Acad::ErrorStatus PDOval::setParameters(double lengthA, double lengthB,
     return Acad::eOk;
 }
 
-AcGePoint3d PDOval::getpointCenter() const
+const AcGePoint3d & PDOval::getCenter() const
 {
 	assertReadEnabled();
 	return m_ptCenter;
@@ -883,7 +883,7 @@ Adesk::UInt32 PDOval::getprecisionB() const
 	return m_nprecisionB;
 }
 
-AcGeVector3d PDOval::getVect() const
+const AcGeVector3d & PDOval::getVect() const
 {
     assertReadEnabled();
 	return m_vect;

@@ -86,10 +86,11 @@ osg::ref_ptr<osg::Geode> TestEllipsoid()
 	osg::Vec3 center(0, 0, 0);
 	osg::Vec3 height(100, 100, 100);
 	double bottomRadius = 500;
+	double angle = 270.0 * M_PI / 180.0;
 	osg::Vec4 color(1, 1, 1, 0);
 
 	osg::ref_ptr<osg::Geode> geode = new osg::Geode;
-	geode->addDrawable(Geometry::BuildEllipsoid(center, height, bottomRadius, color));
+	geode->addDrawable(Geometry::BuildEllipsoid(center, height, bottomRadius, angle, color));
 	return geode;
 }
 
@@ -172,12 +173,12 @@ int main(int argc, char* argv[])
 	//root->addChild(TestCasCadeByMakeRevol());
 	//root->addChild(TestCasCadeByMakeTorus());
 	//root->addChild(TestCircularTorus());
-	root->addChild(TestRectangularTorus());
+	//root->addChild(TestRectangularTorus());
 	//root->addChild(TestCone());
 	//root->addChild(TestSnout());
 	//root->addChild(TestPyramid());
 	//root->addChild(TestSphere());
-	//root->addChild(TestEllipsoid());
+	root->addChild(TestEllipsoid());
 	//root->getOrCreateStateSet()->setAttributeAndModes(TestFog(), osg::StateAttribute::ON);
 
 	//osg::ref_ptr<osgParticle::PrecipitationEffect> pe = new osgParticle::PrecipitationEffect();

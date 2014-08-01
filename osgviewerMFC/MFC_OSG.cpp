@@ -262,6 +262,7 @@ osg::Group *cOSG::InitOSGFromDb()
 				group->addChild(CreateWedge(session));
 				group->addChild(CreatePrism(session));
 				group->addChild(CreateSphere(session));
+				group->addChild(CreateEllipsoid(session));
 				tx->Commit();
 				return group;
 			}
@@ -407,7 +408,7 @@ osg::Node* cOSG::CreateDish(NHibernate::ISession^ session)
 		Point2Vec3(dish->Org, center);
 		Point2Vec3(dish->Height, height);
 		if (dish->IsEllipse)
-			pDishs->addDrawable(Geometry::BuildEllipsoid(center, height, dish->Radius, CvtColor(dish->Color)));
+			pDishs->addDrawable(Geometry::BuildEllipsoid(center, height, dish->Radius, M_PI, CvtColor(dish->Color)));
 		else
 			pDishs->addDrawable(Geometry::BuildSphere(center, height, dish->Radius, CvtColor(dish->Color)));
 	}
@@ -494,6 +495,20 @@ osg::Node* cOSG::CreateSphere(NHibernate::ISession^ session)
 		pSphere->addDrawable(Geometry::BuildSphere(center, bottomNormal, sphere->Radius, sphere->Angle, CvtColor(sphere->Color)));
 	}
 	return pSphere;
+}
+
+osg::Node* cOSG::CreateEllipsoid(NHibernate::ISession^ session)
+{
+	osg::Geode *pEllipsoid = new osg::Geode();
+	IList<Ellipsoid^>^ ellipsoidList = session->CreateQuery("from Ellipsoid")->List<Ellipsoid^>();
+	osg::Vec3 center, aLen;
+	for each (Ellipsoid^ ellipsoid in ellipsoidList)
+	{
+		Point2Vec3(ellipsoid->Center, center);
+		Point2Vec3(ellipsoid->ALen, aLen);
+		pEllipsoid->addDrawable(Geometry::BuildEllipsoid(center, aLen, ellipsoid->BRadius, ellipsoid->Angle, CvtColor(ellipsoid->Color)));
+	}
+	return pEllipsoid;
 }
 
 void cOSG::CreatePoint(const osg::Vec3 &pos, int idx)
