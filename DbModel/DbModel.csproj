@@ -63,6 +63,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="RectCirc.cs" />
+    <Compile Include="Saddle.cs" />
     <Compile Include="SCylinder.cs" />
     <Compile Include="Ellipsoid.cs" />
     <Compile Include="Sphere.cs" />

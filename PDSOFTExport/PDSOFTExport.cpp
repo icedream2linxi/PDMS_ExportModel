@@ -569,9 +569,66 @@ void ExportEntity(NHibernate::ISession^ session, const AcDbEntity *pEnt, const A
 	}
 	else if (pEnt->isKindOf(PDSaddle::desc()))
 	{
+		const PDSaddle &pdsaddle = *PDSaddle::cast(pEnt);
+		AcGePoint3d org = pdsaddle.getOrg();
+		org.transformBy(mtx);
+		double width = pdsaddle.getWidth();
+		double length = pdsaddle.getLength();
+		double height = pdsaddle.getHeight();
+		double angle = pdsaddle.getAngle();
+		AcGeVector3d insX, insY, insZ;
+		pdsaddle.getInsDir(insX, insY, insZ);
+		insX.transformBy(mtx);
+		insY.transformBy(mtx);
+		insZ.transformBy(mtx);
 
+		AcGeMatrix3d trans = AcGeMatrix3d::rotation(angle, insZ);
+		AcGeVector3d xLen = insX * length;
+		AcGeVector3d zLen = insZ * height;
+
+		DbModel::Saddle^ saddle = gcnew DbModel::Saddle();
+		saddle->Org = ToPnt(org);
+		saddle->XLen = ToPnt(xLen);
+		saddle->YLen = width;
+		saddle->ZLen = ToPnt(zLen);
+		saddle->radius = pdsaddle.getRadius();
+		saddle->Color = GetColor(pEnt);
+		session->Save(saddle);
 	}
 	else if (pEnt->isKindOf(PDSqucir::desc()))
+	{
+		const PDSqucir &pdsqucir = *PDSqucir::cast(pEnt);
+		AcGeVector3d xLen = pdsqucir.getVectSqu();
+		xLen.transformBy(mtx);
+		AcGeVector3d normal = pdsqucir.getVectCir();
+		normal.transformBy(mtx);
+		AcGeVector3d yVec = normal.crossProduct(xLen);
+		yVec.normalize();
+		AcGePoint3d org = pdsqucir.getRectOrg();
+		org.transformBy(mtx);
+		AcGePoint3d circCenter = pdsqucir.getCircCenter();
+		circCenter.transformBy(mtx);
+
+		AcGePoint3d rectCenter = org - xLen / 2.0 - yVec * (pdsqucir.getWidth() / 2.0);
+		AcGeVector3d vec = circCenter - rectCenter;
+		AcGeVector3d offset = vec.orthoProject(normal);
+		AcGeVector3d height = vec - offset;
+
+		DbModel::RectCirc^ rectCirc = gcnew DbModel::RectCirc();
+		rectCirc->RectCenter = ToPnt(rectCenter);
+		rectCirc->XLen = ToPnt(xLen);
+		rectCirc->YLen = pdsqucir.getWidth();
+		rectCirc->Height = ToPnt(height);
+		rectCirc->Offset = ToPnt(offset);
+		rectCirc->Radius = pdsqucir.getRadius();
+		rectCirc->Color = GetColor(pEnt);
+		session->Save(rectCirc);
+	}
+	else if (pEnt->isKindOf(PDRevolve::desc()))
+	{
+
+	}
+	else if (pEnt->isKindOf(PDSpolygon::desc()))
 	{
 
 	}

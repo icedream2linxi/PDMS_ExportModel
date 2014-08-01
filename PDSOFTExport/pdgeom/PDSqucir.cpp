@@ -959,39 +959,34 @@ Acad::ErrorStatus PDSqucir::dxfInFields(AcDbDxfFiler* filer)
 	return filer->filerStatus();
 }
 
-Acad::ErrorStatus PDSqucir::getpointP1(AcGePoint3d& ptP1)
+const AcGePoint3d & PDSqucir::getRectOrg() const
 {
 	assertReadEnabled();
-	ptP1 = m_ptP1;
-	return Acad::eOk;
+	return m_ptP1;
 }
 
-Acad::ErrorStatus PDSqucir::getpointP2(AcGePoint3d& ptP2)
+const AcGePoint3d & PDSqucir::getCircCenter() const
 {
 	assertReadEnabled();
-	ptP2 = m_ptP2;
-	return Acad::eOk;
+	return m_ptP2;
 }
 
-Acad::ErrorStatus PDSqucir::getLength(double& length)
+double PDSqucir::getLength() const
 {
 	assertReadEnabled();
-	length = m_dLength;
-	return Acad::eOk;
+	return m_dLength;
 }
 
-Acad::ErrorStatus PDSqucir::getWidth(double& width)
+double PDSqucir::getWidth() const
 {
 	assertReadEnabled();
-	width = m_dWidth;
-	return Acad::eOk;
+	return m_dWidth;
 }
 
-Acad::ErrorStatus PDSqucir::getRadius(double& radius)
+double PDSqucir::getRadius() const
 {
 	assertReadEnabled();
-	radius = m_dRadius;
-	return Acad::eOk;
+	return m_dRadius;
 }
 
 Acad::ErrorStatus PDSqucir::getprecision(Adesk::UInt32& precision)
@@ -1001,25 +996,22 @@ Acad::ErrorStatus PDSqucir::getprecision(Adesk::UInt32& precision)
 	return Acad::eOk;
 }
 
-Acad::ErrorStatus PDSqucir::getVectCir(AcGeVector3d& vectCir)
+const AcGeVector3d & PDSqucir::getVectCir() const
 {
 	assertReadEnabled();
-	vectCir = m_VectCir;
-	return Acad::eOk;
+	return m_VectCir;
 }
 
-Acad::ErrorStatus PDSqucir::getVectSqu(AcGeVector3d& vectSqu)
+const AcGeVector3d & PDSqucir::getVectSqu() const
 {
 	assertReadEnabled();
-	vectSqu = m_VectSqu;
-	return Acad::eOk;
+	return m_VectSqu;
 }
 
-Acad::ErrorStatus PDSqucir:: getVectWidth(AcGeVector3d& vectW)
+const AcGeVector3d & PDSqucir::getVectWidth() const
 {
 	assertReadEnabled();
-	vectW=m_VectW;
-	return Acad::eOk;
+	return m_VectW;
 }
 
 

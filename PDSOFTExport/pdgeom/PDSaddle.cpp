@@ -1228,11 +1228,10 @@ Acad::ErrorStatus PDSaddle::dxfInFields(AcDbDxfFiler* filer)
 	return filer->filerStatus();
 }
 
-Acad::ErrorStatus PDSaddle::getpointP(AcGePoint3d& ptP)
+const AcGePoint3d & PDSaddle::getOrg() const
 {
 	assertReadEnabled();
-	ptP = m_ptP;
-	return Acad::eOk;
+	return m_ptP;
 }
 
 
@@ -1342,39 +1341,34 @@ Acad::ErrorStatus PDSaddle::getRightHandCoord(AcGePoint3d &ori,
 	return Acad::eOk;
 }//added by linlin 20050831
 
-Acad::ErrorStatus PDSaddle::getangle(double& angle )
+double PDSaddle::getAngle() const
 {
 	assertReadEnabled();
-	angle = m_dAngle / PI * 180;
-	return Acad::eOk;
+	return m_dAngle;
 }
 
-Acad::ErrorStatus PDSaddle::getheight(double& height)
+double PDSaddle::getHeight() const
 {
 	assertReadEnabled();
-	height = m_dHeight;
-	return Acad::eOk;
+	return m_dHeight;
 }
 
-Acad::ErrorStatus PDSaddle::getlength(double& length)
+double PDSaddle::getLength() const
 {
 	assertReadEnabled();
-	length = m_dLength;
-	return Acad::eOk;
+	return m_dLength;
 }
 
-Acad::ErrorStatus PDSaddle::getradius(double& radius)
+double PDSaddle::getRadius() const
 {
 	assertReadEnabled();
-	radius = m_dRadius;
-	return Acad::eOk;
+	return m_dRadius;
 }
 
-Acad::ErrorStatus PDSaddle::getwidth(double& width)
+double PDSaddle::getWidth() const
 {
 	assertReadEnabled();
-	width = m_dWidth;
-	return Acad::eOk;
+	return m_dWidth;
 }
 
 Acad::ErrorStatus PDSaddle::getprecision(Adesk::UInt32& precision)
@@ -1737,7 +1731,7 @@ Acad::ErrorStatus PDSaddle::getGripPoints(
 	return Acad::eOk; 
 }
 
-Acad::ErrorStatus PDSaddle::getInsDir(AcGeVector3d& insX, AcGeVector3d& insY, AcGeVector3d& insZ)
+Acad::ErrorStatus PDSaddle::getInsDir(AcGeVector3d& insX, AcGeVector3d& insY, AcGeVector3d& insZ) const
 {
 	assertReadEnabled();
 	insX = m_insX;

@@ -105,15 +105,15 @@ public:
     //////////// adding function
 	Acad::ErrorStatus getgrippoints(AcGePoint3dArray& gripArray) const;
 
-	Acad::ErrorStatus getpointP1(AcGePoint3d& ptP1);
-	Acad::ErrorStatus getpointP2(AcGePoint3d& ptP2);
-	Acad::ErrorStatus getLength(double& length);
-	Acad::ErrorStatus getWidth(double& width);
-	Acad::ErrorStatus getRadius(double& radius);
+	const AcGePoint3d &getRectOrg() const;
+	const AcGePoint3d &getCircCenter() const;
+	double getLength() const;
+	double getWidth() const;
+	double getRadius() const;
 	Acad::ErrorStatus getprecision(Adesk::UInt32& precision);
-	Acad::ErrorStatus getVectCir(AcGeVector3d& vectCir);
-	Acad::ErrorStatus getVectSqu(AcGeVector3d& vectSqu);
-	Acad::ErrorStatus getVectWidth(AcGeVector3d& vectW);
+	const AcGeVector3d &getVectCir() const;
+	const AcGeVector3d &getVectSqu() const;
+	const AcGeVector3d &getVectWidth() const;
 
 	/*!
 	 * 获取SquCirInfo信息

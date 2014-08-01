@@ -101,15 +101,15 @@ public:
 	virtual Acad::ErrorStatus	dxfInFields(AcDbDxfFiler* filer);
 	virtual Acad::ErrorStatus	dxfOutFields(AcDbDxfFiler* filer) const;
 
-	Acad::ErrorStatus getpointP(AcGePoint3d& ptP);
-	Acad::ErrorStatus getangle(double& angle);  // angle为角度
-	Acad::ErrorStatus getlength(double& length);
-	Acad::ErrorStatus getheight(double& height);
-	Acad::ErrorStatus getwidth(double& width);
-	Acad::ErrorStatus getradius(double& radius);
+	const AcGePoint3d &getOrg() const;
+	double getAngle() const;  // angle为角度
+	double getLength() const;
+	double getHeight() const;
+	double getWidth() const;
+	double getRadius() const;
 	Acad::ErrorStatus getlengthVwidthV(AcGeVector3d &lengthvect,AcGeVector3d &widthvect) const;
 	Acad::ErrorStatus getprecision(Adesk::UInt32& precision);
-	Acad::ErrorStatus getInsDir(AcGeVector3d& insX, AcGeVector3d& insY, AcGeVector3d& insZ);
+	Acad::ErrorStatus getInsDir(AcGeVector3d& insX, AcGeVector3d& insY, AcGeVector3d& insZ) const;
 
 	/*!
 	 * 获取马鞍形的定位点（即m_ptP）所在侧面的四个顶点及圆弧中点

@@ -750,7 +750,11 @@ namespace Geometry
 		Vec3 xVec = bottomNormal ^ osg::Z_AXIS;
 		if (xVec.length2() < g_epsilon)
 			xVec = osg::X_AXIS;
-		double incAng = 2 * acos((radius - g_deflection) / radius);
+		double incAng = 0.0;
+		if (radius < g_deflection)
+			incAng = 60.0 * M_PI / 180.0;
+		else
+			incAng = 2 * acos((radius - g_deflection) / radius);
 		int count = (int)ceil(2 * M_PI / incAng);
 		incAng = 2 * M_PI / count;
 		Quat quat(incAng, bottomNormal);
@@ -834,7 +838,11 @@ namespace Geometry
 			mainRadius = bottomRadius;
 		else
 			mainRadius = topRadius;
-		double incAng = 2 * acos((mainRadius - g_deflection) / mainRadius);
+		double incAng = 0.0;
+		if (mainRadius < g_deflection)
+			incAng = 60.0 * M_PI / 180.0;
+		else
+			incAng = 2.0 * acos((mainRadius - g_deflection) / mainRadius);
 		int count = (int)ceil(2 * M_PI / incAng);
 		incAng = 2 * M_PI / count;
 		Quat quat(incAng, bottomNormal);
