@@ -27,7 +27,7 @@ namespace DbModel
 		public virtual Point ZLen { get; set; }
 
 		[Property(Column = "radius")]
-		public virtual double radius { get; set; }
+		public virtual double Radius { get; set; }
 
 		[Property(Column = "color")]
 		public virtual int Color { get; set; }

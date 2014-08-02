@@ -170,7 +170,7 @@ void PDPRIMARY3D_MODEL()
 	addToDb(pSqu12);
 	pSqu12->close();
 
-	PDSaddle *pSad = new PDSaddle(80, 60, 60, AcGePoint3d(400, 900, 0), 0, 50, 24);
+	PDSaddle *pSad = new PDSaddle(80, 60, 60, AcGePoint3d(400, 900, 0), 0, 20, 24);
 	addToDb(pSad);
 	pSad->close();
 

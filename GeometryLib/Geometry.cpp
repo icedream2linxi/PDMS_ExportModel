@@ -1435,4 +1435,178 @@ namespace Geometry
 		return geometry;
 	}
 
+	osg::ref_ptr<osg::Geometry> BuildSaddle(const osg::Vec3 &org, const osg::Vec3 &xLen, double yLen, const osg::Vec3 &zLen,
+		double radius, const osg::Vec4 &color)
+	{
+		ref_ptr<osg::Geometry> geometry = new osg::Geometry();
+		ref_ptr<Vec3Array> vertexArr = new Vec3Array;
+		ref_ptr<Vec3Array> normalArr = new Vec3Array;
+		geometry->setVertexArray(vertexArr);
+		geometry->setNormalArray(normalArr, osg::Array::BIND_PER_VERTEX);
+		osg::ref_ptr<osg::Vec4Array> colArr = new osg::Vec4Array();
+		colArr->push_back(color);
+		geometry->setColorArray(colArr, osg::Array::BIND_OVERALL);
+
+		int count = (int)ceil(2 * M_PI / g_defaultIncAngle);
+
+		osg::Vec3 yNormal = zLen ^ xLen;
+		yNormal.normalize();
+		osg::Vec3 yVec = yNormal * yLen;
+		osg::Vec3 bp1 = org - xLen / 2.0 - yVec / 2.0;
+		osg::Vec3 bp2 = org + xLen / 2.0 - yVec / 2.0;
+		osg::Vec3 bp3 = org + xLen / 2.0 + yVec / 2.0;
+		osg::Vec3 bp4 = org - xLen / 2.0 + yVec / 2.0;
+
+		osg::Vec3 tp1 = bp1 + zLen, tp2 = bp2 + zLen, tp3 = bp3 + zLen, tp4 = bp4 + zLen;
+
+		// bottom
+		size_t first = vertexArr->size();
+		vertexArr->push_back(bp1);
+		vertexArr->push_back(bp2);
+		vertexArr->push_back(bp3);
+		vertexArr->push_back(bp4);
+		osg::Vec3 normal = -zLen;
+		normal.normalize();
+		for (int i = 0; i < 4; ++i)
+			normalArr->push_back(normal);
+
+		// top
+		double yLen_2 = yLen / 2.0;
+		osg::Vec3 width = yNormal * (yLen_2 - radius);
+		bool isCircLessThenRect = radius < yLen_2;
+		if (isCircLessThenRect)
+		{
+			// 1
+			vertexArr->push_back(tp1);
+			vertexArr->push_back(tp2);
+			vertexArr->push_back(tp2 + width);
+			vertexArr->push_back(tp1 + width);
+
+			// 2
+			vertexArr->push_back(tp4 - width);
+			vertexArr->push_back(tp3 - width);
+			vertexArr->push_back(tp3);
+			vertexArr->push_back(tp4);
+
+			normal = -normal;
+			for (int i = 0; i < 8; ++i)
+				normalArr->push_back(normal);
+		}
+
+		// front
+		vertexArr->push_back(tp4);
+		vertexArr->push_back(tp3);
+		vertexArr->push_back(bp3);
+		vertexArr->push_back(bp4);
+		normal = yNormal;
+		for (int i = 0; i < 4; ++i)
+			normalArr->push_back(normal);
+
+		// back
+		vertexArr->push_back(bp1);
+		vertexArr->push_back(bp2);
+		vertexArr->push_back(tp2);
+		vertexArr->push_back(tp1);
+		normal = -normal;
+		for (int i = 0; i < 4; ++i)
+			normalArr->push_back(normal);
+
+		geometry->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, first, vertexArr->size() - first));
+
+		// calc top circ
+		double angle = M_PI;
+		osg::Vec3 circCenter;
+		if (radius > yLen_2)
+		{
+			angle = asin(yLen_2 / radius);
+			osg::Vec3 vec = zLen;
+			vec.normalize();
+			vec *= cos(angle) * radius;
+			circCenter = tp1 + yVec / 2.0 + vec;
+			angle *= 2.0;
+		}
+		else
+		{
+			circCenter = tp1 + yVec / 2.0;
+		}
+		count = (int)ceil(angle / g_defaultIncAngle);
+		double incAng = angle / count;
+
+		first = vertexArr->size();
+		osg::Vec3 circPnt(tp1);
+		if (isCircLessThenRect)
+			circPnt = tp1 + width;
+		osg::Vec3 circVec = circCenter - circPnt;
+		osg::Quat quat(incAng, xLen);
+		for (int i = 0; i < count + 1; ++i)
+		{
+			vertexArr->push_back(circCenter - circVec);
+			vertexArr->push_back(vertexArr->back() + xLen);
+			normalArr->push_back(circVec);
+			normalArr->back().normalize();
+			normalArr->push_back(normalArr->back());
+
+			circVec = quat * circVec;
+		}
+		geometry->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUAD_STRIP, first, vertexArr->size() - first));
+
+		// left
+		size_t leftFirst = vertexArr->size();
+		double rectLen = yLen;
+		osg::Vec3 rectPnt(bp1);
+		if (isCircLessThenRect)
+		{
+			vertexArr->push_back(bp1);
+			vertexArr->push_back(tp1);
+			rectPnt = bp1 + width;
+			rectLen = radius * 2.0;
+		}
+		osg::Vec3 rectVec = yNormal * rectLen / count;
+		for (int i = 0; i < count + 1; ++i)
+		{
+			vertexArr->push_back(rectPnt);
+			vertexArr->push_back((*vertexArr)[first + i * 2]);
+			rectPnt += rectVec;
+		}
+		if (isCircLessThenRect)
+		{
+			vertexArr->push_back(bp4);
+			vertexArr->push_back(tp4);
+		}
+		size_t leftEnd = vertexArr->size();
+		normal = -xLen;
+		normal.normalize();
+		for (size_t i = leftFirst; i < leftEnd; ++i)
+			normalArr->push_back(normal);
+		geometry->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUAD_STRIP, leftFirst, vertexArr->size() - leftFirst));
+
+		// right
+		first = vertexArr->size();
+		normal = -normal;
+		for (size_t i = leftFirst; i < leftEnd; ++i)
+		{
+			vertexArr->push_back((*vertexArr)[i] + xLen);
+			normalArr->push_back(normal);
+		}
+
+		geometry->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUAD_STRIP, first, vertexArr->size() - first));
+
+		return geometry;
+	}
+
+	osg::ref_ptr<osg::Geometry> BuildRectCirc(const osg::Vec3 &rectCenter, const osg::Vec3 &xLen, double yLen, const osg::Vec3 &height,
+		const osg::Vec3 &offset, double radius, const osg::Vec4 &color)
+	{
+		ref_ptr<osg::Geometry> geometry = new osg::Geometry();
+		ref_ptr<Vec3Array> vertexArr = new Vec3Array;
+		ref_ptr<Vec3Array> normalArr = new Vec3Array;
+		geometry->setVertexArray(vertexArr);
+		geometry->setNormalArray(normalArr, osg::Array::BIND_PER_VERTEX);
+		osg::ref_ptr<osg::Vec4Array> colArr = new osg::Vec4Array();
+		colArr->push_back(color);
+		geometry->setColorArray(colArr, osg::Array::BIND_OVERALL);
+
+		return geometry;
+	}
+
 }

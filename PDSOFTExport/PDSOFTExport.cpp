@@ -591,7 +591,7 @@ void ExportEntity(NHibernate::ISession^ session, const AcDbEntity *pEnt, const A
 		saddle->XLen = ToPnt(xLen);
 		saddle->YLen = width;
 		saddle->ZLen = ToPnt(zLen);
-		saddle->radius = pdsaddle.getRadius();
+		saddle->Radius = pdsaddle.getRadius();
 		saddle->Color = GetColor(pEnt);
 		session->Save(saddle);
 	}

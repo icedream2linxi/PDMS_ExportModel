@@ -32,4 +32,8 @@ namespace Geometry
 		const osg::Vec3 &bottomStartPnt, int edgeNum, const osg::Vec4 &color);
 	osg::ref_ptr<osg::Geometry> BuildSCylinder(const osg::Vec3 &org, const osg::Vec3 &height, const osg::Vec3 &bottomNormal,
 		double radius, const osg::Vec4 &color, bool bottomVis = true, bool topVis = true);
+	osg::ref_ptr<osg::Geometry> BuildSaddle(const osg::Vec3 &org, const osg::Vec3 &xLen, double yLen, const osg::Vec3 &zLen,
+		double radius, const osg::Vec4 &color);
+	osg::ref_ptr<osg::Geometry> BuildRectCirc(const osg::Vec3 &rectCenter, const osg::Vec3 &xLen, double yLen, const osg::Vec3 &height,
+		const osg::Vec3 &offset, double radius, const osg::Vec4 &color);
 }
