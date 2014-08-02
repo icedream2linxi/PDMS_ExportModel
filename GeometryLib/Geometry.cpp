@@ -1606,6 +1606,157 @@ namespace Geometry
 		colArr->push_back(color);
 		geometry->setColorArray(colArr, osg::Array::BIND_OVERALL);
 
+		osg::Vec3 topNormal = height;
+		topNormal.normalize();
+		osg::Vec3 yVec = height ^ xLen;
+		yVec.normalize();
+		yVec *= yLen;
+		osg::Vec3 circVec = -yVec;
+		circVec.normalize();
+		circVec *= radius;
+		osg::Vec3 circCenter = rectCenter + height + offset;
+
+		int count = (int)ceil(M_PI * 2.0 / g_defaultIncAngle);
+		int t = count % 4;
+		if (t != 0)
+			count += 4 - t;
+		double incAng = M_PI * 2.0 / count;
+		osg::Quat quat(incAng, topNormal);
+
+		// top
+		size_t topFirst = vertexArr->size();
+		vertexArr->push_back(circCenter);
+		normalArr->push_back(topNormal);
+		for (int i = 0; i < count; ++i)
+		{
+			vertexArr->push_back(circCenter + circVec);
+			normalArr->push_back(topNormal);
+			circVec = quat * circVec;
+		}
+		vertexArr->push_back((*vertexArr)[topFirst + 1]);
+		normalArr->push_back(topNormal);
+		geometry->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::TRIANGLE_FAN, topFirst, vertexArr->size() - topFirst));
+
+		// bottom
+		size_t first = vertexArr->size();
+		osg::Vec3 bp1 = rectCenter - xLen / 2.0 - yVec / 2.0;
+		osg::Vec3 bp2 = rectCenter + xLen / 2.0 - yVec / 2.0;
+		osg::Vec3 bp3 = rectCenter + xLen / 2.0 + yVec / 2.0;
+		osg::Vec3 bp4 = rectCenter - xLen / 2.0 + yVec / 2.0;
+		vertexArr->push_back(bp1);
+		vertexArr->push_back(bp2);
+		vertexArr->push_back(bp3);
+		vertexArr->push_back(bp4);
+		osg::Vec3 normal = -topNormal;
+		for (int i = 0; i < 4; ++i)
+			normalArr->push_back(normal);
+		geometry->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, first, vertexArr->size() - first));
+
+		int count_4 = count >> 2;
+		first = vertexArr->size();
+		// front
+		normal = yVec;
+		normal.normalize();
+		vertexArr->push_back(bp4);
+		vertexArr->push_back(bp3);
+		vertexArr->push_back((*vertexArr)[count_4 * 2 + topFirst + 1]);
+		for (int i = 0; i < 3; ++i)
+			normalArr->push_back(normal);
+
+		// back
+		normal = -normal;
+		vertexArr->push_back(bp1);
+		vertexArr->push_back(bp2);
+		vertexArr->push_back((*vertexArr)[topFirst + 1]);
+		for (int i = 0; i < 3; ++i)
+			normalArr->push_back(normal);
+
+		// right
+		normal = xLen;
+		normal.normalize();
+		vertexArr->push_back(bp2);
+		vertexArr->push_back(bp3);
+		vertexArr->push_back((*vertexArr)[count_4 + topFirst + 1]);
+		for (int i = 0; i < 3; ++i)
+			normalArr->push_back(normal);
+
+		// left
+		normal = -normal;
+		vertexArr->push_back(bp4);
+		vertexArr->push_back(bp1);
+		vertexArr->push_back((*vertexArr)[count_4 * 3 + topFirst + 1]);
+		for (int i = 0; i < 3; ++i)
+			normalArr->push_back(normal);
+		geometry->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::TRIANGLES, first, vertexArr->size() - first));
+
+		// back right
+		first = vertexArr->size();
+		size_t vertexIdx = topFirst + 1;
+		osg::Vec3 vec = xLen;
+		vec.normalize();
+		for (int i = 0; i < count_4 + 1; ++i, ++vertexIdx)
+		{
+			vertexArr->push_back((*vertexArr)[vertexIdx]);
+			vertexArr->push_back(bp2);
+			normalArr->push_back((bp2 - (*vertexArr)[vertexIdx]) ^ vec);
+			normalArr->back().normalize();
+			normalArr->push_back(normalArr->back());
+
+			vec = quat * vec;
+		}
+		geometry->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUAD_STRIP, first, vertexArr->size() - first));
+
+		// front right
+		first = vertexArr->size();
+		--vertexIdx;
+		vec = yVec;
+		vec.normalize();
+		for (int i = 0; i < count_4 + 1; ++i, ++vertexIdx)
+		{
+			vertexArr->push_back((*vertexArr)[vertexIdx]);
+			vertexArr->push_back(bp3);
+			normalArr->push_back((bp3 - (*vertexArr)[vertexIdx]) ^ vec);
+			normalArr->back().normalize();
+			normalArr->push_back(normalArr->back());
+
+			vec = quat * vec;
+		}
+		geometry->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUAD_STRIP, first, vertexArr->size() - first));
+
+		// front left
+		first = vertexArr->size();
+		--vertexIdx;
+		vec = -xLen;
+		vec.normalize();
+		for (int i = 0; i < count_4 + 1; ++i, ++vertexIdx)
+		{
+			vertexArr->push_back((*vertexArr)[vertexIdx]);
+			vertexArr->push_back(bp4);
+			normalArr->push_back((bp4 - (*vertexArr)[vertexIdx]) ^ vec);
+			normalArr->back().normalize();
+			normalArr->push_back(normalArr->back());
+
+			vec = quat * vec;
+		}
+		geometry->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUAD_STRIP, first, vertexArr->size() - first));
+
+		// back left
+		first = vertexArr->size();
+		--vertexIdx;
+		vec = -yVec;
+		vec.normalize();
+		for (int i = 0; i < count_4 + 1; ++i, ++vertexIdx)
+		{
+			vertexArr->push_back((*vertexArr)[vertexIdx]);
+			vertexArr->push_back(bp1);
+			normalArr->push_back((bp1 - (*vertexArr)[vertexIdx]) ^ vec);
+			normalArr->back().normalize();
+			normalArr->push_back(normalArr->back());
+
+			vec = quat * vec;
+		}
+		geometry->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUAD_STRIP, first, vertexArr->size() - first));
+	
 		return geometry;
 	}
 
