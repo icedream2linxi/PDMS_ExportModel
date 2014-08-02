@@ -599,6 +599,7 @@ void ExportEntity(NHibernate::ISession^ session, const AcDbEntity *pEnt, const A
 	{
 		const PDSqucir &pdsqucir = *PDSqucir::cast(pEnt);
 		AcGeVector3d xLen = pdsqucir.getVectSqu();
+		xLen *= pdsqucir.getLength();
 		xLen.transformBy(mtx);
 		AcGeVector3d normal = pdsqucir.getVectCir();
 		normal.transformBy(mtx);
@@ -609,7 +610,7 @@ void ExportEntity(NHibernate::ISession^ session, const AcDbEntity *pEnt, const A
 		AcGePoint3d circCenter = pdsqucir.getCircCenter();
 		circCenter.transformBy(mtx);
 
-		AcGePoint3d rectCenter = org - xLen / 2.0 - yVec * (pdsqucir.getWidth() / 2.0);
+		AcGePoint3d rectCenter = org + xLen / 2.0 + yVec * (pdsqucir.getWidth() / 2.0);
 		AcGeVector3d vec = circCenter - rectCenter;
 		AcGeVector3d offset = vec.orthoProject(normal);
 		AcGeVector3d height = vec - offset;

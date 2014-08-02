@@ -264,6 +264,8 @@ osg::Group *cOSG::InitOSGFromDb()
 				group->addChild(CreatePrism(session));
 				group->addChild(CreateSphere(session));
 				group->addChild(CreateEllipsoid(session));
+				group->addChild(CreateSaddle(session));
+				group->addChild(CreateRectCirc(session));
 				tx->Commit();
 				return group;
 			}
@@ -525,6 +527,37 @@ osg::Node* cOSG::CreateEllipsoid(NHibernate::ISession^ session)
 		pEllipsoid->addDrawable(Geometry::BuildEllipsoid(center, aLen, ellipsoid->BRadius, ellipsoid->Angle, CvtColor(ellipsoid->Color)));
 	}
 	return pEllipsoid;
+}
+
+osg::Node* cOSG::CreateSaddle(NHibernate::ISession^ session)
+{
+	osg::Geode *pSaddle = new osg::Geode();
+	IList<Saddle^>^ saddleList = session->CreateQuery("from Saddle")->List<Saddle^>();
+	osg::Vec3 org, xLen, zLen;
+	for each (Saddle^ saddle in saddleList)
+	{
+		Point2Vec3(saddle->Org, org);
+		Point2Vec3(saddle->XLen, xLen);
+		Point2Vec3(saddle->ZLen, zLen);
+		pSaddle->addDrawable(Geometry::BuildSaddle(org, xLen, saddle->YLen, zLen, saddle->Radius, CvtColor(saddle->Color)));
+	}
+	return pSaddle;
+}
+
+osg::Node* cOSG::CreateRectCirc(NHibernate::ISession^ session)
+{
+	osg::Geode *pRectCirc = new osg::Geode();
+	IList<RectCirc^>^ rectCircList = session->CreateQuery("from RectCirc")->List<RectCirc^>();
+	osg::Vec3 rectCenter, xLen, height, offset;
+	for each (RectCirc^ rectCirc in rectCircList)
+	{
+		Point2Vec3(rectCirc->RectCenter, rectCenter);
+		Point2Vec3(rectCirc->XLen, xLen);
+		Point2Vec3(rectCirc->Height, height);
+		Point2Vec3(rectCirc->Offset, offset);
+		pRectCirc->addDrawable(Geometry::BuildRectCirc(rectCenter, xLen, rectCirc->YLen, height, offset, rectCirc->Radius, CvtColor(rectCirc->Color)));
+	}
+	return pRectCirc;
 }
 
 void cOSG::CreatePoint(const osg::Vec3 &pos, int idx)
