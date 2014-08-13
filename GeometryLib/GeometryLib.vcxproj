@@ -141,11 +141,17 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="inc\BaseGeometry.h" />
+    <ClInclude Include="inc\Box.h" />
+    <ClInclude Include="inc\Cylinder.h" />
     <ClInclude Include="inc\Geometry.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BaseGeometry.cpp" />
+    <ClCompile Include="Box.cpp" />
+    <ClCompile Include="Cylinder.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

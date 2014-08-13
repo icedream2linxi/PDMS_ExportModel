@@ -15,6 +15,8 @@
 #include "GeometryUtility.h"
 #include <Geometry.hpp>
 #include "ManipulatorTravel.h"
+#include <Box.h>
+#include <Cylinder.h>
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -297,23 +299,20 @@ osg::Node* cOSG::CreateCylinders(NHibernate::ISession^ session)
 {
 	osg::Geode *pCylinders = new osg::Geode();
 	IList<Cylinder^>^ cylList = session->CreateQuery("from Cylinder")->List<Cylinder^>();
-	osg::Vec3 center, dir;
+	osg::Vec3 org, height;
 	for (int i = 0; i < cylList->Count; ++i) {
 		Cylinder^ cyl = cylList->default[i];
-		Point2Vec3(cyl->Org, center);
-		Point2Vec3(cyl->Height, dir);
-		float height = dir.length();
+		Point2Vec3(cyl->Org, org);
+		Point2Vec3(cyl->Height, height);
 
-		osg::Matrixf matrix = osg::Matrixf::rotate(osg::Z_AXIS, dir);
-		osg::Quat quat;
-		quat.set(matrix);
-
-		osg::Cylinder *pOsgCyl = new osg::Cylinder(center + dir / 2.0, safe_cast<float>(cyl->Radius), height);
-		pOsgCyl->setRotation(quat);
-
-		osg::ShapeDrawable *pShape = new osg::ShapeDrawable(pOsgCyl, mHints);
-		pShape->setColor(CvtColor(cyl->Color));
-		pCylinders->addDrawable(pShape);
+		osg::ref_ptr<Geometry::Cylinder> geoCyl(new Geometry::Cylinder);
+		geoCyl->setOrg(org);
+		geoCyl->setHeight(height);
+		geoCyl->setRadius(cyl->Radius);
+		geoCyl->setColor(CvtColor(cyl->Color));
+		geoCyl->draw();
+		
+		pCylinders->addDrawable(geoCyl);
 	}
 
 	//osg::Group *pCylinders = new osg::Group();
@@ -368,19 +367,15 @@ osg::Geode * cOSG::CreateBoxs(NHibernate::ISession^ session)
 		Point2Vec3(box->YLen, ylen);
 		Point2Vec3(box->ZLen, zlen);
 
-		osg::Vec3 center = org + xlen / 2.0 + ylen / 2.0 + zlen / 2.0;
-		osg::Box *pOsgBox = new osg::Box(center, xlen.length(), ylen.length(), zlen.length());
+		osg::ref_ptr<Geometry::Box> geoBox(new Geometry::Box);
+		geoBox->setOrg(org);
+		geoBox->setXLen(xlen);
+		geoBox->setYLen(ylen);
+		geoBox->setZLen(zlen);
+		geoBox->setColor(CvtColor(box->Color));
+		geoBox->draw();
 
-		osg::Matrixf matrix = osg::Matrixf::rotate(osg::Z_AXIS, zlen);
-		osg::Vec3 y = matrix.preMult(osg::Y_AXIS);
-		matrix *= osg::Matrixf::rotate(y, ylen);
-		osg::Quat quat;
-		quat.set(matrix);
-		pOsgBox->setRotation(quat);
-
-		osg::ShapeDrawable *pShape = new osg::ShapeDrawable(pOsgBox, mHints);
-		pShape->setColor(CvtColor(box->Color));
-		pBoxs->addDrawable(pShape);
+		pBoxs->addDrawable(geoBox);
 	}
 	
 	return pBoxs;

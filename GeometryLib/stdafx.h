@@ -21,3 +21,4 @@ using namespace std;
 #include <osg/Quat>
 #include <osg/Geometry>
 #include <osg/Math>
+#include <osg/ref_ptr>
