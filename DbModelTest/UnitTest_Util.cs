@@ -14,7 +14,7 @@ namespace DbModelTest
 			if (File.Exists("test1.db"))
 				File.Delete("test1.db");
 			Util util = new Util();
-			util.init("test1.db");
+			util.init("test1.db", true);
 			Assert.IsTrue(File.Exists("test1.db"));
 		}
 	}

@@ -2,6 +2,7 @@
 #include <osg/ref_ptr>
 #include <osg/Vec3>
 #include <osg/Geode>
+#include <memory>
 
 namespace Geometry
 {
@@ -36,4 +37,31 @@ namespace Geometry
 		double radius, const osg::Vec4 &color);
 	osg::ref_ptr<osg::Geometry> BuildRectCirc(const osg::Vec3 &rectCenter, const osg::Vec3 &xLen, double yLen, const osg::Vec3 &height,
 		const osg::Vec3 &offset, double radius, const osg::Vec4 &color);
+
+	struct CombineGeometry
+	{
+		struct Mesh
+		{
+			int rows;
+			int colums;
+			std::vector<osg::Vec3> vertexs;
+		};
+
+		struct Shell
+		{
+			std::vector<osg::Vec3> vertexs;
+			std::vector<int> faces;
+		};
+
+		struct Polygon
+		{
+			std::vector<osg::Vec3> vertexs;
+		};
+
+		std::vector<std::shared_ptr<Mesh>> meshs;
+		std::vector<std::shared_ptr<Shell>> shells;
+		std::vector<std::shared_ptr<Polygon>> polygons;
+		osg::Vec4 color;
+	};
+	osg::ref_ptr<osg::Geometry> BuildCombineGeometry(const CombineGeometry &cg);
 }

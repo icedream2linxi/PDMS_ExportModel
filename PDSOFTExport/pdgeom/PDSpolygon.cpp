@@ -2026,28 +2026,28 @@ Acad::ErrorStatus PDSpolygon::getOsnapPoints(
 }
 
 // 空间任意平面坐标系原点
-AcGePoint3d               PDSpolygon::getOri() const
+const AcGePoint3d & PDSpolygon::getOri() const
 {
   assertReadEnabled();
   return m_ptOri;
 }
 
 // X轴方向
-AcGeVector3d              PDSpolygon::getV1() const
+const AcGeVector3d & PDSpolygon::getV1() const
 {
   assertReadEnabled();
   return m_vecV1;
 }
 
 // Y轴方向
-AcGeVector3d              PDSpolygon::getV2() const
+const AcGeVector3d & PDSpolygon::getV2() const
 {
   assertReadEnabled();
   return m_vecV2;
 }
 
 // 拉伸方向
-AcGeVector3d              PDSpolygon::getVh() const
+const AcGeVector3d & PDSpolygon::getVh() const
 {
   assertReadEnabled();
   return m_vecVh;
@@ -2071,14 +2071,14 @@ Acad::ErrorStatus         PDSpolygon::setH(double val)
 }
 
 // 外环的顶点
-std::vector<t_PolylineVertex>           PDSpolygon::getOut() const
+const std::vector<t_PolylineVertex> & PDSpolygon::getOut() const
 {
   assertReadEnabled();
   return m_vertexArrOut;
 }
 
 // 内环的顶点
-std::vector< std::vector<t_PolylineVertex> >  PDSpolygon::getIn() const
+const std::vector< std::vector<t_PolylineVertex> > & PDSpolygon::getIn() const
 {
   assertReadEnabled();
   return m_vertexArrArrIn;

@@ -99,6 +99,9 @@
     <ClInclude Include="TestModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CustAcGi.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -180,6 +183,9 @@
       <Filter>pdgeom</Filter>
     </ClCompile>
     <ClCompile Include="TestModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CustAcGi.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

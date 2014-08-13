@@ -63,6 +63,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Shell.cs" />
+    <Compile Include="Mesh.cs" />
+    <Compile Include="Polygon.cs" />
+    <Compile Include="CombineGeometry.cs" />
+    <Compile Include="ShellFace.cs" />
+    <Compile Include="MeshVertex.cs" />
+    <Compile Include="PolygonVertex.cs" />
+    <Compile Include="ShellVertex.cs" />
     <Compile Include="RectCirc.cs" />
     <Compile Include="Saddle.cs" />
     <Compile Include="SCylinder.cs" />

@@ -1,3 +1,6 @@
+ISession
+ISession
+ISession
 // PDSOFTExport.cpp : Defines the exported functions for the DLL application.
 //
 
@@ -12,6 +15,7 @@
 #include <dbobjptr2.h>
 #include <migrtion.h>
 #include <dbapserv.h>
+#include <dbsubd.h>
 
 #include <boost/scope_exit.hpp>
 
@@ -40,6 +44,8 @@
 
 using namespace Autodesk::AutoCAD::Runtime;
 using namespace Autodesk::AutoCAD::ApplicationServices;
+using namespace Iesi::Collections::Generic;
+
 
 void Export();
 
@@ -247,6 +253,147 @@ int GetColor(const AcDbEntity *pEnt)
 	default:
 		return 0xffffff;
 	}
+}
+
+#include <vcclr.h>
+struct MeshOperator
+{
+	MeshOperator(DbModel::CombineGeometry^ cg, NHibernate::ISession^ session)
+	{
+		m_cg = cg;
+		m_session = session;
+	}
+
+	void operator()(Adesk::UInt32 rows,
+		Adesk::UInt32 columns,
+		const AcGePoint3d* pVertexList,
+		const AcGiEdgeData* pEdgeData,
+		const AcGiFaceData* pFaceData,
+		const AcGiVertexData* pVertexData,
+		bool bAutoGenerateNormals)
+	{
+		if (rows <= 1 || columns <= 1)
+			return;
+		
+		DbModel::Mesh^ mesh = gcnew DbModel::Mesh();
+		mesh->Rows = rows;
+		mesh->Colums = columns;
+		mesh->Vertexs = gcnew OrderedSet<DbModel::MeshVertex^>();
+		for (Adesk::UInt32 i = 0; i < rows * columns; ++i)
+		{
+			DbModel::MeshVertex^ vertex = gcnew DbModel::MeshVertex();
+			vertex->Mesh = mesh;
+			vertex->Pos = ToPnt(pVertexList[i]);
+			mesh->Vertexs->Add(vertex);
+			m_session->Save(vertex);
+		}
+
+		if (m_cg->Meshs == nullptr)
+			m_cg->Meshs = gcnew OrderedSet<DbModel::Mesh^>();
+		m_cg->Meshs->Add(mesh);
+		m_session->Save(mesh);
+	}
+
+private:
+	gcroot<DbModel::CombineGeometry^> m_cg;
+	gcroot<NHibernate::ISession^> m_session;
+};
+
+struct ShellOperator
+{
+	ShellOperator(DbModel::CombineGeometry^ cg, NHibernate::ISession^ session)
+	{
+		m_cg = cg;
+		m_session = session;
+	}
+
+	void operator()(Adesk::UInt32 nbVertex,
+		const AcGePoint3d* pVertexList,
+		Adesk::UInt32 faceListSize,
+		const Adesk::Int32* pFaceList,
+		const AcGiEdgeData* pEdgeData,
+		const AcGiFaceData* pFaceData,
+		const AcGiVertexData* pVertexData,
+		const struct resbuf* pResBuf,
+		bool bAutoGenerateNormals)
+	{
+		DbModel::Shell^ shell = gcnew DbModel::Shell();
+		shell->Vertexs = gcnew OrderedSet<DbModel::ShellVertex^>();
+		for (Adesk::UInt32 i = 0; i < nbVertex; ++i)
+		{
+			DbModel::ShellVertex^ vertex = gcnew DbModel::ShellVertex();
+			vertex->Shell = shell;
+			vertex->Pos = ToPnt(pVertexList[i]);
+			shell->Vertexs->Add(vertex);
+			m_session->Save(vertex);
+		}
+
+		shell->Faces = gcnew OrderedSet<DbModel::ShellFace^>();
+		for (Adesk::UInt32 i = 0; i < faceListSize; ++i)
+		{
+			DbModel::ShellFace^ face = gcnew DbModel::ShellFace();
+			face->Shell = shell;
+			face->VertexIndex = pFaceList[i];
+			shell->Faces->Add(face);
+			m_session->Save(face);
+		}
+
+		if (m_cg->Shells == nullptr)
+			m_cg->Shells = gcnew OrderedSet<DbModel::Shell^>();
+		m_cg->Shells->Add(shell);
+		m_session->Save(shell);
+	}
+
+private:
+	gcroot<DbModel::CombineGeometry^> m_cg;
+	gcroot<NHibernate::ISession^> m_session;
+};
+
+struct PolygonOperator
+{
+	PolygonOperator(DbModel::CombineGeometry^ cg, NHibernate::ISession^ session)
+	{
+		m_cg = cg;
+		m_session = session;
+	}
+
+	void operator()(Adesk::UInt32 nbPoints, const AcGePoint3d* pVertexList)
+	{
+		DbModel::Polygon^ polygon = gcnew DbModel::Polygon();
+		polygon->Vertexs = gcnew OrderedSet<DbModel::PolygonVertex^>();
+		for (Adesk::UInt32 i = 0; i < nbPoints; ++i)
+		{
+			DbModel::PolygonVertex^ vertex = gcnew DbModel::PolygonVertex();
+			vertex->Polygon = polygon;
+			vertex->Pos = ToPnt(pVertexList[i]);
+			polygon->Vertexs->Add(vertex);
+			m_session->Save(vertex);
+		}
+		if (m_cg->Polygons == nullptr)
+			m_cg->Polygons = gcnew OrderedSet<DbModel::Polygon^>();
+		m_cg->Polygons->Add(polygon);
+		m_session->Save(polygon);
+	}
+
+private:
+	gcroot<DbModel::CombineGeometry^> m_cg;
+	gcroot<NHibernate::ISession^> m_session;
+};
+
+#include "CustAcGi.hpp"
+void ExportEntity(NHibernate::ISession^ session, const AcDbEntity *pEnt, int color)
+{
+	DbModel::CombineGeometry^ cg = gcnew DbModel::CombineGeometry();
+	CustAcGiWorldDraw worldDraw;
+	MeshOperator mo(cg, session);
+	ShellOperator so(cg, session);
+	PolygonOperator po(cg, session);
+	worldDraw.geom().meshEvent = mo;
+	worldDraw.geom().shellEvent = so;
+	worldDraw.geom().polygonEvent = po;
+	const_cast<AcDbEntity*>(pEnt)->worldDraw(&worldDraw);
+	cg->Color = color;
+	session->Save(cg);
 }
 
 void ExportEntity(NHibernate::ISession^ session, const AcDbEntity *pEnt, const AcGeMatrix3d &mtx)
@@ -627,11 +774,15 @@ void ExportEntity(NHibernate::ISession^ session, const AcDbEntity *pEnt, const A
 	}
 	else if (pEnt->isKindOf(PDRevolve::desc()))
 	{
-
+		ExportEntity(session, pEnt, GetColor(pEnt));
 	}
 	else if (pEnt->isKindOf(PDSpolygon::desc()))
 	{
-
+		ExportEntity(session, pEnt, GetColor(pEnt));
+	}
+	else if (pEnt->isKindOf(AcDb3dSolid::desc()))
+	{
+		ExportEntity(session, pEnt, GetColor(pEnt));
 	}
 	else if (pEnt->isKindOf(AcDbBlockReference::desc()))
 	{
@@ -768,7 +919,7 @@ void DoExport()
 {
 	DbModel::Util^ util = gcnew DbModel::Util();
 	try {
-		util->init(gcnew System::String(L"d:/pdsoft.db"), false);
+		util->init(gcnew System::String(L"d:/pdsoft.db"), true);
 		NHibernate::ISession^ session = util->SessionFactory->OpenSession();
 		try {
 			NHibernate::ITransaction^ tx = session->BeginTransaction();

@@ -266,6 +266,7 @@ osg::Group *cOSG::InitOSGFromDb()
 				group->addChild(CreateEllipsoid(session));
 				group->addChild(CreateSaddle(session));
 				group->addChild(CreateRectCirc(session));
+				group->addChild(CreateCombineGeometry(session));
 				tx->Commit();
 				return group;
 			}
@@ -558,6 +559,60 @@ osg::Node* cOSG::CreateRectCirc(NHibernate::ISession^ session)
 		pRectCirc->addDrawable(Geometry::BuildRectCirc(rectCenter, xLen, rectCirc->YLen, height, offset, rectCirc->Radius, CvtColor(rectCirc->Color)));
 	}
 	return pRectCirc;
+}
+
+//#include <fstream>
+osg::Node* cOSG::CreateCombineGeometry(NHibernate::ISession^ session)
+{
+	osg::Geode *pCg = new osg::Geode();
+	IList<CombineGeometry^>^ cgList = session->CreateQuery("from CombineGeometry")->List<CombineGeometry^>();
+	osg::Vec3 pos;
+	for each (CombineGeometry^ cg in cgList)
+	{
+		Geometry::CombineGeometry geocg;
+		geocg.color = CvtColor(cg->Color);
+		for each (Mesh^ mesh in cg->Meshs)
+		{
+			std::shared_ptr<Geometry::CombineGeometry::Mesh> geomesh(new Geometry::CombineGeometry::Mesh);
+			geomesh->rows = mesh->Rows;
+			geomesh->colums = mesh->Colums;
+			for each (MeshVertex^ vertex in mesh->Vertexs)
+			{
+				Point2Vec3(vertex->Pos, pos);
+				geomesh->vertexs.push_back(pos);
+			}
+			geocg.meshs.push_back(geomesh);
+		}
+
+		for each (DbModel::Shell^ shell in cg->Shells)
+		{
+			std::shared_ptr<Geometry::CombineGeometry::Shell> geoshell(new Geometry::CombineGeometry::Shell);
+			for each (ShellVertex^ vertex in shell->Vertexs)
+			{
+				Point2Vec3(vertex->Pos, pos);
+				geoshell->vertexs.push_back(pos);
+			}
+
+			for each (ShellFace^ face in shell->Faces)
+			{
+				geoshell->faces.push_back(face->VertexIndex);
+			}
+			geocg.shells.push_back(geoshell);
+		}
+
+		for each (DbModel::Polygon^ polygon in cg->Polygons)
+		{
+			std::shared_ptr<Geometry::CombineGeometry::Polygon> geopolygon(new Geometry::CombineGeometry::Polygon);
+			for each (PolygonVertex^ vertex in polygon->Vertexs)
+			{
+				Point2Vec3(vertex->Pos, pos);
+				geopolygon->vertexs.push_back(pos);
+			}
+			geocg.polygons.push_back(geopolygon);
+		}
+		pCg->addDrawable(Geometry::BuildCombineGeometry(geocg));
+	}
+	return pCg;
 }
 
 void cOSG::CreatePoint(const osg::Vec3 &pos, int idx)

@@ -74,20 +74,20 @@ public:
 
 
   // 空间任意平面坐标系原点
-	AcGePoint3d               getOri() const;
+	const AcGePoint3d &getOri() const;
   // X轴方向
-  AcGeVector3d              getV1() const;
+  const AcGeVector3d &getV1() const;
   // Y轴方向
-  AcGeVector3d              getV2() const;
+  const AcGeVector3d &getV2() const;
   // 拉伸方向(世界坐标系坐标)
-  AcGeVector3d              getVh() const;
+  const AcGeVector3d &getVh() const;
   // 拉伸高度
   double                    getH() const;
   Acad::ErrorStatus         setH(double val);
   // 外环的顶点（世界坐标系的坐标）
-  std::vector<t_PolylineVertex>          getOut() const;
+  const std::vector<t_PolylineVertex> &getOut() const;
   // 内环的顶点（世界坐标系的坐标）
-	std::vector< std::vector<t_PolylineVertex> >  getIn() const;
+	const std::vector< std::vector<t_PolylineVertex> > &getIn() const;
 
   // Vh、OutPtArr、InPtArrArr为局部坐标系的坐标
   Acad::ErrorStatus         setVal(const AcGePoint3d& oriPt, const AcGeVector3d& V1, const AcGeVector3d& V2, 

@@ -155,6 +155,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CustAcGi.hpp" />
     <ClInclude Include="pdgeom\AsdkBodyAModelerCallBack.h" />
     <ClInclude Include="pdgeom\FilerCallBack.h" />
     <ClInclude Include="pdgeom\PDBox.h" />
@@ -183,6 +184,7 @@
     <ClInclude Include="TestModel.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CustAcGi.cpp" />
     <ClCompile Include="dllmain.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</CompileAsManaged>
@@ -243,6 +245,9 @@
     </Reference>
     <Reference Include="Acmgd">
       <HintPath>E:\ObjectARX2014\inc\AcMgd.dll</HintPath>
+    </Reference>
+    <Reference Include="Iesi.Collections">
+      <HintPath>..\packages\Iesi.Collections.3.2.0.1001\lib\Net35\Iesi.Collections.dll</HintPath>
     </Reference>
     <Reference Include="NHibernate">
       <HintPath>..\packages\NHibernate.3.3.3.4001\lib\Net35\NHibernate.dll</HintPath>

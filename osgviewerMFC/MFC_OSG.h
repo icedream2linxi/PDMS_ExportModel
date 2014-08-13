@@ -52,6 +52,7 @@ private:
 	osg::Node* CreateSCylinder(NHibernate::ISession^ session);
 	osg::Node* CreateSaddle(NHibernate::ISession^ session);
 	osg::Node* CreateRectCirc(NHibernate::ISession^ session);
+	osg::Node* CreateCombineGeometry(NHibernate::ISession^ session);
 private:
     bool mDone;
     std::string m_ModelName;
