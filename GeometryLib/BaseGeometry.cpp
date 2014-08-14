@@ -26,3 +26,8 @@ void BaseGeometry::subDraw()
 {
 
 }
+
+double GetEpsilon()
+{
+	return 0.00001;
+}

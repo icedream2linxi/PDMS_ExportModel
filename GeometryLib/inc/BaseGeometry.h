@@ -18,3 +18,4 @@ protected:
 	unsigned int m_division;
 };
 
+double GetEpsilon();
