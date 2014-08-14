@@ -145,6 +145,7 @@
     <ClInclude Include="inc\Box.h" />
     <ClInclude Include="inc\Cone.h" />
     <ClInclude Include="inc\Cylinder.h" />
+    <ClInclude Include="inc\Ellipsoid.h" />
     <ClInclude Include="inc\Geometry.hpp" />
     <ClInclude Include="inc\Pyramid.h" />
     <ClInclude Include="inc\Snout.h" />
@@ -158,6 +159,7 @@
     <ClCompile Include="Box.cpp" />
     <ClCompile Include="Cone.cpp" />
     <ClCompile Include="Cylinder.cpp" />
+    <ClCompile Include="Ellipsoid.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="Pyramid.cpp" />
     <ClCompile Include="Snout.cpp" />
