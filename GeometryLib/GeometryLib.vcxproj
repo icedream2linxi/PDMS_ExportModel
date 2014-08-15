@@ -149,6 +149,7 @@
     <ClInclude Include="inc\Geometry.hpp" />
     <ClInclude Include="inc\Pyramid.h" />
     <ClInclude Include="inc\RectCirc.h" />
+    <ClInclude Include="inc\Saddle.h" />
     <ClInclude Include="inc\SCylinder.h" />
     <ClInclude Include="inc\Snout.h" />
     <ClInclude Include="inc\Sphere.h" />
@@ -165,6 +166,7 @@
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="Pyramid.cpp" />
     <ClCompile Include="RectCirc.cpp" />
+    <ClCompile Include="Saddle.cpp" />
     <ClCompile Include="SCylinder.cpp" />
     <ClCompile Include="Snout.cpp" />
     <ClCompile Include="Sphere.cpp" />
