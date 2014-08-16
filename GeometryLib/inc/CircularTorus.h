@@ -1,6 +1,9 @@
 #pragma once
 #include "BaseGeometry.h"
 
+namespace Geometry
+{
+
 // Ô²»·
 class CircularTorus :
 	public BaseGeometry
@@ -134,3 +137,5 @@ inline const bool &CircularTorus::getBottomVis() const
 {
 	return m_bottomVis;
 }
+
+} // namespace Geometry

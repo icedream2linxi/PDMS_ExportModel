@@ -1,6 +1,10 @@
 #pragma once
 #include "BaseGeometry.h"
 
+namespace Geometry
+{
+
+// Õ÷«Ú
 class Ellipsoid :
 	public BaseGeometry
 {
@@ -93,3 +97,5 @@ inline const bool &Ellipsoid::getBottomVis() const
 {
 	return m_bottomVis;
 }
+
+} // namespace Geometry

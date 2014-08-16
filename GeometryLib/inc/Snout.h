@@ -1,7 +1,10 @@
 #pragma once
 #include "BaseGeometry.h"
 
-// Բ̨
+namespace Geometry
+{
+
+// 圆台
 class Snout :
 	public BaseGeometry
 {
@@ -122,4 +125,6 @@ inline bool Snout::isTopVisible() const
 {
 	return m_topVis;
 }
+
+} // namespace Geometry
 

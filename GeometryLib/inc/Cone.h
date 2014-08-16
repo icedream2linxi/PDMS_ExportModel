@@ -1,7 +1,7 @@
 #pragma once
 #include "BaseGeometry.h"
 
-// Բ׶
+// 圆锥
 class Cone :
 	public BaseGeometry
 {

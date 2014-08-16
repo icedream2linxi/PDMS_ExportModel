@@ -2,6 +2,9 @@
 #include "inc\Pyramid.h"
 
 
+namespace Geometry
+{
+
 Pyramid::Pyramid()
 {
 }
@@ -90,3 +93,5 @@ void Pyramid::subDraw()
 
 	addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, vertexArr->size()));
 }
+
+} // namespace Geometry

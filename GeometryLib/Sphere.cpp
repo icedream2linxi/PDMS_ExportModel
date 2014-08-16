@@ -2,6 +2,9 @@
 #include "inc\Sphere.h"
 
 
+namespace Geometry
+{
+
 Sphere::Sphere()
 {
 }
@@ -100,3 +103,5 @@ void Sphere::subDraw()
 	}
 	addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUAD_STRIP, first, vertexArr->size() - first));
 }
+
+} // namespace Geometry

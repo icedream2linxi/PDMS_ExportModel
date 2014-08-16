@@ -4,6 +4,7 @@
 namespace Geometry
 {
 
+// Ô²Öù
 class Cylinder :
 	public BaseGeometry
 {

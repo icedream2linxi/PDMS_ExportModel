@@ -2,6 +2,9 @@
 #include "inc\SCylinder.h"
 
 
+namespace Geometry
+{
+
 SCylinder::SCylinder()
 {
 }
@@ -93,3 +96,5 @@ void SCylinder::subDraw()
 		addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::TRIANGLE_FAN, first, vertexArr->size() - first));
 	}
 }
+
+} // namespace Geometry

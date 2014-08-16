@@ -1,6 +1,10 @@
 #pragma once
 #include "BaseGeometry.h"
 
+namespace Geometry
+{
+
+// Ð±ÇÐÔ²Öù
 class SCylinder :
 	public BaseGeometry
 {
@@ -108,3 +112,5 @@ inline bool SCylinder::isTopVisible() const
 {
 	return m_topVis;
 }
+
+} // namespace Geometry

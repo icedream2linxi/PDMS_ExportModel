@@ -1,6 +1,10 @@
 #pragma once
 #include "BaseGeometry.h"
 
+namespace Geometry
+{
+
+// Ô²Çò
 class Sphere :
 	public BaseGeometry
 {
@@ -93,3 +97,5 @@ inline const bool &Sphere::getBottomVis() const
 {
 	return m_bottomVis;
 }
+
+} // namespace Geometry

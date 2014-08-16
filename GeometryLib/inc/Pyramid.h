@@ -1,6 +1,10 @@
 #pragma once
 #include "BaseGeometry.h"
 
+namespace Geometry
+{
+
+// ¾ØÐÎÌ¨
 class Pyramid :
 	public BaseGeometry
 {
@@ -133,3 +137,5 @@ inline const osg::Vec4 & Pyramid::getColor() const
 {
 	return m_color;
 }
+
+} // namespace Geometry

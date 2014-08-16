@@ -2,6 +2,9 @@
 #include "inc\Wedge.h"
 
 
+namespace Geometry
+{
+
 Wedge::Wedge()
 {
 }
@@ -78,3 +81,5 @@ void Wedge::subDraw()
 		normalArr->push_back(normal);
 	addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, first, vertexArr->size() - first));
 }
+
+} // namespace Geometry

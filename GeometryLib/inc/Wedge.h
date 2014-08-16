@@ -1,6 +1,10 @@
 #pragma once
 #include "BaseGeometry.h"
 
+namespace Geometry
+{
+
+// п╗пн 
 class Wedge :
 	public BaseGeometry
 {
@@ -80,3 +84,5 @@ inline const osg::Vec4 &Wedge::getColor() const
 {
 	return m_color;
 }
+
+} // namespace Geometry

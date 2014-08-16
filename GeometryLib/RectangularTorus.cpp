@@ -2,6 +2,9 @@
 #include "inc\RectangularTorus.h"
 
 
+namespace Geometry
+{
+
 RectangularTorus::RectangularTorus()
 	: m_topVis(true)
 	, m_bottomVis(true)
@@ -234,3 +237,5 @@ void RectangularTorus::subDraw()
 		addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, first, vertexArr->size() - first));
 	}
 }
+
+} // namespace Geometry

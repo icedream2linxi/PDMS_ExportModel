@@ -2,6 +2,9 @@
 #include "inc\Ellipsoid.h"
 
 
+namespace Geometry
+{
+
 Ellipsoid::Ellipsoid()
 {
 }
@@ -118,3 +121,5 @@ void Ellipsoid::subDraw()
 		addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::TRIANGLE_FAN, first, vertexArr->size() - first));
 	}
 }
+
+} // namespace Geometry

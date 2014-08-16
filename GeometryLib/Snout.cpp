@@ -2,6 +2,9 @@
 #include "inc\Snout.h"
 
 
+namespace Geometry
+{
+
 Snout::Snout()
 {
 }
@@ -88,3 +91,5 @@ void Snout::subDraw()
 	}
 	addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUAD_STRIP, first, vertexArr->size() - first));
 }
+
+} // namespace Geometry

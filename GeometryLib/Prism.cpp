@@ -2,6 +2,9 @@
 #include "inc\Prism.h"
 
 
+namespace Geometry
+{
+
 Prism::Prism()
 {
 }
@@ -65,3 +68,5 @@ void Prism::subDraw()
 	}
 	addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, first, vertexArr->size() - first));
 }
+
+} // namespace Geometry

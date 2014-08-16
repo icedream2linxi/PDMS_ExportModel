@@ -2,6 +2,9 @@
 #include "inc\CircularTorus.h"
 
 
+namespace Geometry
+{
+
 CircularTorus::CircularTorus()
 	: m_topVis(true)
 	, m_bottomVis(true)
@@ -146,3 +149,5 @@ void CircularTorus::subDraw()
 		addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::TRIANGLE_FAN, first, vertexArr->size() - first));
 	}
 }
+
+} // namespace Geometry

@@ -1,6 +1,9 @@
 #pragma once
 #include "BaseGeometry.h"
 
+namespace Geometry
+{
+
 // ÃÏ∑Ωµÿ‘≤
 class RectCirc :
 	public BaseGeometry
@@ -108,3 +111,5 @@ inline const osg::Vec4 &RectCirc::getColor() const
 {
 	return m_color;
 }
+
+} // namespace Geometry

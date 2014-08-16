@@ -1,6 +1,9 @@
 #pragma once
 #include "BaseGeometry.h"
 
+namespace Geometry
+{
+
 // Âí°°ÐÎ
 class Saddle :
 	public BaseGeometry
@@ -95,3 +98,5 @@ inline const osg::Vec4 &Saddle::getColor() const
 {
 	return m_color;
 }
+
+} // namespace Geometry

@@ -2,6 +2,9 @@
 #include "inc\CombineGeometry.h"
 
 
+namespace Geometry
+{
+
 CombineGeometry::CombineGeometry()
 {
 }
@@ -110,3 +113,5 @@ void CombineGeometry::subDraw()
 		addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::POLYGON, first, vertexArr->size() - first));
 	}
 }
+
+} // namespace Geometry

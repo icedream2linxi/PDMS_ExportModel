@@ -1,6 +1,9 @@
 #pragma once
 #include "BaseGeometry.h"
 
+namespace Geometry
+{
+
 // ¶àÀâÖù
 class Prism :
 	public BaseGeometry
@@ -82,3 +85,5 @@ inline const osg::Vec4 &Prism::getColor() const
 {
 	return m_color;
 }
+
+} // namespace Geometry

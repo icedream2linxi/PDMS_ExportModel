@@ -3,6 +3,9 @@
 #include <vector>
 #include <memory>
 
+namespace Geometry
+{
+
 struct Mesh
 {
 	int rows;
@@ -21,6 +24,7 @@ struct Polygon
 	std::vector<osg::Vec3> vertexs;
 };
 
+// 组合型体元
 class CombineGeometry :
 	public BaseGeometry
 {
@@ -88,3 +92,5 @@ inline const osg::Vec4 &CombineGeometry::getColor() const
 {
 	return m_color;
 }
+
+} // namespace Geometry

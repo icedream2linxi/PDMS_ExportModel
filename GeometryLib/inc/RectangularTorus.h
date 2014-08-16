@@ -1,6 +1,10 @@
 #pragma once
 #include "BaseGeometry.h"
 
+namespace Geometry
+{
+
+// ¾ØÐÎÔ²»·
 class RectangularTorus :
 	public BaseGeometry
 {
@@ -159,3 +163,5 @@ inline const bool &RectangularTorus::getBottomVis() const
 {
 	return m_bottomVis;
 }
+
+} // namespace Geometry

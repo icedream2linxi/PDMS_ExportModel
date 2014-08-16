@@ -2,6 +2,9 @@
 #include "inc\RectCirc.h"
 
 
+namespace Geometry
+{
+
 RectCirc::RectCirc()
 {
 }
@@ -172,3 +175,5 @@ void RectCirc::subDraw()
 	}
 	addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUAD_STRIP, first, vertexArr->size() - first));
 }
+
+} // namespace Geometry

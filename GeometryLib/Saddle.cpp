@@ -2,6 +2,9 @@
 #include "inc\Saddle.h"
 
 
+namespace Geometry
+{
+
 Saddle::Saddle()
 {
 }
@@ -166,3 +169,5 @@ void Saddle::subDraw()
 
 	addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUAD_STRIP, first, vertexArr->size() - first));
 }
+
+} // namespace Geometry
