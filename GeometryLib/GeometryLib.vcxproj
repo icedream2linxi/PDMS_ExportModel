@@ -150,6 +150,7 @@
     <ClInclude Include="inc\Geometry.hpp" />
     <ClInclude Include="inc\Prism.h" />
     <ClInclude Include="inc\Pyramid.h" />
+    <ClInclude Include="inc\RectangularTorus.h" />
     <ClInclude Include="inc\RectCirc.h" />
     <ClInclude Include="inc\Saddle.h" />
     <ClInclude Include="inc\SCylinder.h" />
@@ -169,6 +170,7 @@
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="Prism.cpp" />
     <ClCompile Include="Pyramid.cpp" />
+    <ClCompile Include="RectangularTorus.cpp" />
     <ClCompile Include="RectCirc.cpp" />
     <ClCompile Include="Saddle.cpp" />
     <ClCompile Include="SCylinder.cpp" />

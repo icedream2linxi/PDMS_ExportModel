@@ -69,6 +69,9 @@
     <ClInclude Include="inc\CircularTorus.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="inc\RectangularTorus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -117,6 +120,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CircularTorus.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RectangularTorus.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
