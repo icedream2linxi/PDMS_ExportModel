@@ -143,6 +143,7 @@
   <ItemGroup>
     <ClInclude Include="inc\BaseGeometry.h" />
     <ClInclude Include="inc\Box.h" />
+    <ClInclude Include="inc\CircularTorus.h" />
     <ClInclude Include="inc\Cone.h" />
     <ClInclude Include="inc\Cylinder.h" />
     <ClInclude Include="inc\Ellipsoid.h" />
@@ -161,6 +162,7 @@
   <ItemGroup>
     <ClCompile Include="BaseGeometry.cpp" />
     <ClCompile Include="Box.cpp" />
+    <ClCompile Include="CircularTorus.cpp" />
     <ClCompile Include="Cone.cpp" />
     <ClCompile Include="Cylinder.cpp" />
     <ClCompile Include="Ellipsoid.cpp" />

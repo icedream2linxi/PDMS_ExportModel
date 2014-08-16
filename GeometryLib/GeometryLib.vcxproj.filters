@@ -66,6 +66,9 @@
     <ClInclude Include="inc\Prism.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="inc\CircularTorus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -111,6 +114,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Prism.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CircularTorus.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
