@@ -13,10 +13,23 @@
 #include <Standard_ConstructionError.hxx>
 
 #include "GeometryUtility.h"
-#include <Geometry.hpp>
+//#include <Geometry.hpp>
 #include "ManipulatorTravel.h"
 #include <Box.h>
+#include <CircularTorus.h>
+#include <CombineGeometry.h>
+#include <Cone.h>
 #include <Cylinder.h>
+#include <Ellipsoid.h>
+#include <Prism.h>
+#include <Pyramid.h>
+#include <RectangularTorus.h>
+#include <RectCirc.h>
+#include <Saddle.h>
+#include <SCylinder.h>
+#include <Snout.h>
+#include <Sphere.h>
+#include <Wedge.h>
 
 using namespace System;
 using namespace System::Collections::Generic;
@@ -89,10 +102,10 @@ void cOSG::InitManipulators(void)
     // Add our trackball manipulator to the switcher
     keyswitchManipulator->addMatrixManipulator( '1', "Trackball", trackball.get());
 
-	osg::ref_ptr<osgGA::AnimationPathManipulator> apm = new osgGA::AnimationPathManipulator();
-	keyswitchManipulator->addMatrixManipulator('2', "Path", apm);
+	//osg::ref_ptr<osgGA::AnimationPathManipulator> apm = new osgGA::AnimationPathManipulator();
+	//keyswitchManipulator->addMatrixManipulator('2', "Path", apm);
 
-	keyswitchManipulator->addMatrixManipulator('3', "Flight", new osgGA::FlightManipulator());
+	//keyswitchManipulator->addMatrixManipulator('3', "Flight", new osgGA::FlightManipulator());
 
     // Init the switcher to the first manipulator (in this case the only manipulator)
     keyswitchManipulator->selectMatrixManipulator(0);  // Zero based index Value
@@ -335,7 +348,15 @@ osg::Node* cOSG::CreateSCylinder(NHibernate::ISession^ session)
 		Point2Vec3(scylinder->Org, org);
 		Point2Vec3(scylinder->Height, height);
 		Point2Vec3(scylinder->BottomNormal, bottomNormal);
-		pSCylinder->addDrawable(Geometry::BuildSCylinder(org, height, bottomNormal, scylinder->Radius, CvtColor(scylinder->Color)));
+
+		osg::ref_ptr<Geometry::SCylinder> geoSCyl(new Geometry::SCylinder);
+		geoSCyl->setOrg(org);
+		geoSCyl->setHeight(height);
+		geoSCyl->setBottomNormal(bottomNormal);
+		geoSCyl->setRadius(scylinder->Radius);
+		geoSCyl->setColor(CvtColor(scylinder->Color));
+		geoSCyl->draw();
+		pSCylinder->addDrawable(geoSCyl);
 	}
 	return pSCylinder;
 }
@@ -343,14 +364,48 @@ osg::Node* cOSG::CreateSCylinder(NHibernate::ISession^ session)
 osg::Node* cOSG::CreateCone(NHibernate::ISession^ session)
 {
 	osg::Geode *pCones = new osg::Geode();
-	IList<Cone^>^ coneList = session->CreateQuery("from Cone")->List<Cone^>();
+	IList<DbModel::Cone^>^ coneList = session->CreateQuery("from Cone")->List<DbModel::Cone^>();
 	osg::Vec3 center, height, offset;
 	for (int i = 0; i < coneList->Count; ++i)
 	{
-		Cone^ cone = coneList->default[i];
+		DbModel::Cone^ cone = coneList->default[i];
 		Point2Vec3(cone->Org, center);
 		Point2Vec3(cone->Height, height);
-		pCones->addDrawable(Geometry::BuildSnout(center, height, offset, cone->BottomRadius, cone->TopRadius, CvtColor(cone->Color)));
+
+		if (osg::equivalent(cone->TopRadius, 0.0, Geometry::GetEpsilon()))
+		{
+			osg::ref_ptr<Geometry::Cone> geoCone(new Geometry::Cone);
+			geoCone->setOrg(center);
+			geoCone->setHeight(height);
+			geoCone->setOffset(offset);
+			geoCone->setRadius(cone->BottomRadius);
+			geoCone->setColor(CvtColor(cone->Color));
+			geoCone->draw();
+			pCones->addDrawable(geoCone);
+		}
+		else if (osg::equivalent(cone->BottomRadius, 0.0, Geometry::GetEpsilon()))
+		{
+			osg::ref_ptr<Geometry::Cone> geoCone(new Geometry::Cone);
+			geoCone->setOrg(center);
+			geoCone->setHeight(height);
+			geoCone->setOffset(offset);
+			geoCone->setRadius(cone->TopRadius);
+			geoCone->setColor(CvtColor(cone->Color));
+			geoCone->draw();
+			pCones->addDrawable(geoCone);
+		}
+		else
+		{
+			osg::ref_ptr<Geometry::Snout> geoSnout(new Geometry::Snout);
+			geoSnout->setOrg(center);
+			geoSnout->setHeight(height);
+			geoSnout->setOffset(offset);
+			geoSnout->setBottomRadius(cone->BottomRadius);
+			geoSnout->setTopRadius(cone->TopRadius);
+			geoSnout->setColor(CvtColor(cone->Color));
+			geoSnout->draw();
+			pCones->addDrawable(geoSnout);
+		}
 	}
 	return pCones;
 }
@@ -391,8 +446,17 @@ osg::Node* cOSG::CreateCircularTorus(NHibernate::ISession^ session)
 		Point2Vec3(ct->Center, center);
 		Point2Vec3(ct->StartPnt, startPnt);
 		Point2Vec3(ct->Normal, normal);
-		pCts->addDrawable(Geometry::BuildCircularTorus(center, startPnt, normal,
-			ct->StartRadius, ct->EndRadius, ct->Angle, CvtColor(ct->Color)));
+
+		osg::ref_ptr<Geometry::CircularTorus> geoCt(new Geometry::CircularTorus);
+		geoCt->setCenter(center);
+		geoCt->setStartPnt(startPnt);
+		geoCt->setNormal(normal);
+		geoCt->setStartRadius(ct->StartRadius);
+		geoCt->setEndRadius(ct->EndRadius);
+		geoCt->setAngle(ct->Angle);
+		geoCt->setColor(CvtColor(ct->Color));
+		geoCt->draw();
+		pCts->addDrawable(geoCt);
 	}
 	return pCts;
 }
@@ -407,7 +471,41 @@ osg::Node* cOSG::CreateSnout(NHibernate::ISession^ session)
 		Point2Vec3(snout->Org, center);
 		Point2Vec3(snout->Height, height);
 		Point2Vec3(snout->Offset, offset);
-		pSnouts->addDrawable(Geometry::BuildSnout(center, height, offset, snout->BottomRadius, snout->TopRadius, CvtColor(snout->Color)));
+
+		if (osg::equivalent(snout->TopRadius, 0.0, Geometry::GetEpsilon()))
+		{
+			osg::ref_ptr<Geometry::Cone> geoCone(new Geometry::Cone);
+			geoCone->setOrg(center);
+			geoCone->setHeight(height);
+			geoCone->setOffset(offset);
+			geoCone->setRadius(snout->BottomRadius);
+			geoCone->setColor(CvtColor(snout->Color));
+			geoCone->draw();
+			pSnouts->addDrawable(geoCone);
+		}
+		else if (osg::equivalent(snout->BottomRadius, 0.0, Geometry::GetEpsilon()))
+		{
+			osg::ref_ptr<Geometry::Cone> geoCone(new Geometry::Cone);
+			geoCone->setOrg(center);
+			geoCone->setHeight(height);
+			geoCone->setOffset(offset);
+			geoCone->setRadius(snout->TopRadius);
+			geoCone->setColor(CvtColor(snout->Color));
+			geoCone->draw();
+			pSnouts->addDrawable(geoCone);
+		}
+		else
+		{
+			osg::ref_ptr<Geometry::Snout> geoSnout(new Geometry::Snout);
+			geoSnout->setOrg(center);
+			geoSnout->setHeight(height);
+			geoSnout->setOffset(offset);
+			geoSnout->setBottomRadius(snout->BottomRadius);
+			geoSnout->setTopRadius(snout->TopRadius);
+			geoSnout->setColor(CvtColor(snout->Color));
+			geoSnout->draw();
+			pSnouts->addDrawable(geoSnout);
+		}
 	}
 	return pSnouts;
 }
@@ -421,17 +519,42 @@ osg::Node* cOSG::CreateDish(NHibernate::ISession^ session)
 		Dish^ dish = dishList->default[i];
 		Point2Vec3(dish->Org, center);
 		Point2Vec3(dish->Height, height);
-		if (dish->IsEllipse)
-			pDishs->addDrawable(Geometry::BuildEllipsoid(center, height, dish->Radius, M_PI, CvtColor(dish->Color)));
-		else
-			pDishs->addDrawable(Geometry::BuildSphere(center, height, dish->Radius, CvtColor(dish->Color)));
+		if (dish->IsEllipse) {
+			osg::ref_ptr<Geometry::Ellipsoid> geoEllipsoid(new Geometry::Ellipsoid);
+			geoEllipsoid->setCenter(center);
+			geoEllipsoid->setALen(height);
+			geoEllipsoid->setBRadius(dish->Radius);
+			geoEllipsoid->setAngle(M_PI);
+			geoEllipsoid->setColor(CvtColor(dish->Color));
+			geoEllipsoid->draw();
+			pDishs->addDrawable(geoEllipsoid);
+		}
+		else {
+			double h = height.length();
+			double sphereRadius = (dish->Radius * dish->Radius + h * h) / 2.0 / h;
+			double angle = M_PI / 2.0 - asin(2.0 * dish->Radius * h / (dish->Radius * dish->Radius + h * h));
+			if (dish->Radius >= h)
+			{
+				angle = M_PI - angle * 2.0;
+			}
+			else
+			{
+				angle = M_PI + angle * 2.0;
+			}
+			osg::Vec3 bottomNormal = -height;
+			bottomNormal.normalize();
+
+			osg::ref_ptr<Geometry::Sphere> geoSphere(new Geometry::Sphere);
+			geoSphere->setCenter(center);
+			geoSphere->setBottomNormal(bottomNormal);
+			geoSphere->setRadius(sphereRadius);
+			geoSphere->setAngle(angle);
+			geoSphere->setColor(CvtColor(dish->Color));
+			geoSphere->draw();
+			pDishs->addDrawable(geoSphere);
+		}
 	}
 	return pDishs;
-}
-
-inline osg::Vec3 ToOsgVec3(Point^ pnt)
-{
-	return osg::Vec3(pnt->X, pnt->Y, pnt->Z);
 }
 
 osg::Node* cOSG::CreatePyramid(NHibernate::ISession^ session)
@@ -445,8 +568,19 @@ osg::Node* cOSG::CreatePyramid(NHibernate::ISession^ session)
 		Point2Vec3(pyramid->Height, height);
 		Point2Vec3(pyramid->XAxis, xAxis);
 		Point2Vec3(pyramid->Offset, offset);
-		pPyramids->addDrawable(Geometry::BuildPyramid(org, height, xAxis, offset,
-			pyramid->BottomXLen, pyramid->BottomYLen, pyramid->TopXLen, pyramid->TopYLen, CvtColor(pyramid->Color)));
+
+		osg::ref_ptr<Geometry::Pyramid> geoPyramid(new Geometry::Pyramid);
+		geoPyramid->setOrg(org);
+		geoPyramid->setHeight(height);
+		geoPyramid->setXAxis(xAxis);
+		geoPyramid->setOffset(offset);
+		geoPyramid->setBottomXLen(pyramid->BottomXLen);
+		geoPyramid->setBottomYLen(pyramid->BottomYLen);
+		geoPyramid->setTopXLen(pyramid->TopXLen);
+		geoPyramid->setTopYLen(pyramid->TopYLen);
+		geoPyramid->setColor(CvtColor(pyramid->Color));
+		geoPyramid->draw();
+		pPyramids->addDrawable(geoPyramid);
 	}
 	return pPyramids.release();
 }
@@ -460,8 +594,19 @@ osg::Node* cOSG::CreateRectangularTorus(NHibernate::ISession^ session)
 		Point2Vec3(rt->Center, center);
 		Point2Vec3(rt->StartPnt, startPnt);
 		Point2Vec3(rt->Normal, normal);
-		pRt->addDrawable(Geometry::BuildRectangularTorus(center, startPnt, normal,
-			rt->StartWidth, rt->StartHeight, rt->EndWidth, rt->EndHeight, rt->Angle, CvtColor(rt->Color)));
+
+		osg::ref_ptr<Geometry::RectangularTorus> geoRt(new Geometry::RectangularTorus);
+		geoRt->setCenter(center);
+		geoRt->setStartPnt(startPnt);
+		geoRt->setNormal(normal);
+		geoRt->setStartWidth(rt->StartWidth);
+		geoRt->setStartHeight(rt->StartHeight);
+		geoRt->setEndWidth(rt->EndWidth);
+		geoRt->setEndHeight(rt->EndHeight);
+		geoRt->setAngle(rt->Angle);
+		geoRt->setColor(CvtColor(rt->Color));
+		geoRt->draw();
+		pRt->addDrawable(geoRt);
 	}
 	return pRt;
 }
@@ -477,7 +622,15 @@ osg::Node* cOSG::CreateWedge(NHibernate::ISession^ session)
 		Point2Vec3(wedge->Edge1, edge1);
 		Point2Vec3(wedge->Edge2, edge2);
 		Point2Vec3(wedge->Height, height);
-		pWedge->addDrawable(Geometry::BuildWedge(org, edge1, edge2, height, CvtColor(wedge->Color)));
+
+		osg::ref_ptr<Geometry::Wedge> geoWedge(new Geometry::Wedge);
+		geoWedge->setOrg(org);
+		geoWedge->setEdge1(edge1);
+		geoWedge->setEdge2(edge2);
+		geoWedge->setHeight(height);
+		geoWedge->setColor(CvtColor(wedge->Color));
+		geoWedge->draw();
+		pWedge->addDrawable(geoWedge);
 	}
 	return pWedge;
 }
@@ -492,7 +645,15 @@ osg::Node* cOSG::CreatePrism(NHibernate::ISession^ session)
 		Point2Vec3(prism->Org, org);
 		Point2Vec3(prism->Height, height);
 		Point2Vec3(prism->BottomStartPnt, bottomStartPnt);
-		pPrism->addDrawable(Geometry::BuildPrism(org, height, bottomStartPnt, prism->EdgeNum, CvtColor(prism->Color)));
+
+		osg::ref_ptr<Geometry::Prism> geoPrism(new Geometry::Prism);
+		geoPrism->setOrg(org);
+		geoPrism->setHeight(height);
+		geoPrism->setBottomStartPnt(bottomStartPnt);
+		geoPrism->setEdgeNum(prism->EdgeNum);
+		geoPrism->setColor(CvtColor(prism->Color));
+		geoPrism->draw();
+		pPrism->addDrawable(geoPrism);
 	}
 	return pPrism;
 }
@@ -506,7 +667,15 @@ osg::Node* cOSG::CreateSphere(NHibernate::ISession^ session)
 	{
 		Point2Vec3(sphere->Center, center);
 		Point2Vec3(sphere->BottomNormal, bottomNormal);
-		pSphere->addDrawable(Geometry::BuildSphere(center, bottomNormal, sphere->Radius, sphere->Angle, CvtColor(sphere->Color)));
+
+		osg::ref_ptr<Geometry::Sphere> geoSphere(new Geometry::Sphere);
+		geoSphere->setCenter(center);
+		geoSphere->setBottomNormal(bottomNormal);
+		geoSphere->setRadius(sphere->Radius);
+		geoSphere->setAngle(sphere->Angle);
+		geoSphere->setColor(CvtColor(sphere->Color));
+		geoSphere->draw();
+		pSphere->addDrawable(geoSphere);
 	}
 	return pSphere;
 }
@@ -520,7 +689,15 @@ osg::Node* cOSG::CreateEllipsoid(NHibernate::ISession^ session)
 	{
 		Point2Vec3(ellipsoid->Center, center);
 		Point2Vec3(ellipsoid->ALen, aLen);
-		pEllipsoid->addDrawable(Geometry::BuildEllipsoid(center, aLen, ellipsoid->BRadius, ellipsoid->Angle, CvtColor(ellipsoid->Color)));
+
+		osg::ref_ptr<Geometry::Ellipsoid> geoEllipsoid(new Geometry::Ellipsoid);
+		geoEllipsoid->setCenter(center);
+		geoEllipsoid->setALen(aLen);
+		geoEllipsoid->setBRadius(ellipsoid->BRadius);
+		geoEllipsoid->setAngle(ellipsoid->Angle);
+		geoEllipsoid->setColor(CvtColor(ellipsoid->Color));
+		geoEllipsoid->draw();
+		pEllipsoid->addDrawable(geoEllipsoid);
 	}
 	return pEllipsoid;
 }
@@ -535,7 +712,16 @@ osg::Node* cOSG::CreateSaddle(NHibernate::ISession^ session)
 		Point2Vec3(saddle->Org, org);
 		Point2Vec3(saddle->XLen, xLen);
 		Point2Vec3(saddle->ZLen, zLen);
-		pSaddle->addDrawable(Geometry::BuildSaddle(org, xLen, saddle->YLen, zLen, saddle->Radius, CvtColor(saddle->Color)));
+
+		osg::ref_ptr<Geometry::Saddle> geoSaddle(new Geometry::Saddle);
+		geoSaddle->setOrg(org);
+		geoSaddle->setXLen(xLen);
+		geoSaddle->setYLen(saddle->YLen);
+		geoSaddle->setZLen(zLen);
+		geoSaddle->setRadius(saddle->Radius);
+		geoSaddle->setColor(CvtColor(saddle->Color));
+		geoSaddle->draw();
+		pSaddle->addDrawable(geoSaddle);
 	}
 	return pSaddle;
 }
@@ -551,7 +737,17 @@ osg::Node* cOSG::CreateRectCirc(NHibernate::ISession^ session)
 		Point2Vec3(rectCirc->XLen, xLen);
 		Point2Vec3(rectCirc->Height, height);
 		Point2Vec3(rectCirc->Offset, offset);
-		pRectCirc->addDrawable(Geometry::BuildRectCirc(rectCenter, xLen, rectCirc->YLen, height, offset, rectCirc->Radius, CvtColor(rectCirc->Color)));
+
+		osg::ref_ptr<Geometry::RectCirc> geoRc(new Geometry::RectCirc);
+		geoRc->setRectCenter(rectCenter);
+		geoRc->setXLen(xLen);
+		geoRc->setYLen(rectCirc->YLen);
+		geoRc->setHeight(height);
+		geoRc->setOffset(offset);
+		geoRc->setRadius(rectCirc->Radius);
+		geoRc->setColor(CvtColor(rectCirc->Color));
+		geoRc->draw();
+		pRectCirc->addDrawable(geoRc);
 	}
 	return pRectCirc;
 }
@@ -564,11 +760,13 @@ osg::Node* cOSG::CreateCombineGeometry(NHibernate::ISession^ session)
 	osg::Vec3 pos;
 	for each (CombineGeometry^ cg in cgList)
 	{
-		Geometry::CombineGeometry geocg;
-		geocg.color = CvtColor(cg->Color);
+		osg::ref_ptr<Geometry::CombineGeometry> geocg(new Geometry::CombineGeometry);
+		geocg->setColor(CvtColor(cg->Color));
+
+		std::vector<std::shared_ptr<Geometry::Mesh>> meshs;
 		for each (Mesh^ mesh in cg->Meshs)
 		{
-			std::shared_ptr<Geometry::CombineGeometry::Mesh> geomesh(new Geometry::CombineGeometry::Mesh);
+			std::shared_ptr<Geometry::Mesh> geomesh(new Geometry::Mesh);
 			geomesh->rows = mesh->Rows;
 			geomesh->colums = mesh->Colums;
 			for each (MeshVertex^ vertex in mesh->Vertexs)
@@ -576,12 +774,14 @@ osg::Node* cOSG::CreateCombineGeometry(NHibernate::ISession^ session)
 				Point2Vec3(vertex->Pos, pos);
 				geomesh->vertexs.push_back(pos);
 			}
-			geocg.meshs.push_back(geomesh);
+			meshs.push_back(geomesh);
 		}
+		geocg->setMeshs(meshs);
 
+		std::vector<std::shared_ptr<Geometry::Shell>> shells;
 		for each (DbModel::Shell^ shell in cg->Shells)
 		{
-			std::shared_ptr<Geometry::CombineGeometry::Shell> geoshell(new Geometry::CombineGeometry::Shell);
+			std::shared_ptr<Geometry::Shell> geoshell(new Geometry::Shell);
 			for each (ShellVertex^ vertex in shell->Vertexs)
 			{
 				Point2Vec3(vertex->Pos, pos);
@@ -592,20 +792,25 @@ osg::Node* cOSG::CreateCombineGeometry(NHibernate::ISession^ session)
 			{
 				geoshell->faces.push_back(face->VertexIndex);
 			}
-			geocg.shells.push_back(geoshell);
+			shells.push_back(geoshell);
 		}
+		geocg->setShells(shells);
 
+		std::vector<std::shared_ptr<Geometry::Polygon>> polygons;
 		for each (DbModel::Polygon^ polygon in cg->Polygons)
 		{
-			std::shared_ptr<Geometry::CombineGeometry::Polygon> geopolygon(new Geometry::CombineGeometry::Polygon);
+			std::shared_ptr<Geometry::Polygon> geopolygon(new Geometry::Polygon);
 			for each (PolygonVertex^ vertex in polygon->Vertexs)
 			{
 				Point2Vec3(vertex->Pos, pos);
 				geopolygon->vertexs.push_back(pos);
 			}
-			geocg.polygons.push_back(geopolygon);
+			polygons.push_back(geopolygon);
 		}
-		pCg->addDrawable(Geometry::BuildCombineGeometry(geocg));
+		geocg->setPolygons(polygons);
+		geocg->draw();
+
+		pCg->addDrawable(geocg);
 	}
 	return pCg;
 }

@@ -2,6 +2,9 @@
 #include "BaseGeometry.h"
 
 
+namespace Geometry
+{
+
 BaseGeometry::BaseGeometry()
 	: m_division(16)
 {
@@ -31,3 +34,5 @@ double GetEpsilon()
 {
 	return 0.00001;
 }
+
+} // namespace Geometry

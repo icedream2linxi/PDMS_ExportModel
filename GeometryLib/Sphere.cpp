@@ -6,6 +6,7 @@ namespace Geometry
 {
 
 Sphere::Sphere()
+	: m_bottomVis(true)
 {
 }
 

@@ -6,6 +6,8 @@ namespace Geometry
 {
 
 Snout::Snout()
+	: m_bottomVis(true)
+	, m_topVis(true)
 {
 }
 

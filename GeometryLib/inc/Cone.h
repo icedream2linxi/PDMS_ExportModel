@@ -1,6 +1,9 @@
 #pragma once
 #include "BaseGeometry.h"
 
+namespace Geometry
+{
+
 // 圆锥
 class Cone :
 	public BaseGeometry
@@ -97,3 +100,5 @@ inline bool Cone::isBottomVisible() const
 {
 	return m_bottomVis;
 }
+
+} // namespace Geometry

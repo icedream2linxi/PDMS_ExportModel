@@ -6,6 +6,8 @@ namespace Geometry
 {
 
 SCylinder::SCylinder()
+	: m_bottomVis(true)
+	, m_topVis(true)
 {
 }
 

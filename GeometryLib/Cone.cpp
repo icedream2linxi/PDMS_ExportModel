@@ -2,7 +2,11 @@
 #include "inc\Cone.h"
 
 
+namespace Geometry
+{
+
 Cone::Cone()
+	: m_bottomVis(true)
 {
 }
 
@@ -76,3 +80,5 @@ void Cone::subDraw()
 		addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::TRIANGLE_FAN, first, vertexArr->size() - first));
 	}
 }
+
+} // namespace Geometry

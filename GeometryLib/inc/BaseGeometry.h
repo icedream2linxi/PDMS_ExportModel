@@ -1,6 +1,9 @@
 #pragma once
 #include <osg/Geometry>
 
+namespace Geometry
+{
+
 class BaseGeometry :
 	public osg::Geometry
 {
@@ -19,3 +22,5 @@ protected:
 };
 
 double GetEpsilon();
+
+} // namespace Geometry

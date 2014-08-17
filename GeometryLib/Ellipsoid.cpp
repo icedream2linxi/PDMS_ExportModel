@@ -6,6 +6,7 @@ namespace Geometry
 {
 
 Ellipsoid::Ellipsoid()
+	: m_bottomVis(true)
 {
 }
 
