@@ -35,24 +35,9 @@ public:
 
 private:
 	void InitAxis(double width, double height);
-	osg::Group *InitOSGFromDb();
-	osg::Node *CreateCylinders(NHibernate::ISession^ session);
-	osg::Geode *CreateBoxs(NHibernate::ISession^ session);
-	osg::Node* CreateCircularTorus(NHibernate::ISession^ session);
-	void CreatePoint(const osg::Vec3 &pos, int idx = 0);
-	osg::Node* CreateSnout(NHibernate::ISession^ session);
-	osg::Node* CreateDish(NHibernate::ISession^ session);
-	osg::Node* CreateCone(NHibernate::ISession^ session);
-	osg::Node* CreatePyramid(NHibernate::ISession^ session);
-	osg::Node* CreateRectangularTorus(NHibernate::ISession^ session);
-	osg::Node* CreateWedge(NHibernate::ISession^ session);
-	osg::Node* CreatePrism(NHibernate::ISession^ session);
-	osg::Node* CreateSphere(NHibernate::ISession^ session);
-	osg::Node* CreateEllipsoid(NHibernate::ISession^ session);
-	osg::Node* CreateSCylinder(NHibernate::ISession^ session);
-	osg::Node* CreateSaddle(NHibernate::ISession^ session);
-	osg::Node* CreateRectCirc(NHibernate::ISession^ session);
-	osg::Node* CreateCombineGeometry(NHibernate::ISession^ session);
+	osg::ref_ptr<osg::Group> InitOSGFromDb();
+	void CreatePoint(const osg::Vec3 &pos, int idx);
+
 private:
     bool mDone;
     std::string m_ModelName;

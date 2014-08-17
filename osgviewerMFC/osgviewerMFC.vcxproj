@@ -165,7 +165,11 @@
     <ClInclude Include="MFC_OSG_MDI.h" />
     <ClInclude Include="MFC_OSG_MDIDoc.h" />
     <ClInclude Include="MFC_OSG_MDIView.h" />
+    <ClInclude Include="NetLoad.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="sqlite3.h" />
+    <ClInclude Include="sqlite3ext.h" />
+    <ClInclude Include="SqliteLoad.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
@@ -177,6 +181,14 @@
     <ClCompile Include="MFC_OSG_MDI.cpp" />
     <ClCompile Include="MFC_OSG_MDIDoc.cpp" />
     <ClCompile Include="MFC_OSG_MDIView.cpp" />
+    <ClCompile Include="NetLoad.cpp" />
+    <ClCompile Include="sqlite3.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</CompileAsManaged>
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</CompileAsManaged>
+    </ClCompile>
+    <ClCompile Include="SqliteLoad.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
