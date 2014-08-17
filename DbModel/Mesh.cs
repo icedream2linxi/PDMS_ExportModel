@@ -20,10 +20,10 @@ namespace DbModel
 		[Key(1, Column = "mesh_id")]
 		public virtual ISet<MeshVertex> Vertexs { get; set; }
 
-		[Property]
+		[Property(Column = "rows")]
 		public virtual int Rows { get; set; }
 
-		[Property]
+		[Property(Column = "columns")]
 		public virtual int Colums { get; set; }
 
 		[ManyToOne(Column = "combine_geometry_id")]
