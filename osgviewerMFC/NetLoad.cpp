@@ -19,6 +19,8 @@
 #include <Sphere.h>
 #include <Wedge.h>
 
+#ifdef __cplusplus_cli
+
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace NHibernate;
@@ -580,3 +582,5 @@ void NetLoad(osg::ref_ptr<osg::Group> &root, const std::string &filePath)
 		util->~Util();
 	}
 }
+
+#endif // __cplusplus_cli

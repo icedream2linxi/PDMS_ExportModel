@@ -7,17 +7,18 @@
 class SqliteLoad
 {
 public:
-	SqliteLoad(osg::ref_ptr<osg::Group> &root, const std::wstring &filePath);
+	SqliteLoad(osg::ref_ptr<osg::Group> &root, const std::string &filePath);
 	~SqliteLoad();
 	bool doLoad();
-	const wchar_t *getErrorMessage() const;
+	const char *getErrorMessage() const;
 
 private:
 	int init();
 	bool loadBox();
+	bool loadCircularTorus();
 
 private:
-	std::wstring m_filePath;
+	std::string m_filePath;
 	osg::ref_ptr<osg::Group> m_root;
 
 	sqlite3 *m_pDb;

@@ -4,6 +4,8 @@
 #include <osg/ref_ptr>
 #include <osg/Geometry>
 
+#ifdef __cplusplus_cli
+
 #include <Precision.hxx>
 
 #include <gp_Ax3.hxx>
@@ -247,12 +249,6 @@ inline gp_Vec GetOrthoVec(gp_Vec &vec)
 	return vec.Crossed(zAxis);
 }
 
-inline osg::Vec4 CvtColor(int color)
-{
-	System::Drawing::Color col = System::Drawing::Color::FromArgb(color);
-	return osg::Vec4(col.R / 256.0, col.G / 256.0, col.B / 256.0, col.A / 256.0);
-}
-
 osg::Node* BuildCylinder(DbModel::Cylinder^ cyl)
 {
 	gp_Ax2 axis;
@@ -456,3 +452,20 @@ osg::Node* BuildRectangularTorus(DbModel::RectangularTorus^ rt)
 //	gp_Vec height = ToGpVec(pyramid->Height);
 //	gp_Vec xAxis = ToGpVec(pyramid->XAxis);
 //}
+
+#endif // __cplusplus_cli
+
+osg::Vec4 CvtColor(int color)
+{
+	//System::Drawing::Color col = System::Drawing::Color::FromArgb(color);
+	//return osg::Vec4(col.R / 256.0, col.G / 256.0, col.B / 256.0, col.A / 256.0);
+
+	BYTE b = color & 0xff;
+	color >>= 8;
+	BYTE g = color & 0xff;
+	color >>= 8;
+	BYTE r = color & 0xff;
+	color >>= 8;
+	BYTE a = color & 0xff;
+	return osg::Vec4(r / 256.0, g / 256.0, b / 256.0, a / 256.0);
+}

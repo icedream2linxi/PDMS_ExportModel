@@ -8,11 +8,8 @@
 #include <osg/Multisample>
 #include <osgGA/AnimationPathManipulator>
 
-#include <Standard_ErrorHandler.hxx>
-#include <Standard_Failure.hxx>
-#include <Standard_ConstructionError.hxx>
-
-#include "NetLoad.h"
+//#include "NetLoad.h"
+#include "SqliteLoad.h"
 
 #define MULTI_SAMPLES 0
 
@@ -237,7 +234,11 @@ void cOSG::PostFrameUpdate()
 osg::ref_ptr<osg::Group> cOSG::InitOSGFromDb()
 {
 	osg::ref_ptr<osg::Group> group(new osg::Group);
-	NetLoad(group, m_ModelName);
+	//NetLoad(group, m_ModelName);
+
+	SqliteLoad sl(group, m_ModelName);
+	if (!sl.doLoad())
+		AfxMessageBox(sl.getErrorMessage());
 
 	return group;
 }
