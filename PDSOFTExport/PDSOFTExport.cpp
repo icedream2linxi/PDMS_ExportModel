@@ -474,13 +474,28 @@ void ExportEntity(NHibernate::ISession^ session, const AcDbEntity *pEnt, const A
 		AcGeVector3d height = pdcone.getpointEnd() - pdcone.getpointStart();
 		height.transformBy(mtx);
 
-		DbModel::Cone^ cone = gcnew DbModel::Cone();
-		cone->Org = ToPnt(org);
-		cone->Height = ToPnt(height);
-		cone->BottomRadius = pdcone.getDiameter1() / 2.0;
-		cone->TopRadius = pdcone.getDiameter2() / 2.0;
-		cone->Color = GetColor(pEnt);
-		session->Save(cone);
+		if (pdcone.getDiameter1() < 1.0e-5 || pdcone.getDiameter2() < 1.0e-5)
+		{
+			DbModel::Cone^ cone = gcnew DbModel::Cone();
+			cone->Org = ToPnt(org);
+			cone->Height = ToPnt(height);
+			cone->Offset = ToPnt(AcGeVector3d::kIdentity);
+			cone->Radius = pdcone.getDiameter1() > pdcone.getDiameter2() ? pdcone.getDiameter1() / 2.0
+				: pdcone.getDiameter2() / 2.0;
+			cone->Color = GetColor(pEnt);
+			session->Save(cone);
+		}
+		else
+		{
+			DbModel::Snout^ snout = gcnew DbModel::Snout();
+			snout->Org = ToPnt(org);
+			snout->Height = ToPnt(height);
+			snout->Offset = ToPnt(AcGeVector3d::kIdentity);
+			snout->BottomRadius = pdcone.getDiameter1() / 2.0;
+			snout->TopRadius = pdcone.getDiameter2() / 2.0;
+			snout->Color = GetColor(pEnt);
+			session->Save(snout);
+		}
 	}
 	else if (pEnt->isKindOf(PDEcone::desc()))
 	{
@@ -500,14 +515,28 @@ void ExportEntity(NHibernate::ISession^ session, const AcDbEntity *pEnt, const A
 
 		offset *= fabs(pdcone.getDiameter1() / 2.0 - pdcone.getDiameter2() / 2.0);
 
-		DbModel::Snout^ cone = gcnew DbModel::Snout();
-		cone->Org = ToPnt(org);
-		cone->Height = ToPnt(height);
-		cone->BottomRadius = pdcone.getDiameter1() / 2.0;
-		cone->TopRadius = pdcone.getDiameter2() / 2.0;
-		cone->Offset = ToPnt(offset);
-		cone->Color = GetColor(pEnt);
-		session->Save(cone);
+		if (pdcone.getDiameter1() < 1.0e-5 || pdcone.getDiameter2() < 1.0e-5)
+		{
+			DbModel::Cone^ cone = gcnew DbModel::Cone();
+			cone->Org = ToPnt(org);
+			cone->Height = ToPnt(height);
+			cone->Offset = ToPnt(offset);
+			cone->Radius = pdcone.getDiameter1() > pdcone.getDiameter2() ? pdcone.getDiameter1() / 2.0
+				: pdcone.getDiameter2() / 2.0;
+			cone->Color = GetColor(pEnt);
+			session->Save(cone);
+		}
+		else
+		{
+			DbModel::Snout^ cone = gcnew DbModel::Snout();
+			cone->Org = ToPnt(org);
+			cone->Height = ToPnt(height);
+			cone->BottomRadius = pdcone.getDiameter1() / 2.0;
+			cone->TopRadius = pdcone.getDiameter2() / 2.0;
+			cone->Offset = ToPnt(offset);
+			cone->Color = GetColor(pEnt);
+			session->Save(cone);
+		}
 	}
 	else if (pEnt->isKindOf(PDOval::desc()))
 	{

@@ -202,3 +202,8 @@ bool SqliteLoad::loadCircularTorus()
 
 	return true;
 }
+
+bool SqliteLoad::loadCone()
+{
+	return true;
+}

@@ -16,6 +16,7 @@ private:
 	int init();
 	bool loadBox();
 	bool loadCircularTorus();
+	bool loadCone();
 
 private:
 	std::string m_filePath;

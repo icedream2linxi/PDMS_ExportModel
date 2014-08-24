@@ -20,11 +20,11 @@ namespace DbModel
 		[Point(After = typeof(IdAttribute), Name = "Height")]
 		public virtual Point Height { get; set; }
 
-		[Property(Column = "top_radius")]
-		public virtual double TopRadius { get; set; }
+		[Point(After = typeof(IdAttribute), Name = "Offset")]
+		public virtual Point Offset { get; set; }
 
-		[Property(Column = "bottom_radius")]
-		public virtual double BottomRadius { get; set; }
+		[Property(Column = "radius")]
+		public virtual double Radius { get; set; }
 
 		[Property(Column = "color")]
 		public virtual int Color { get; set; }

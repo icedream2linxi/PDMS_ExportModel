@@ -469,21 +469,32 @@ namespace ExportModel
 							double ptdm = GetExper(gEle, DbAttributeInstance.PTDM).Eval(ele);
 							double pbdm = GetExper(gEle, DbAttributeInstance.PBDM).Eval(ele);
 							double poff = GetExper(gEle, DbAttributeInstance.POFF).Eval(ele);
-	
-							Snout snout = new Snout();
-							snout.BottomRadius = pbdm / 2.0;
-							snout.TopRadius = ptdm / 2.0;
-	
+
 							D3Vector tdir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(paax.Dir));
 							D3Point pos = eleTrans.Multiply(GeometryUtility.ToD3Point(paax.Pos));
 							D3Vector bdir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(pbax.Dir));
 	
-							snout.Org = new Point(pos).MoveBy(tdir, pbdi);
-							snout.Offset = new Point(bdir).Mul(poff);
-							snout.Height = new Point(tdir).Mul(ptdi - pbdi);
-							snout.Color = color;
-	
-							session.Save(snout);
+							if (pbdm < 1.0e-5 || ptdm < 1.0e-5)
+							{
+								Cone cone = new Cone();
+								cone.Radius = pbdm > ptdm ? pbdm / 2.0 : ptdm / 2.0;
+								cone.Org = new Point(pos).MoveBy(tdir, pbdi);
+								cone.Offset = new Point(bdir).Mul(poff);
+								cone.Height = new Point(tdir).Mul(ptdi - pbdi);
+								cone.Color = color;
+								session.Save(cone);
+							}
+							else
+							{
+								Snout snout = new Snout();
+								snout.BottomRadius = pbdm / 2.0;
+								snout.TopRadius = ptdm / 2.0;
+								snout.Org = new Point(pos).MoveBy(tdir, pbdi);
+								snout.Offset = new Point(bdir).Mul(poff);
+								snout.Height = new Point(tdir).Mul(ptdi - pbdi);
+								snout.Color = color;
+								session.Save(snout);
+							}
 						}
 						else if (gEle.GetElementType() == DbElementTypeInstance.SDSH)
 						{
@@ -725,14 +736,31 @@ namespace ExportModel
 				D3Vector dir = eleTrans.Multiply(D3Vector.D3UP);
 				double height = ele.GetDouble(DbAttributeInstance.HEIG);
 
-				Cone cone = new Cone();
-				cone.Org = new Point(pos).MoveBy(dir, -height / 2.0);
-				cone.Height = new Point(dir)
-					.Mul(height);
-				cone.TopRadius = ele.GetDouble(DbAttributeInstance.DTOP) / 2.0;
-				cone.BottomRadius = ele.GetDouble(DbAttributeInstance.DBOT) / 2.0;
-				cone.Color = color;
-				session.Save(cone);
+				double topRadius = ele.GetDouble(DbAttributeInstance.DTOP) / 2.0;
+				double bottomRadius = ele.GetDouble(DbAttributeInstance.DBOT) / 2.0;
+				if (topRadius < 1.0e-5 || bottomRadius < 1.0e-5)
+				{
+					Cone cone = new Cone();
+					cone.Org = new Point(pos).MoveBy(dir, -height / 2.0);
+					cone.Height = new Point(dir)
+						.Mul(height);
+					cone.Offset = new Point();
+					cone.Radius = topRadius > bottomRadius ? topRadius : bottomRadius;
+					cone.Color = color;
+					session.Save(cone);
+				}
+				else
+				{
+					Snout snout = new Snout();
+					snout.Org = new Point(pos).MoveBy(dir, -height / 2.0);
+					snout.Height = new Point(dir)
+						.Mul(height);
+					snout.Offset = new Point();
+					snout.TopRadius = topRadius;
+					snout.BottomRadius = bottomRadius;
+					snout.Color = color;
+					session.Save(snout);
+				}
 			}
 			else if (ele.GetElementType() == DbElementTypeInstance.PYRAMID)
 			{
