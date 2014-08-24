@@ -63,6 +63,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SetRawXmlAttribute.cs" />
     <Compile Include="Shell.cs" />
     <Compile Include="Mesh.cs" />
     <Compile Include="Polygon.cs" />

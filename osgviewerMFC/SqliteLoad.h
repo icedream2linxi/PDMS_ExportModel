@@ -17,6 +17,17 @@ private:
 	bool loadBox();
 	bool loadCircularTorus();
 	bool loadCone();
+	bool loadCylinder();
+	bool loadEllipsoid();
+	bool loadPrism();
+	bool loadPyramid();
+	bool loadRectCirc();
+	bool loadRectangularTorus();
+	bool loadSaddle();
+	bool loadSCylinder();
+	bool loadSnout();
+	bool loadSphere();
+	bool loadWedge();
 
 private:
 	std::string m_filePath;

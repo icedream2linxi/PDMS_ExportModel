@@ -15,9 +15,7 @@ namespace DbModel
 		[Generator(2, Class="native")]
 		public virtual int ID { get; set; }
 
-		[Set(0, OrderBy = "id asc")]
-		[OneToMany(1, ClassType = typeof(PolygonVertex))]
-		[Key(1, Column = "polygon_id")]
+		[SetRawXml(After = typeof(IdAttribute), Id = "polygon_id", Name = "Vertexs", Type = typeof(PolygonVertex))]
 		public virtual ISet<PolygonVertex> Vertexs { get; set; }
 
 		[ManyToOne(Column = "combine_geometry_id")]

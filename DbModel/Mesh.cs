@@ -15,9 +15,7 @@ namespace DbModel
 		[Generator(2, Class="native")]
 		public virtual int ID { get; set; }
 
-		[Set(0, OrderBy = "id asc")]
-		[OneToMany(1, ClassType = typeof(MeshVertex))]
-		[Key(1, Column = "mesh_id")]
+		[SetRawXml(After = typeof(IdAttribute), Id = "mesh_id", Name = "Vertexs", Type = typeof(MeshVertex))]
 		public virtual ISet<MeshVertex> Vertexs { get; set; }
 
 		[Property(Column = "rows")]

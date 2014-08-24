@@ -15,19 +15,13 @@ namespace DbModel
 		[Generator(2, Class = "native")]
 		public virtual int ID { get; set; }
 
-		[Set(0, OrderBy = "id asc")]
-		[Key(1, Column = "combine_geometry_id")]
-		[OneToMany(1, ClassType = typeof(Mesh))]
+		[SetRawXml(After = typeof(IdAttribute), Id = "combine_geometry_id", Name = "Meshs", Type = typeof(Mesh))]
 		public virtual ISet<Mesh> Meshs { get; set; }
 
-		[Set(0, OrderBy = "id asc")]
-		[OneToMany(1, ClassType = typeof(Shell))]
-		[Key(1, Column = "combine_geometry_id")]
+		[SetRawXml(After = typeof(IdAttribute), Id = "combine_geometry_id", Name = "Shells", Type = typeof(Shell))]
 		public virtual ISet<Shell> Shells { get; set; }
 
-		[Set(0, OrderBy = "id asc")]
-		[OneToMany(1, ClassType = typeof(Polygon))]
-		[Key(1, Column = "combine_geometry_id")]
+		[SetRawXml(After = typeof(IdAttribute), Id = "combine_geometry_id", Name = "Polygons", Type = typeof(Polygon))]
 		public virtual ISet<Polygon> Polygons { get; set; }
 
 		[Property(Column = "color")]
