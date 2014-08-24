@@ -389,7 +389,7 @@ namespace ExportModel
 							ct.Normal = new Point(eleTrans.Multiply(GeometryUtility.ToD3VectorRef(normal)));
 	
 							ct.StartPnt = new Point(eleTrans.Multiply(GeometryUtility.ToD3Point(pbax.Pos)));
-							ct.Radius = pdia / 2.0;
+							ct.StartRadius = ct.EndRadius = pdia / 2.0;
 	
 							double mRadius = 0.0;
 							if (!paax.Dir.IsParallel(pbax.Dir))
@@ -432,8 +432,8 @@ namespace ExportModel
 							rt.Normal = new Point(eleTrans.Multiply(GeometryUtility.ToD3VectorRef(normal)));
 	
 							rt.StartPnt = new Point(eleTrans.Multiply(GeometryUtility.ToD3Point(pbax.Pos)));
-							rt.Width = pdia;
-							rt.Height = phei;
+							rt.StartWidth = rt.EndWidth = pdia;
+							rt.StartHeight = rt.EndHeight = phei;
 	
 							double mRadius = 0.0;
 							if (!paax.Dir.IsParallel(pbax.Dir))
@@ -496,14 +496,32 @@ namespace ExportModel
 							double prad = GetExper(gEle, DbAttributeInstance.PRAD).Eval(ele);
 	
 							D3Vector dir = eleTrans.Multiply(GeometryUtility.ToD3VectorRef(paxi.Dir));
-							Dish dish = new Dish();
-							dish.Org = new Point(eleTrans.Multiply(GeometryUtility.ToD3Point(paxi.Pos)))
-								.MoveBy(dir, pdis);
-							dish.Height = new Point(dir).Mul(phei);
-							dish.Radius = pdia / 2.0;
-							dish.IsEllipse = prad > 0.0;
-							dish.Color = color;
-							session.Save(dish);
+							if (prad > 0.0)
+							{
+								Ellipsoid ellipsoid = new Ellipsoid();
+								ellipsoid.Center = new Point(eleTrans.Multiply(GeometryUtility.ToD3Point(paxi.Pos)))
+									.MoveBy(dir, pdis);
+								ellipsoid.ALen = new Point(dir).Mul(phei);
+								ellipsoid.BRadius = pdia / 2.0;
+								ellipsoid.Color = color;
+								session.Save(ellipsoid);
+							}
+							else
+							{
+								Sphere sphere = new Sphere();
+								sphere.Center = new Point(eleTrans.Multiply(GeometryUtility.ToD3Point(paxi.Pos)))
+									.MoveBy(dir, pdis);
+								double bottomRadius = pdia / 2.0;
+								sphere.Radius = (bottomRadius * bottomRadius + phei * phei) / 2.0 / phei;
+								sphere.BottomNormal = new Point(-dir);
+								double angle = Math.PI / 2.0 - Math.Asin(2.0 * bottomRadius * phei / (bottomRadius * bottomRadius + phei * phei));
+								if (bottomRadius >= phei)
+									sphere.Angle = Math.PI - angle * 2.0;
+								else
+									sphere.Angle = Math.PI + angle * 2.0;
+								sphere.Color = color;
+								session.Save(sphere);
+							}
 						}
 						else if (gEle.GetElementType() == DbElementTypeInstance.LPYRAMID)
 						{
@@ -673,14 +691,32 @@ namespace ExportModel
 			{
 				D3Transform eleTrans = currTrans.Multiply(GetTransform(ele));
 
-				Dish dish = new Dish();
-				dish.Org = new Point(eleTrans.Multiply(GeometryUtility.Org));
-				dish.Height = new Point(eleTrans.Multiply(D3Vector.D3UP))
-					.Mul(ele.GetDouble(DbAttributeInstance.HEIG));
-				dish.Radius = ele.GetDouble(DbAttributeInstance.DIAM) / 2.0;
-				dish.IsEllipse = ele.GetDouble(DbAttributeInstance.RADI) > 0.0;
-				dish.Color = color;
-				session.Save(dish);
+				D3Vector normal = eleTrans.Multiply(D3Vector.D3UP);
+				double h = ele.GetDouble(DbAttributeInstance.HEIG);
+				double bottomRadius = ele.GetDouble(DbAttributeInstance.DIAM) / 2.0;
+				if (ele.GetDouble(DbAttributeInstance.RADI) > 0.0)
+				{
+					Ellipsoid ellipsoid = new Ellipsoid();
+					ellipsoid.Center = new Point(eleTrans.Multiply(GeometryUtility.Org));
+					ellipsoid.ALen = new Point(normal).Mul(ele.GetDouble(DbAttributeInstance.HEIG));
+					ellipsoid.BRadius = bottomRadius;
+					ellipsoid.Color = color;
+					session.Save(ellipsoid);
+				}
+				else
+				{
+					Sphere sphere = new Sphere();
+					sphere.Center = new Point(eleTrans.Multiply(GeometryUtility.Org));
+					sphere.BottomNormal = new Point(-normal);
+					sphere.Radius = (bottomRadius * bottomRadius + h * h) / 2.0 / h;
+					sphere.Angle = Math.PI / 2.0 - Math.Asin(2.0 * bottomRadius * h / (bottomRadius * bottomRadius + h * h));
+					if (bottomRadius >= h)
+						sphere.Angle = Math.PI - sphere.Angle * 2.0;
+					else
+						sphere.Angle = Math.PI + sphere.Angle * 2.0;
+					sphere.Color = color;
+					session.Save(sphere);
+				}
 			}
 			else if (ele.GetElementType() == DbElementTypeInstance.CONE)
 			{

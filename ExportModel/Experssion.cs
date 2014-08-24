@@ -101,6 +101,7 @@ namespace ExportModel
 					op = null;
 					break;
 			}
+			op = null;
 			return isEof;
 		}
 
