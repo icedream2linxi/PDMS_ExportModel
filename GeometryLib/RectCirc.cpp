@@ -61,10 +61,10 @@ void RectCirc::subDraw()
 	osg::Vec3 bp2 = m_rectCenter + m_xLen / 2.0 - yVec / 2.0;
 	osg::Vec3 bp3 = m_rectCenter + m_xLen / 2.0 + yVec / 2.0;
 	osg::Vec3 bp4 = m_rectCenter - m_xLen / 2.0 + yVec / 2.0;
-	vertexArr->push_back(bp1);
-	vertexArr->push_back(bp2);
-	vertexArr->push_back(bp3);
 	vertexArr->push_back(bp4);
+	vertexArr->push_back(bp3);
+	vertexArr->push_back(bp2);
+	vertexArr->push_back(bp1);
 	osg::Vec3 normal = -topNormal;
 	for (int i = 0; i < 4; ++i)
 		normalArr->push_back(normal);
@@ -75,9 +75,9 @@ void RectCirc::subDraw()
 	// front
 	normal = yVec;
 	normal.normalize();
-	vertexArr->push_back(bp4);
-	vertexArr->push_back(bp3);
 	vertexArr->push_back((*vertexArr)[count_4 * 2 + topFirst + 1]);
+	vertexArr->push_back(bp3);
+	vertexArr->push_back(bp4);
 	for (int i = 0; i < 3; ++i)
 		normalArr->push_back(normal);
 
