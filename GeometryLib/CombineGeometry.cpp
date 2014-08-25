@@ -114,4 +114,18 @@ void CombineGeometry::subDraw()
 	}
 }
 
+void CombineGeometry::addMesh(std::shared_ptr<Mesh> &mesh)
+{
+	m_meshs.push_back(mesh);
+}
+
+void CombineGeometry::addShell(std::shared_ptr<Shell> &shell)
+{
+	m_shells.push_back(shell);
+}
+
+void CombineGeometry::addPolygon(std::shared_ptr<Polygon> &polygon)
+{
+	m_polygons.push_back(polygon);
+}
 } // namespace Geometry

@@ -41,6 +41,10 @@ public:
 	void setColor(const osg::Vec4 &val);
 	const osg::Vec4 &getColor() const;
 
+	void addMesh(std::shared_ptr<Mesh> &mesh);
+	void addShell(std::shared_ptr<Shell> &shell);
+	void addPolygon(std::shared_ptr<Polygon> &polygon);
+
 protected:
 	virtual void subDraw();
 

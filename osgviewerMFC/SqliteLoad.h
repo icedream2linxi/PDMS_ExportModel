@@ -28,6 +28,7 @@ private:
 	bool loadSnout();
 	bool loadSphere();
 	bool loadWedge();
+	bool loadCombineGeometry();
 
 private:
 	std::string m_filePath;

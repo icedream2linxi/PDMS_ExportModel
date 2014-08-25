@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "SqliteLoad.h"
 #include <osg/Geode>
+#include <unordered_map>
 
 #include <Box.h>
 #include <CircularTorus.h>
@@ -65,6 +66,8 @@ bool SqliteLoad::doLoad()
 	if (!loadSphere())
 		return false;
 	if (!loadWedge())
+		return false;
+	if (!loadCombineGeometry())
 		return false;
 
 	clock_t end = clock();
@@ -1073,5 +1076,245 @@ bool SqliteLoad::loadWedge()
 	m_errorCode = sqlite3_finalize(pStmt);
 	pStmt = NULL;
 
+	return true;
+}
+
+bool SqliteLoad::loadCombineGeometry()
+{
+	std::unordered_map<int, osg::ref_ptr<Geometry::CombineGeometry>> cgMap;
+	std::unordered_map<int, std::shared_ptr<Geometry::Shell>> shellMap;
+	std::unordered_map<int, std::shared_ptr<Geometry::Mesh>> meshMap;
+	std::unordered_map<int, std::shared_ptr<Geometry::Polygon>> polygonMap;
+
+	const wchar_t *zCgSql = L"select id, color from combine_geometry";
+	sqlite3_stmt *pStmt = NULL;
+	const void *pzTail = NULL;
+	if ((m_errorCode = sqlite3_prepare16(m_pDb, zCgSql, -1, &pStmt, &pzTail)) != SQLITE_OK)
+		return false;
+	
+	int id, color;
+	while ((m_errorCode = sqlite3_step(pStmt)) != SQLITE_DONE)
+	{
+		if (m_errorCode != SQLITE_ROW)
+		{
+			sqlite3_finalize(pStmt);
+			return false;
+		}
+
+		int iCol = 0;
+		id = sqlite3_column_int(pStmt, iCol);
+		++iCol;
+		color = sqlite3_column_int(pStmt, iCol);
+
+		osg::ref_ptr<Geometry::CombineGeometry> cg(new Geometry::CombineGeometry);
+		cg->setColor(CvtColor(color));
+		cgMap.insert(std::make_pair(id, cg));
+	}
+	m_errorCode = sqlite3_finalize(pStmt);
+	pStmt = NULL;
+
+	const wchar_t *zShellSql = L"select id, combine_geometry_id from shell";
+	if ((m_errorCode = sqlite3_prepare16(m_pDb, zShellSql, -1, &pStmt, &pzTail)) != SQLITE_OK)
+		return false;
+
+	int cgId;
+	while ((m_errorCode = sqlite3_step(pStmt)) != SQLITE_DONE)
+	{
+		if (m_errorCode != SQLITE_ROW)
+		{
+			sqlite3_finalize(pStmt);
+			return false;
+		}
+
+		int iCol = 0;
+		id = sqlite3_column_int(pStmt, iCol);
+		++iCol;
+		cgId = sqlite3_column_int(pStmt, iCol);
+
+		std::shared_ptr<Geometry::Shell> shell(new Geometry::Shell);
+		shellMap.insert(std::make_pair(id, shell));
+		auto iter = cgMap.find(cgId);
+		if (iter != cgMap.end())
+			iter->second->addShell(shell);
+	}
+	m_errorCode = sqlite3_finalize(pStmt);
+	pStmt = NULL;
+
+	const wchar_t *zShellFaceSql = L"select vertex_index, shell_id from shell_face order by id asc";
+	if ((m_errorCode = sqlite3_prepare16(m_pDb, zShellFaceSql, -1, &pStmt, &pzTail)) != SQLITE_OK)
+		return false;
+
+	int vertexIndex, shellId;
+	while ((m_errorCode = sqlite3_step(pStmt)) != SQLITE_DONE)
+	{
+		if (m_errorCode != SQLITE_ROW)
+		{
+			sqlite3_finalize(pStmt);
+			return false;
+		}
+
+		int iCol = 0;
+		vertexIndex = sqlite3_column_int(pStmt, iCol);
+		++iCol;
+		shellId = sqlite3_column_int(pStmt, iCol);
+
+		auto iter = shellMap.find(shellId);
+		if (iter != shellMap.end())
+			iter->second->faces.push_back(vertexIndex);
+	}
+	m_errorCode = sqlite3_finalize(pStmt);
+	pStmt = NULL;
+
+	const wchar_t *zShellVertexSql = L"select pos_x, pos_y, pos_z, shell_id from shell_vertex order by id asc";
+	if ((m_errorCode = sqlite3_prepare16(m_pDb, zShellVertexSql, -1, &pStmt, &pzTail)) != SQLITE_OK)
+		return false;
+
+	osg::Vec3 pos;
+	while ((m_errorCode = sqlite3_step(pStmt)) != SQLITE_DONE)
+	{
+		if (m_errorCode != SQLITE_ROW)
+		{
+			sqlite3_finalize(pStmt);
+			return false;
+		}
+
+		int iCol = 0;
+		pos[0] = sqlite3_column_double(pStmt, iCol);
+		++iCol;
+		pos[1] = sqlite3_column_double(pStmt, iCol);
+		++iCol;
+		pos[2] = sqlite3_column_double(pStmt, iCol);
+		++iCol;
+		shellId = sqlite3_column_int(pStmt, iCol);
+
+		auto iter = shellMap.find(shellId);
+		if (iter != shellMap.end())
+			iter->second->vertexs.push_back(pos);
+	}
+	m_errorCode = sqlite3_finalize(pStmt);
+	pStmt = NULL;
+
+	const wchar_t *zMeshSql = L"select rows, columns, combine_geometry_id from mesh";
+	if ((m_errorCode = sqlite3_prepare16(m_pDb, zShellFaceSql, -1, &pStmt, &pzTail)) != SQLITE_OK)
+		return false;
+
+	int rows, columns;
+	while ((m_errorCode = sqlite3_step(pStmt)) != SQLITE_DONE)
+	{
+		if (m_errorCode != SQLITE_ROW)
+		{
+			sqlite3_finalize(pStmt);
+			return false;
+		}
+
+		int iCol = 0;
+		rows = sqlite3_column_int(pStmt, iCol);
+		++iCol;
+		columns = sqlite3_column_int(pStmt, iCol);
+		++iCol;
+		cgId = sqlite3_column_int(pStmt, iCol);
+
+		std::shared_ptr<Geometry::Mesh> mesh(new Geometry::Mesh);
+		mesh->rows = rows;
+		mesh->colums = columns;
+		auto iter = cgMap.find(cgId);
+		if (iter != cgMap.end())
+			iter->second->addMesh(mesh);
+	}
+	m_errorCode = sqlite3_finalize(pStmt);
+	pStmt = NULL;
+
+
+	const wchar_t *zMeshVertexSql = L"select pos_x, pos_y, pos_z, mesh_id from mesh_vertex order by id asc";
+	if ((m_errorCode = sqlite3_prepare16(m_pDb, zMeshVertexSql, -1, &pStmt, &pzTail)) != SQLITE_OK)
+		return false;
+
+	int meshId;
+	while ((m_errorCode = sqlite3_step(pStmt)) != SQLITE_DONE)
+	{
+		if (m_errorCode != SQLITE_ROW)
+		{
+			sqlite3_finalize(pStmt);
+			return false;
+		}
+
+		int iCol = 0;
+		pos[0] = sqlite3_column_double(pStmt, iCol);
+		++iCol;
+		pos[1] = sqlite3_column_double(pStmt, iCol);
+		++iCol;
+		pos[2] = sqlite3_column_double(pStmt, iCol);
+		++iCol;
+		meshId = sqlite3_column_int(pStmt, iCol);
+
+		auto iter = meshMap.find(meshId);
+		if (iter != meshMap.end())
+			iter->second->vertexs.push_back(pos);
+	}
+	m_errorCode = sqlite3_finalize(pStmt);
+	pStmt = NULL;
+
+	const wchar_t *zPolygonSql = L"select id, combine_geometry_id from polygon";
+	if ((m_errorCode = sqlite3_prepare16(m_pDb, zPolygonSql, -1, &pStmt, &pzTail)) != SQLITE_OK)
+		return false;
+
+	while ((m_errorCode = sqlite3_step(pStmt)) != SQLITE_DONE)
+	{
+		if (m_errorCode != SQLITE_ROW)
+		{
+			sqlite3_finalize(pStmt);
+			return false;
+		}
+
+		int iCol = 0;
+		id = sqlite3_column_int(pStmt, iCol);
+		++iCol;
+		cgId = sqlite3_column_int(pStmt, iCol);
+
+		std::shared_ptr<Geometry::Polygon> polygon(new Geometry::Polygon);
+		polygonMap.insert(std::make_pair(id, polygon));
+		auto iter = cgMap.find(cgId);
+		if (iter != cgMap.end())
+			iter->second->addPolygon(polygon);
+	}
+	m_errorCode = sqlite3_finalize(pStmt);
+	pStmt = NULL;
+
+	const wchar_t *zPolygonVertexSql = L"select pos_x, pos_y, pos_z, polygon_id from polygon_vertex order by id asc";
+	if ((m_errorCode = sqlite3_prepare16(m_pDb, zPolygonVertexSql, -1, &pStmt, &pzTail)) != SQLITE_OK)
+		return false;
+
+	int polygonId;
+	while ((m_errorCode = sqlite3_step(pStmt)) != SQLITE_DONE)
+	{
+		if (m_errorCode != SQLITE_ROW)
+		{
+			sqlite3_finalize(pStmt);
+			return false;
+		}
+
+		int iCol = 0;
+		pos[0] = sqlite3_column_double(pStmt, iCol);
+		++iCol;
+		pos[1] = sqlite3_column_double(pStmt, iCol);
+		++iCol;
+		pos[2] = sqlite3_column_double(pStmt, iCol);
+		++iCol;
+		polygonId = sqlite3_column_int(pStmt, iCol);
+
+		auto iter = polygonMap.find(polygonId);
+		if (iter != polygonMap.end())
+			iter->second->vertexs.push_back(pos);
+	}
+	m_errorCode = sqlite3_finalize(pStmt);
+	pStmt = NULL;
+
+	osg::ref_ptr<osg::Geode> cgGeode(new osg::Geode);
+	for each(auto &entry in cgMap)
+	{
+		entry.second->draw();
+		cgGeode->addDrawable(entry.second);
+	}
+	m_root->addChild(cgGeode);
 	return true;
 }
