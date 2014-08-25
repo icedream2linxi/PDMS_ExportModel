@@ -51,29 +51,36 @@ void RectangularTorus::subDraw()
 	osg::Vec3 halfWidthVec = torusNormal * width / 2.0;
 	osg::Vec3 halfHeightVec = m_normal * height / 2.0;
 
+	// 计算顶点
 	vertexArr->push_back(subCenter - halfWidthVec - halfHeightVec);
-	pBottomDrawEle->push_back(vertexArr->size() - 1);
-
+	size_t bottomInIdx = vertexArr->size() - 1;
 	vertexArr->push_back(vertexArr->back());
-	pInSideDrawEle->push_back(vertexArr->size() - 1);
+	size_t inBottomIdx = vertexArr->size() - 1;
 
 	vertexArr->push_back(subCenter + halfWidthVec - halfHeightVec);
-	pBottomDrawEle->push_back(vertexArr->size() - 1);
-
+	size_t bottomOutIdx = vertexArr->size() - 1;
 	vertexArr->push_back(vertexArr->back());
-	pOutSideDrawEle->push_back(vertexArr->size() - 1);
+	size_t outBottomIdx = vertexArr->size() - 1;
 
 	vertexArr->push_back(subCenter + halfWidthVec + halfHeightVec);
-	pOutSideDrawEle->push_back(vertexArr->size() - 1);
-
+	size_t outTopIdx = vertexArr->size() - 1;
 	vertexArr->push_back(vertexArr->back());
-	pTopDrawEle->push_back(vertexArr->size() - 1);
+	size_t topOutIdx = vertexArr->size() - 1;
 
 	vertexArr->push_back(subCenter - halfWidthVec + halfHeightVec);
-	pTopDrawEle->push_back(vertexArr->size() - 1);
-
+	size_t topInIdx = vertexArr->size() - 1;
 	vertexArr->push_back(vertexArr->back());
-	pInSideDrawEle->push_back(vertexArr->size() - 1);
+	size_t inTopIdx = vertexArr->size() - 1;
+
+	// 构造面片
+	pBottomDrawEle->push_back(bottomOutIdx);
+	pBottomDrawEle->push_back(bottomInIdx);
+	pTopDrawEle->push_back(topInIdx);
+	pTopDrawEle->push_back(topOutIdx);
+	pInSideDrawEle->push_back(inBottomIdx);
+	pInSideDrawEle->push_back(inTopIdx);
+	pOutSideDrawEle->push_back(outTopIdx);
+	pOutSideDrawEle->push_back(outBottomIdx);
 
 	double widthFactor = (m_endWidth - m_startWidth) / mainCount;
 	double heightFactor = (m_endHeight - m_startHeight) / mainCount;
@@ -88,53 +95,56 @@ void RectangularTorus::subDraw()
 		halfWidthVec = torusNormal * width / 2.0;
 		halfHeightVec = m_normal * height / 2.0;
 
+		// 计算顶点
 		vertexArr->push_back(subCenter - halfWidthVec - halfHeightVec);
-		size_t size = vertexArr->size();
-		pBottomDrawEle->push_back(size - 1);
-		osg::Vec3 bottomNormal = ((*vertexArr)[size - 9] - vertexArr->back()) ^ ((*vertexArr)[size - 9] - (*vertexArr)[size - 9 + 2]);
+		bottomInIdx = vertexArr->size() - 1;
+		osg::Vec3 bottomNormal = ((*vertexArr)[bottomInIdx - 8] - vertexArr->back()) ^ ((*vertexArr)[bottomInIdx - 8] - (*vertexArr)[bottomInIdx - 8 + 2]);
 		bottomNormal.normalize();
 		normalArr->push_back(bottomNormal);
 
 		vertexArr->push_back(vertexArr->back());
-		size = vertexArr->size();
-		pInSideDrawEle->push_back(size - 1);
-		osg::Vec3 inSideNormal = (vertexArr->back() - (*vertexArr)[size - 9]) ^ ((*vertexArr)[size - 9] - (*vertexArr)[size - 9 + 6]);
+		inBottomIdx = vertexArr->size() - 1;
+		osg::Vec3 inSideNormal = (vertexArr->back() - (*vertexArr)[inBottomIdx - 8]) ^ ((*vertexArr)[inBottomIdx - 8] - (*vertexArr)[inBottomIdx - 8 + 6]);
 		inSideNormal.normalize();
 		normalArr->push_back(inSideNormal);
 
 		vertexArr->push_back(subCenter + halfWidthVec - halfHeightVec);
-		size = vertexArr->size();
-		pBottomDrawEle->push_back(size - 1);
+		bottomOutIdx = vertexArr->size() - 1;
 		normalArr->push_back(bottomNormal);
 
 		vertexArr->push_back(vertexArr->back());
-		size = vertexArr->size();
-		pOutSideDrawEle->push_back(size - 1);
-		osg::Vec3 outSideNormal = ((*vertexArr)[size - 9] - vertexArr->back()) ^ ((*vertexArr)[size - 9] - (*vertexArr)[size - 9 + 1]);
+		outBottomIdx = vertexArr->size() - 1;
+		osg::Vec3 outSideNormal = ((*vertexArr)[outBottomIdx - 8] - vertexArr->back()) ^ ((*vertexArr)[outBottomIdx - 8] - (*vertexArr)[outBottomIdx - 8 + 1]);
 		outSideNormal.normalize();
 		normalArr->push_back(outSideNormal);
 
 		vertexArr->push_back(subCenter + halfWidthVec + halfHeightVec);
-		size = vertexArr->size();
-		pOutSideDrawEle->push_back(size - 1);
+		outTopIdx = vertexArr->size() - 1;
 		normalArr->push_back(outSideNormal);
 
 		vertexArr->push_back(vertexArr->back());
-		size = vertexArr->size();
-		pTopDrawEle->push_back(size - 1);
-		osg::Vec3 topNormal = ((*vertexArr)[size - 9] - vertexArr->back()) ^ ((*vertexArr)[size - 9] - (*vertexArr)[size - 9 + 1]);
+		topOutIdx = vertexArr->size() - 1;
+		osg::Vec3 topNormal = ((*vertexArr)[topOutIdx - 8] - vertexArr->back()) ^ ((*vertexArr)[topOutIdx - 8] - (*vertexArr)[topOutIdx - 8 + 1]);
 		topNormal.normalize();
 		normalArr->push_back(topNormal);
 
 		vertexArr->push_back(subCenter - halfWidthVec + halfHeightVec);
-		size = vertexArr->size();
-		pTopDrawEle->push_back(size - 1);
+		topInIdx = vertexArr->size() - 1;
 		normalArr->push_back(topNormal);
 
 		vertexArr->push_back(vertexArr->back());
-		size = vertexArr->size();
-		pInSideDrawEle->push_back(size - 1);
+		inTopIdx = vertexArr->size() - 1;
 		normalArr->push_back(inSideNormal);
+
+		// 构造面片
+		pBottomDrawEle->push_back(bottomOutIdx);
+		pBottomDrawEle->push_back(bottomInIdx);
+		pTopDrawEle->push_back(topInIdx);
+		pTopDrawEle->push_back(topOutIdx);
+		pInSideDrawEle->push_back(inBottomIdx);
+		pInSideDrawEle->push_back(inTopIdx);
+		pOutSideDrawEle->push_back(outTopIdx);
+		pOutSideDrawEle->push_back(outBottomIdx);
 	}
 
 	// 最后一圈
@@ -147,53 +157,56 @@ void RectangularTorus::subDraw()
 	halfWidthVec = torusNormal * m_endWidth / 2.0;
 	halfHeightVec = m_normal * m_endHeight / 2.0;
 
+	// 计算顶点
 	vertexArr->push_back(subCenter - halfWidthVec - halfHeightVec);
-	size_t size = vertexArr->size();
-	pBottomDrawEle->push_back(size - 1);
-	osg::Vec3 bottomNormal = ((*vertexArr)[size - 9] - vertexArr->back()) ^ ((*vertexArr)[size - 9] - (*vertexArr)[size - 9 + 2]);
+	bottomInIdx = vertexArr->size() - 1;
+	osg::Vec3 bottomNormal = ((*vertexArr)[bottomInIdx - 8] - vertexArr->back()) ^ ((*vertexArr)[bottomInIdx - 8] - (*vertexArr)[bottomInIdx - 8 + 2]);
 	bottomNormal.normalize();
 	normalArr->push_back(bottomNormal);
 
 	vertexArr->push_back(vertexArr->back());
-	size = vertexArr->size();
-	pInSideDrawEle->push_back(size - 1);
-	osg::Vec3 inSideNormal = (vertexArr->back() - (*vertexArr)[size - 9]) ^ ((*vertexArr)[size - 9] - (*vertexArr)[size - 9 + 6]);
+	inBottomIdx = vertexArr->size() - 1;
+	osg::Vec3 inSideNormal = (vertexArr->back() - (*vertexArr)[inBottomIdx - 8]) ^ ((*vertexArr)[inBottomIdx - 8] - (*vertexArr)[inBottomIdx - 8 + 6]);
 	inSideNormal.normalize();
 	normalArr->push_back(inSideNormal);
 
 	vertexArr->push_back(subCenter + halfWidthVec - halfHeightVec);
-	size = vertexArr->size();
-	pBottomDrawEle->push_back(size - 1);
+	bottomOutIdx = vertexArr->size() - 1;
 	normalArr->push_back(bottomNormal);
 
 	vertexArr->push_back(vertexArr->back());
-	size = vertexArr->size();
-	pOutSideDrawEle->push_back(size - 1);
-	osg::Vec3 outSideNormal = ((*vertexArr)[size - 9] - vertexArr->back()) ^ ((*vertexArr)[size - 9] - (*vertexArr)[size - 9 + 1]);
+	outBottomIdx = vertexArr->size() - 1;
+	osg::Vec3 outSideNormal = ((*vertexArr)[outBottomIdx - 8] - vertexArr->back()) ^ ((*vertexArr)[outBottomIdx - 8] - (*vertexArr)[outBottomIdx - 8 + 1]);
 	outSideNormal.normalize();
 	normalArr->push_back(outSideNormal);
 
 	vertexArr->push_back(subCenter + halfWidthVec + halfHeightVec);
-	size = vertexArr->size();
-	pOutSideDrawEle->push_back(size - 1);
+	outTopIdx = vertexArr->size() - 1;
 	normalArr->push_back(outSideNormal);
 
 	vertexArr->push_back(vertexArr->back());
-	size = vertexArr->size();
-	pTopDrawEle->push_back(size - 1);
-	osg::Vec3 topNormal = ((*vertexArr)[size - 9] - vertexArr->back()) ^ ((*vertexArr)[size - 9] - (*vertexArr)[size - 9 + 1]);
+	topOutIdx = vertexArr->size() - 1;
+	osg::Vec3 topNormal = ((*vertexArr)[topOutIdx - 8] - vertexArr->back()) ^ ((*vertexArr)[topOutIdx - 8] - (*vertexArr)[topOutIdx - 8 + 1]);
 	topNormal.normalize();
 	normalArr->push_back(topNormal);
 
 	vertexArr->push_back(subCenter - halfWidthVec + halfHeightVec);
-	size = vertexArr->size();
-	pTopDrawEle->push_back(size - 1);
+	topInIdx = vertexArr->size() - 1;
 	normalArr->push_back(topNormal);
 
 	vertexArr->push_back(vertexArr->back());
-	size = vertexArr->size();
-	pInSideDrawEle->push_back(size - 1);
+	inTopIdx = vertexArr->size() - 1;
 	normalArr->push_back(inSideNormal);
+
+	// 构造面片
+	pBottomDrawEle->push_back(bottomOutIdx);
+	pBottomDrawEle->push_back(bottomInIdx);
+	pTopDrawEle->push_back(topInIdx);
+	pTopDrawEle->push_back(topOutIdx);
+	pInSideDrawEle->push_back(inBottomIdx);
+	pInSideDrawEle->push_back(inTopIdx);
+	pOutSideDrawEle->push_back(outTopIdx);
+	pOutSideDrawEle->push_back(outBottomIdx);
 
 	// 最后一圈法向
 	normalArr->push_back(bottomNormal);
@@ -216,7 +229,7 @@ void RectangularTorus::subDraw()
 		size_t base = first - 8;
 		osg::Vec3 topNormal = m_normal ^ torusNormal;
 		topNormal.normalize();
-		for (int i = 0; i < 8; i += 2)
+		for (int i = 7; i >= 0; i -= 2)
 		{
 			vertexArr->push_back((*vertexArr)[base + i]);
 			normalArr->push_back(topNormal);
