@@ -82,8 +82,8 @@ void CircularTorus::subDraw()
 			normalArr->back().normalize();
 			tangNormal = torusQuat * tangNormal;
 
-			pDrawEle->push_back(size - subCount - 1);
 			pDrawEle->push_back(size - 1);
+			pDrawEle->push_back(size - subCount - 1);
 		}
 	}
 
@@ -107,8 +107,8 @@ void CircularTorus::subDraw()
 		normalArr->back().normalize();
 		tangNormal = torusQuat * tangNormal;
 
-		pDrawEle->push_back(size - subCount - 1);
 		pDrawEle->push_back(size - 1);
+		pDrawEle->push_back(size - subCount - 1);
 	}
 	pDrawEle->push_back(vertexArr->size() - subCount);
 	// 最后一圈法向
@@ -123,7 +123,7 @@ void CircularTorus::subDraw()
 		osg::Vec3 topNormal = -faceNormal;
 		vertexArr->push_back(subCenter);
 		normalArr->push_back(topNormal);
-		for (int i = 0; i < subCount; ++i)
+		for (int i = subCount - 1; i >= 0; --i)
 		{
 			vertexArr->push_back((*vertexArr)[base + i]);
 			normalArr->push_back(topNormal);
