@@ -28,9 +28,9 @@ void Wedge::subDraw()
 	osg::Vec3 bottomNormal = m_edge2 ^ m_edge1;
 	bottomNormal.normalize();
 	GLint first = vertexArr->size();
-	vertexArr->push_back(m_org);
-	vertexArr->push_back(m_org + m_edge1);
 	vertexArr->push_back(m_org + m_edge2);
+	vertexArr->push_back(m_org + m_edge1);
+	vertexArr->push_back(m_org);
 	for (int i = 0; i < 3; ++i)
 		normalArr->push_back(bottomNormal);
 	addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::TRIANGLES, first, vertexArr->size() - first));
@@ -49,7 +49,7 @@ void Wedge::subDraw()
 	osg::Vec3 normal = m_edge1 ^ m_height;
 	normal.normalize();
 	first = vertexArr->size();
-	vertexArr->push_back((*vertexArr)[0]);
+	vertexArr->push_back((*vertexArr)[2]);
 	vertexArr->push_back((*vertexArr)[1]);
 	vertexArr->push_back((*vertexArr)[4]);
 	vertexArr->push_back((*vertexArr)[3]);
@@ -61,8 +61,8 @@ void Wedge::subDraw()
 	normal = m_height ^ m_edge2;
 	normal.normalize();
 	first = vertexArr->size();
-	vertexArr->push_back((*vertexArr)[2]);
 	vertexArr->push_back((*vertexArr)[0]);
+	vertexArr->push_back((*vertexArr)[2]);
 	vertexArr->push_back((*vertexArr)[3]);
 	vertexArr->push_back((*vertexArr)[5]);
 	for (int i = 0; i < 4; ++i)
@@ -74,7 +74,7 @@ void Wedge::subDraw()
 	normal.normalize();
 	first = vertexArr->size();
 	vertexArr->push_back((*vertexArr)[1]);
-	vertexArr->push_back((*vertexArr)[2]);
+	vertexArr->push_back((*vertexArr)[0]);
 	vertexArr->push_back((*vertexArr)[5]);
 	vertexArr->push_back((*vertexArr)[4]);
 	for (int i = 0; i < 4; ++i)
