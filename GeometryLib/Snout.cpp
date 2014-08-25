@@ -68,7 +68,7 @@ void Snout::subDraw()
 		osg::Vec3 topNormal = -bottomNormal;
 		vertexArr->push_back(topCenter);
 		normalArr->push_back(topNormal);
-		for (size_t i = 0; i < pntCount; ++i)
+		for (int i = pntCount - 1; i >= 0; --i)
 		{
 			vertexArr->push_back(topPntArr[i]);
 			normalArr->push_back(topNormal);
@@ -81,8 +81,8 @@ void Snout::subDraw()
 	const GLint first = vertexArr->size();
 	for (size_t i = 0; i < pntCount; ++i)
 	{
-		vertexArr->push_back(topPntArr[i]);
 		vertexArr->push_back(bottomPntArr[i]);
+		vertexArr->push_back(topPntArr[i]);
 
 		osg::Vec3 normal = yVec ^ (topPntArr[i] - bottomPntArr[i]);
 		normal.normalize();

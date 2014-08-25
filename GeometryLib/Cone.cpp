@@ -46,8 +46,8 @@ void Cone::subDraw()
 		osg::Vec3 pnt = m_org + xVec;
 		pntArr.push_back(pnt);
 
-		vertexArr->push_back(topPnt);
 		vertexArr->push_back(pnt);
+		vertexArr->push_back(topPnt);
 
 		osg::Vec3 normal = yVec ^ (topPnt - pnt);
 		normal.normalize();

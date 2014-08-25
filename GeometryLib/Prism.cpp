@@ -46,20 +46,23 @@ void Prism::subDraw()
 	// top
 	first = vertexArr->size();
 	normal = -normal;
-	for (int i = 0; i < m_edgeNum + 2; ++i)
+	vertexArr->push_back((*vertexArr)[0] + m_height);
+	normalArr->push_back(normal);
+	for (int i = m_edgeNum + 1; i >= 1; --i)
 	{
 		vertexArr->push_back((*vertexArr)[i] + m_height);
 		normalArr->push_back(normal);
 	}
 	addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::TRIANGLE_FAN, first, vertexArr->size() - first));
+	size_t topEnd = vertexArr->size();
 
 	first = vertexArr->size();
 	for (int i = 0; i < m_edgeNum; ++i)
 	{
-		vertexArr->push_back((*vertexArr)[i + 1]);
+		vertexArr->push_back((*vertexArr)[topEnd - i - 1]);
+		vertexArr->push_back((*vertexArr)[topEnd - i - 2]);
 		vertexArr->push_back((*vertexArr)[i + 2]);
-		vertexArr->push_back((*vertexArr)[i + m_edgeNum + 4]);
-		vertexArr->push_back((*vertexArr)[i + m_edgeNum + 3]);
+		vertexArr->push_back((*vertexArr)[i + 1]);
 
 		normal = m_height ^ ((*vertexArr)[i + 2] - (*vertexArr)[i + 1]);
 		normal.normalize();

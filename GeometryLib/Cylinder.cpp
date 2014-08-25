@@ -37,10 +37,12 @@ void Cylinder::subDraw()
 	osg::Vec3 normal = localToWorld * osg::X_AXIS;
 	normal.normalize();
 
+	osg::Vec3 vertex;
 	for (unsigned int i = 0; i < count; ++i)
 	{
-		vertexArr->push_back(m_org + normal * m_radius);
-		vertexArr->push_back(vertexArr->back() + m_height);
+		vertex = m_org + normal * m_radius;
+		vertexArr->push_back(vertex + m_height);
+		vertexArr->push_back(vertex);
 		normalArr->push_back(normal);
 		normalArr->push_back(normal);
 
@@ -59,7 +61,7 @@ void Cylinder::subDraw()
 		normalArr->push_back(topNormal);
 		for (unsigned int i = 0; i < count + 1; ++i)
 		{
-			vertexArr->push_back((*vertexArr)[i * 2 + 1]);
+			vertexArr->push_back((*vertexArr)[i * 2]);
 			normalArr->push_back(topNormal);
 		}
 		addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::TRIANGLE_FAN, first, vertexArr->size() - first));
@@ -71,9 +73,9 @@ void Cylinder::subDraw()
 		osg::Vec3 bottomNormal = -topNormal;
 		vertexArr->push_back(m_org);
 		normalArr->push_back(bottomNormal);
-		for (unsigned int i = 0; i < count + 1; ++i)
+		for (int i = count; i >= 0; --i)
 		{
-			vertexArr->push_back((*vertexArr)[i * 2]);
+			vertexArr->push_back((*vertexArr)[i * 2 + 1]);
 			normalArr->push_back(bottomNormal);
 		}
 		addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::TRIANGLE_FAN, first, vertexArr->size() - first));

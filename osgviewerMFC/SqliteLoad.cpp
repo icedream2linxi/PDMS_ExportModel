@@ -61,6 +61,8 @@ bool SqliteLoad::doLoad()
 		return false;
 	if (!loadRectangularTorus())
 		return false;
+	if (!loadSCylinder())
+		return false;
 	if (!loadSnout())
 		return false;
 	if (!loadSphere())

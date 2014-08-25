@@ -77,7 +77,7 @@ void SCylinder::subDraw()
 		first = vertexArr->size();
 		vertexArr->push_back(m_org);
 		normalArr->push_back(m_bottomNormal);
-		for (int i = 0; i < count + 1; ++i)
+		for (int i = count; i >= 0; --i)
 		{
 			vertexArr->push_back((*vertexArr)[i * 2 + 1]);
 			normalArr->push_back(m_bottomNormal);
