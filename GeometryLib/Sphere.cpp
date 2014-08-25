@@ -37,7 +37,7 @@ void Sphere::subDraw()
 	osg::Vec3 yVec = xVec ^ m_bottomNormal;
 	int hCount = (int)getDivision();
 	double hIncAng = 2 * M_PI / hCount;
-	osg::Quat hQuat(hIncAng, -m_bottomNormal);
+	osg::Quat hQuat(hIncAng, m_bottomNormal);
 
 	int vCount = (int)ceil(m_angle / hIncAng);
 	if (vCount & 1) // 如果是奇数，则变成偶数
