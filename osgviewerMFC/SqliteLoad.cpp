@@ -41,6 +41,7 @@ bool SqliteLoad::doLoad()
 {
 	if ((m_errorCode = init()) != SQLITE_OK)
 		return false;
+	clock_t start = clock();
 	if (!loadBox())
 		return false;
 	if (!loadCircularTorus())
@@ -65,6 +66,11 @@ bool SqliteLoad::doLoad()
 		return false;
 	if (!loadWedge())
 		return false;
+
+	clock_t end = clock();
+	CString msg;
+	msg.Format("Time = %lf", ((double)end - start) / 1000.0);
+	//AfxMessageBox(msg);
 
 	return true;
 }

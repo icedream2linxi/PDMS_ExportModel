@@ -130,11 +130,11 @@ void cOSG::InitSceneGraph(void)
 	if (!mModel) return;
 
 	// Optimize the model
-	osgUtil::Optimizer optimizer;
-	optimizer.optimize(mModel.get());
-	if (mPoints != NULL)
-		optimizer.optimize(mPoints);
-	optimizer.reset();
+	//osgUtil::Optimizer optimizer;
+	//optimizer.optimize(mModel.get());
+	//if (mPoints != NULL)
+	//	optimizer.optimize(mPoints);
+	//optimizer.reset();
 
 	// Add the model to the scene
 	mRoot->addChild(mModel.get());
