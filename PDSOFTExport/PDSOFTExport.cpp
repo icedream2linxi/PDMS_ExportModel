@@ -948,7 +948,7 @@ void DoExport()
 {
 	DbModel::Util^ util = gcnew DbModel::Util();
 	try {
-		util->init(gcnew System::String(L"d:/pdsoft.db"), true);
+		util->init(gcnew System::String(L"d:/pdsoft.db"), false);
 		NHibernate::ISession^ session = util->SessionFactory->OpenSession();
 		try {
 			NHibernate::ITransaction^ tx = session->BeginTransaction();

@@ -97,6 +97,11 @@ void cOSG::InitSceneGraph(void)
 	mRoot->getOrCreateStateSet()->setAttributeAndModes(ms, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 #endif
 
+	osg::StateSet *state = mRoot->getOrCreateStateSet();
+	osg::CullFace *cullFace = new osg::CullFace(osg::CullFace::BACK);
+	state->setAttribute(cullFace);
+	state->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
+
 	path modelFile(m_ModelName);
 	if (modelFile.extension() == ".db") {
 		mModel = InitOSGFromDb();

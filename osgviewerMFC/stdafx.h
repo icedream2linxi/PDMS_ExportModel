@@ -70,3 +70,4 @@ using namespace std::tr2::sys;
 
 
 #include <osgGA/FlightManipulator>
+#include <osg/CullFace>
