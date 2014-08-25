@@ -46,7 +46,7 @@ void CircularTorus::subDraw()
 
 	// 第一圈
 	osg::Vec3 faceNormal = torusNormal ^ m_normal;
-	osg::Quat torusQuat(subIncAngle, faceNormal);
+	osg::Quat torusQuat(subIncAngle, -faceNormal);
 	osg::Vec3 subVec = torusNormal;
 	double subRadius = m_startRadius;
 	osg::Vec3 subCenter = m_startPnt;
@@ -67,7 +67,7 @@ void CircularTorus::subDraw()
 		mainVec = mainQuat * mainVec;
 		subVec = mainQuat * subVec;
 		subCenter = m_center + mainVec;
-		torusQuat.makeRotate(subIncAngle, faceNormal);
+		torusQuat.makeRotate(subIncAngle, -faceNormal);
 		subRadius += factor;
 
 		tmpSubVec = subVec * subRadius;
@@ -82,8 +82,8 @@ void CircularTorus::subDraw()
 			normalArr->back().normalize();
 			tangNormal = torusQuat * tangNormal;
 
-			pDrawEle->push_back(size - 1);
 			pDrawEle->push_back(size - subCount - 1);
+			pDrawEle->push_back(size - 1);
 		}
 	}
 
@@ -94,7 +94,7 @@ void CircularTorus::subDraw()
 	subVec = fullQuat * (torusNormal * m_endRadius);
 	subCenter = m_center + mainVec;
 
-	torusQuat.makeRotate(subIncAngle, faceNormal);
+	torusQuat.makeRotate(subIncAngle, -faceNormal);
 	tmpSubVec = subVec;
 	osg::Vec3 tangNormal = m_normal;
 	for (int j = 0; j < subCount; ++j)
@@ -107,8 +107,8 @@ void CircularTorus::subDraw()
 		normalArr->back().normalize();
 		tangNormal = torusQuat * tangNormal;
 
-		pDrawEle->push_back(size - 1);
 		pDrawEle->push_back(size - subCount - 1);
+		pDrawEle->push_back(size - 1);
 	}
 	pDrawEle->push_back(vertexArr->size() - subCount);
 	// 最后一圈法向
@@ -123,7 +123,7 @@ void CircularTorus::subDraw()
 		osg::Vec3 topNormal = -faceNormal;
 		vertexArr->push_back(subCenter);
 		normalArr->push_back(topNormal);
-		for (int i = subCount - 1; i >= 0; --i)
+		for (int i = 0; i < subCount; ++i)
 		{
 			vertexArr->push_back((*vertexArr)[base + i]);
 			normalArr->push_back(topNormal);
@@ -139,7 +139,7 @@ void CircularTorus::subDraw()
 		osg::Vec3 bottomNormal = torusNormal ^ m_normal;
 		vertexArr->push_back(m_startPnt);
 		normalArr->push_back(bottomNormal);
-		for (int i = 0; i < subCount; ++i)
+		for (int i = subCount - 1; i >= 0; --i)
 		{
 			vertexArr->push_back((*vertexArr)[i]);
 			normalArr->push_back(bottomNormal);
