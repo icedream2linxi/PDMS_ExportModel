@@ -26,7 +26,11 @@ public:
 	void setColor(const osg::Vec4 &color);
 	const osg::Vec4 &getColor() const;
 
+	virtual bool cullAndUpdate(const osg::CullStack &cullStack);
+
+protected:
 	virtual void subDraw();
+	void computeAssistVar();
 
 private:
 	osg::Vec3 m_org;
@@ -34,6 +38,11 @@ private:
 	osg::Vec3 m_yLen;
 	osg::Vec3 m_zLen;
 	osg::Vec4 m_color;
+
+	double m_dblXLen;
+	double m_dblYLen;
+	double m_dblZLen;
+	osg::Vec3 m_center;
 };
 
 

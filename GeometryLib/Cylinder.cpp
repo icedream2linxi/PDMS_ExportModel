@@ -82,4 +82,14 @@ void Cylinder::subDraw()
 	}
 }
 
+bool Cylinder::cullAndUpdate(const osg::CullStack &cullStack)
+{
+	double dia = m_radius * 2.0;
+	float psb = cullStack.clampedPixelSize(m_org, dia);
+	float pst = cullStack.clampedPixelSize(m_org + m_height, dia);
+	float ps = osg::maximum(psb, pst);
+	if (ps <= cullStack.getSmallFeatureCullingPixelSize())
+		return true;
+	return false;
+}
 } // namespace Geometry

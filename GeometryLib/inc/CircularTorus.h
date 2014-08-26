@@ -30,6 +30,8 @@ public:
 	const bool &getTopVis() const;
 	void setBottomVis(const bool &val);
 	const bool &getBottomVis() const;
+
+	virtual bool cullAndUpdate(const osg::CullStack &cullStack);
 	
 protected:
 	virtual void subDraw();

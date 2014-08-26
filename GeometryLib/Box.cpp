@@ -5,6 +5,9 @@ namespace Geometry
 {
 
 Box::Box()
+	: m_dblXLen(0.0)
+	, m_dblYLen(0.0)
+	, m_dblZLen(0.0)
 {
 }
 
@@ -15,6 +18,8 @@ Box::~Box()
 
 void Box::subDraw()
 {
+	computeAssistVar();
+
 	osg::Vec3 bp1 = m_org;
 	osg::Vec3 bp2 = bp1 + m_xLen;
 	osg::Vec3 bp3 = bp2 + m_yLen;
@@ -95,4 +100,27 @@ void Box::subDraw()
 	addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, vertexArr->size()));
 }
 
+bool Box::cullAndUpdate(const osg::CullStack &cullStack)
+{
+	float psx = cullStack.clampedPixelSize(m_center, m_dblXLen);
+	float psy = cullStack.clampedPixelSize(m_center, m_dblYLen);
+	float psz = cullStack.clampedPixelSize(m_center, m_dblZLen);
+
+	int count = 0;
+	if (psx <= cullStack.getSmallFeatureCullingPixelSize())
+		++count;
+	if (psy <= cullStack.getSmallFeatureCullingPixelSize())
+		++count;
+	if (psz <= cullStack.getSmallFeatureCullingPixelSize())
+		++count;
+	return count >= 2;
+}
+
+void Box::computeAssistVar()
+{
+	m_dblXLen = m_xLen.length();
+	m_dblYLen = m_yLen.length();
+	m_dblZLen = m_zLen.length();
+	m_center = m_org + (m_xLen + m_yLen + m_zLen) / 2.0;
+}
 } // namespace Geometry

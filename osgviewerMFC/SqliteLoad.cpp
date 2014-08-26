@@ -18,6 +18,7 @@
 #include <Snout.h>
 #include <Sphere.h>
 #include <Wedge.h>
+#include <DynamicLOD.h>
 
 osg::Vec4 CvtColor(int color);
 
@@ -99,7 +100,7 @@ bool SqliteLoad::loadBox()
 	if ((m_errorCode = sqlite3_prepare16(m_pDb, zSql, -1, &pStmt, &pzTail)) != SQLITE_OK)
 		return false;
 
-	osg::ref_ptr<osg::Geode> boxGeode(new osg::Geode);
+	osg::ref_ptr<Geometry::DynamicLOD> lod(new Geometry::DynamicLOD);
 
 	osg::Vec3 org, xLen, yLen, zLen;
 	int color;
@@ -150,10 +151,12 @@ bool SqliteLoad::loadBox()
 		box->setColor(CvtColor(color));
 		box->draw();
 		
+		osg::ref_ptr<osg::Geode> boxGeode(new osg::Geode);
 		boxGeode->addDrawable(box);
+		lod->addChild(boxGeode);
 	}
 
-	m_root->addChild(boxGeode);
+	m_root->addChild(lod);
 	m_errorCode = sqlite3_finalize(pStmt);
 	pStmt = NULL;
 
@@ -171,7 +174,7 @@ bool SqliteLoad::loadCircularTorus()
 	if ((m_errorCode = sqlite3_prepare16(m_pDb, zSql, -1, &pStmt, &pzTail)) != SQLITE_OK)
 		return false;
 
-	osg::ref_ptr<osg::Geode> ctGeode(new osg::Geode);
+	osg::ref_ptr<Geometry::DynamicLOD> lod(new Geometry::DynamicLOD);
 
 	osg::Vec3 center, startPnt, normal;
 	double startRadius, endRadius, angle;
@@ -224,10 +227,12 @@ bool SqliteLoad::loadCircularTorus()
 		ct->setColor(CvtColor(color));
 		ct->draw();
 
+		osg::ref_ptr<osg::Geode> ctGeode(new osg::Geode);
 		ctGeode->addDrawable(ct);
+		lod->addChild(ctGeode);
 	}
 
-	m_root->addChild(ctGeode);
+	m_root->addChild(lod);
 	m_errorCode = sqlite3_finalize(pStmt);
 	pStmt = NULL;
 
@@ -312,7 +317,7 @@ bool SqliteLoad::loadCylinder()
 	if ((m_errorCode = sqlite3_prepare16(m_pDb, zSql, -1, &pStmt, &pzTail)) != SQLITE_OK)
 		return false;
 
-	osg::ref_ptr<osg::Geode> ctGeode(new osg::Geode);
+	osg::ref_ptr<Geometry::DynamicLOD> lod(new Geometry::DynamicLOD);
 
 	osg::Vec3 org, height;
 	double radius;
@@ -351,10 +356,12 @@ bool SqliteLoad::loadCylinder()
 		cylinder->setColor(CvtColor(color));
 		cylinder->draw();
 
-		ctGeode->addDrawable(cylinder);
+		osg::ref_ptr<osg::Geode> cylGeode(new osg::Geode);
+		cylGeode->addDrawable(cylinder);
+		lod->addChild(cylGeode);
 	}
 
-	m_root->addChild(ctGeode);
+	m_root->addChild(lod);
 	m_errorCode = sqlite3_finalize(pStmt);
 	pStmt = NULL;
 

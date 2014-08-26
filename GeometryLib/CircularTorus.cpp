@@ -150,4 +150,15 @@ void CircularTorus::subDraw()
 	}
 }
 
+bool CircularTorus::cullAndUpdate(const osg::CullStack &cullStack)
+{
+	osg::Vec3 vec = cullStack.getEyeLocal() - m_center;
+	vec.normalize();
+	float radius = osg::maximum(m_startRadius, m_endRadius);
+	float ps = cullStack.clampedPixelSize(m_center + vec * radius, radius * 2);
+	if (ps <= cullStack.getSmallFeatureCullingPixelSize())
+		return true;
+	return false;
+}
+
 } // namespace Geometry

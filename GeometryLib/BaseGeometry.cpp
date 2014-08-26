@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "BaseGeometry.h"
 
-
 namespace Geometry
 {
 
@@ -28,6 +27,11 @@ unsigned int BaseGeometry::getDivision()
 void BaseGeometry::subDraw()
 {
 
+}
+
+bool BaseGeometry::cullAndUpdate(const osg::CullStack &cullStack)
+{
+	return false;
 }
 
 double GetEpsilon()
