@@ -16,15 +16,22 @@ public:
 	void draw();
 	unsigned int getDivision();
 	virtual bool cullAndUpdate(const osg::CullStack &cullStack);
+	bool needRedraw() const;
 
 protected:
 	virtual void subDraw();
-	typedef std::function<float(const osg::Vec3& pos, float radius)> ClampedPixelSizeFun;
+	void updateDivision(float pixelSize);
 
 protected:
 	unsigned int m_division;
+	bool m_needRedraw;
 };
 
 double GetEpsilon();
+
+inline bool BaseGeometry::needRedraw() const
+{
+	return m_needRedraw;
+}
 
 } // namespace Geometry

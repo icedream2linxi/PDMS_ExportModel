@@ -18,6 +18,8 @@ Cylinder::~Cylinder()
 
 void Cylinder::subDraw()
 {
+	getPrimitiveSetList().clear();
+
 	osg::ref_ptr<osg::Vec4Array> colArr = new osg::Vec4Array();
 	colArr->push_back(m_color);
 	setColorArray(colArr, osg::Array::BIND_OVERALL);
@@ -90,6 +92,8 @@ bool Cylinder::cullAndUpdate(const osg::CullStack &cullStack)
 	float ps = osg::maximum(psb, pst);
 	if (ps <= cullStack.getSmallFeatureCullingPixelSize())
 		return true;
+
+	updateDivision(ps);
 	return false;
 }
 } // namespace Geometry
