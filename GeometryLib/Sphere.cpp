@@ -17,6 +17,8 @@ Sphere::~Sphere()
 
 void Sphere::subDraw()
 {
+	getPrimitiveSetList().clear();
+
 	osg::ref_ptr<osg::Vec3Array> vertexArr = new osg::Vec3Array;
 	osg::ref_ptr<osg::Vec3Array> normalArr = new osg::Vec3Array;
 	setVertexArray(vertexArr);
@@ -103,6 +105,16 @@ void Sphere::subDraw()
 		vec2 = vQuat * vec2;
 	}
 	addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUAD_STRIP, first, vertexArr->size() - first));
+}
+
+bool Sphere::cullAndUpdate(const osg::CullStack &cullStack)
+{
+	float ps = cullStack.clampedPixelSize(m_center, m_radius * 2.0);
+	if (ps <= cullStack.getSmallFeatureCullingPixelSize())
+		return true;
+
+	updateDivision(ps);
+	return false;
 }
 
 } // namespace Geometry

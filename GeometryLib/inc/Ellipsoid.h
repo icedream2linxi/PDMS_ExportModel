@@ -25,8 +25,11 @@ public:
 	void setBottomVis(const bool &val);
 	const bool &getBottomVis() const;
 
+	virtual bool cullAndUpdate(const osg::CullStack &cullStack);
+
 protected:
 	virtual void subDraw();
+	void computeAssistVar();
 
 private:
 	osg::Vec3 m_center;
@@ -35,6 +38,10 @@ private:
 	double m_angle;
 	osg::Vec4 m_color;
 	bool m_bottomVis;
+
+	double m_dblALen;
+	int m_aDivision;
+	int m_bDivision;
 };
 
 

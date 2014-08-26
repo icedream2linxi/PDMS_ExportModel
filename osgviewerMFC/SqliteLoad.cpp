@@ -70,8 +70,8 @@ bool SqliteLoad::doLoad()
 		return false;
 	if (!loadWedge())
 		return false;
-	if (!loadCombineGeometry())
-		return false;
+	//if (!loadCombineGeometry())
+	//	return false;
 
 	clock_t end = clock();
 	CString msg;
@@ -378,7 +378,7 @@ bool SqliteLoad::loadEllipsoid()
 	if ((m_errorCode = sqlite3_prepare16(m_pDb, zSql, -1, &pStmt, &pzTail)) != SQLITE_OK)
 		return false;
 
-	osg::ref_ptr<osg::Geode> ctGeode(new osg::Geode);
+	osg::ref_ptr<Geometry::DynamicLOD> load(new Geometry::DynamicLOD);
 
 	osg::Vec3 center, aLen;
 	double bRadius, angle;
@@ -420,10 +420,12 @@ bool SqliteLoad::loadEllipsoid()
 		ellipsoid->setColor(CvtColor(color));
 		ellipsoid->draw();
 
-		ctGeode->addDrawable(ellipsoid);
+		osg::ref_ptr<osg::Geode> ellipsoidGeode(new osg::Geode);
+		ellipsoidGeode->addDrawable(ellipsoid);
+		load->addChild(ellipsoidGeode);
 	}
 
-	m_root->addChild(ctGeode);
+	m_root->addChild(load);
 	m_errorCode = sqlite3_finalize(pStmt);
 	pStmt = NULL;
 
@@ -965,7 +967,7 @@ bool SqliteLoad::loadSphere()
 	if ((m_errorCode = sqlite3_prepare16(m_pDb, zSql, -1, &pStmt, &pzTail)) != SQLITE_OK)
 		return false;
 
-	osg::ref_ptr<osg::Geode> ctGeode(new osg::Geode);
+	osg::ref_ptr<Geometry::DynamicLOD> load(new Geometry::DynamicLOD);
 
 	osg::Vec3 center, height, bottomNormal;
 	double radius, angle;
@@ -1007,10 +1009,12 @@ bool SqliteLoad::loadSphere()
 		sphere->setColor(CvtColor(color));
 		sphere->draw();
 
-		ctGeode->addDrawable(sphere);
+		osg::ref_ptr<osg::Geode> sphereGeode(new osg::Geode);
+		sphereGeode->addDrawable(sphere);
+		load->addChild(sphereGeode);
 	}
 
-	m_root->addChild(ctGeode);
+	m_root->addChild(load);
 	m_errorCode = sqlite3_finalize(pStmt);
 	pStmt = NULL;
 

@@ -7,6 +7,9 @@ namespace Geometry
 
 Ellipsoid::Ellipsoid()
 	: m_bottomVis(true)
+	, m_dblALen(0.0)
+	, m_aDivision(g_defaultDivision)
+	, m_bDivision(g_defaultDivision)
 {
 }
 
@@ -17,6 +20,9 @@ Ellipsoid::~Ellipsoid()
 
 void Ellipsoid::subDraw()
 {
+	computeAssistVar();
+	getPrimitiveSetList().clear();
+
 	osg::ref_ptr<osg::Vec3Array> vertexArr = new osg::Vec3Array;
 	osg::ref_ptr<osg::Vec3Array> normalArr = new osg::Vec3Array;
 	setVertexArray(vertexArr);
@@ -123,4 +129,32 @@ void Ellipsoid::subDraw()
 	}
 }
 
+bool Ellipsoid::cullAndUpdate(const osg::CullStack &cullStack)
+{
+	float psa = cullStack.clampedPixelSize(m_center, m_dblALen * 2.0);
+	float psb = cullStack.clampedPixelSize(m_center, m_bRadius * 2.0);
+	float ps = osg::maximum(psa, psb);
+	if (ps <= cullStack.getSmallFeatureCullingPixelSize())
+		return true;
+
+	const int aDiv = computeDivision(psa);
+	if (aDiv != m_aDivision)
+	{
+		m_aDivision = aDiv;
+		m_needRedraw = true;
+	}
+
+	const int bDiv = computeDivision(psb);
+	if (bDiv != m_bDivision)
+	{
+		m_bDivision = bDiv;
+		m_needRedraw = true;
+	}
+	return false;
+}
+
+void Ellipsoid::computeAssistVar()
+{
+	m_dblALen = m_aLen.length();
+}
 } // namespace Geometry
