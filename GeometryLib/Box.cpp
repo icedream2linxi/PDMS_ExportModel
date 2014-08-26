@@ -100,7 +100,7 @@ void Box::subDraw()
 	addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, vertexArr->size()));
 }
 
-bool Box::cullAndUpdate(const osg::CullStack &cullStack)
+bool Box::doCullAndUpdate(const osg::CullStack &cullStack)
 {
 	float psx = cullStack.clampedPixelSize(m_center, m_dblXLen);
 	float psy = cullStack.clampedPixelSize(m_center, m_dblYLen);

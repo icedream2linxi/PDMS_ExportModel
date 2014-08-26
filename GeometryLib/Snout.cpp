@@ -96,7 +96,7 @@ void Snout::subDraw()
 	addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUAD_STRIP, first, vertexArr->size() - first));
 }
 
-bool Snout::cullAndUpdate(const osg::CullStack &cullStack)
+bool Snout::doCullAndUpdate(const osg::CullStack &cullStack)
 {
 	float psb = cullStack.clampedPixelSize(m_org, m_bottomRadius * 2.0);
 	float pst = cullStack.clampedPixelSize(m_org + m_height, m_topRadius * 2.0);

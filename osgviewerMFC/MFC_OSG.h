@@ -11,6 +11,7 @@
 #include <osgDB/ReadFile>
 #include <osgUtil/Optimizer>
 #include <string>
+#include <ViewCenterManipulator.h>
 
 class cOSG
 {
@@ -46,7 +47,7 @@ private:
     osg::ref_ptr<osg::Group> mRoot;
     osg::ref_ptr<osg::Node> mModel;
 	osg::ref_ptr<osg::Geode> mPoints;
-    osg::ref_ptr<osgGA::TrackballManipulator> trackball;
+	osg::ref_ptr<ViewCenterManipulator> trackball;
     osg::ref_ptr<osgGA::KeySwitchMatrixManipulator> keyswitchManipulator;
 	osg::ref_ptr<osg::TessellationHints> mHints;
 	osg::ref_ptr<osg::Camera> Axescamera;

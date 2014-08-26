@@ -22,8 +22,9 @@
 
 osg::Vec4 CvtColor(int color);
 
-SqliteLoad::SqliteLoad(osg::ref_ptr<osg::Group> &root, const std::string &filePath)
+SqliteLoad::SqliteLoad(osg::ref_ptr<osg::Group> &root, const std::string &filePath, ViewCenterManipulator *mani)
 	: m_root(root)
+	, m_mani(mani)
 	, m_filePath(filePath)
 	, m_pDb(NULL)
 {
@@ -100,7 +101,7 @@ bool SqliteLoad::loadBox()
 	if ((m_errorCode = sqlite3_prepare16(m_pDb, zSql, -1, &pStmt, &pzTail)) != SQLITE_OK)
 		return false;
 
-	osg::ref_ptr<Geometry::DynamicLOD> lod(new Geometry::DynamicLOD);
+	osg::ref_ptr<Geometry::DynamicLOD> lod(new Geometry::DynamicLOD(m_mani));
 
 	osg::Vec3 org, xLen, yLen, zLen;
 	int color;
@@ -174,7 +175,7 @@ bool SqliteLoad::loadCircularTorus()
 	if ((m_errorCode = sqlite3_prepare16(m_pDb, zSql, -1, &pStmt, &pzTail)) != SQLITE_OK)
 		return false;
 
-	osg::ref_ptr<Geometry::DynamicLOD> lod(new Geometry::DynamicLOD);
+	osg::ref_ptr<Geometry::DynamicLOD> lod(new Geometry::DynamicLOD(m_mani));
 
 	osg::Vec3 center, startPnt, normal;
 	double startRadius, endRadius, angle;
@@ -317,7 +318,7 @@ bool SqliteLoad::loadCylinder()
 	if ((m_errorCode = sqlite3_prepare16(m_pDb, zSql, -1, &pStmt, &pzTail)) != SQLITE_OK)
 		return false;
 
-	osg::ref_ptr<Geometry::DynamicLOD> lod(new Geometry::DynamicLOD);
+	osg::ref_ptr<Geometry::DynamicLOD> lod(new Geometry::DynamicLOD(m_mani));
 
 	osg::Vec3 org, height;
 	double radius;
@@ -378,7 +379,7 @@ bool SqliteLoad::loadEllipsoid()
 	if ((m_errorCode = sqlite3_prepare16(m_pDb, zSql, -1, &pStmt, &pzTail)) != SQLITE_OK)
 		return false;
 
-	osg::ref_ptr<Geometry::DynamicLOD> load(new Geometry::DynamicLOD);
+	osg::ref_ptr<Geometry::DynamicLOD> load(new Geometry::DynamicLOD(m_mani));
 
 	osg::Vec3 center, aLen;
 	double bRadius, angle;
@@ -895,7 +896,7 @@ bool SqliteLoad::loadSnout()
 	if ((m_errorCode = sqlite3_prepare16(m_pDb, zSql, -1, &pStmt, &pzTail)) != SQLITE_OK)
 		return false;
 
-	osg::ref_ptr<Geometry::DynamicLOD> load(new Geometry::DynamicLOD);
+	osg::ref_ptr<Geometry::DynamicLOD> load(new Geometry::DynamicLOD(m_mani));
 
 	osg::Vec3 org, height, offset;
 	double bottomRadius, topRadius;
@@ -967,7 +968,7 @@ bool SqliteLoad::loadSphere()
 	if ((m_errorCode = sqlite3_prepare16(m_pDb, zSql, -1, &pStmt, &pzTail)) != SQLITE_OK)
 		return false;
 
-	osg::ref_ptr<Geometry::DynamicLOD> load(new Geometry::DynamicLOD);
+	osg::ref_ptr<Geometry::DynamicLOD> load(new Geometry::DynamicLOD(m_mani));
 
 	osg::Vec3 center, height, bottomNormal;
 	double radius, angle;

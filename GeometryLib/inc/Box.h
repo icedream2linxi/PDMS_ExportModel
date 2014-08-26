@@ -26,10 +26,9 @@ public:
 	void setColor(const osg::Vec4 &color);
 	const osg::Vec4 &getColor() const;
 
-	virtual bool cullAndUpdate(const osg::CullStack &cullStack);
-
 protected:
 	virtual void subDraw();
+	virtual bool doCullAndUpdate(const osg::CullStack &cullStack);
 	void computeAssistVar();
 
 private:

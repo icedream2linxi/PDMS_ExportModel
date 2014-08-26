@@ -9,6 +9,7 @@ const int g_defaultDivision = 16;
 BaseGeometry::BaseGeometry()
 	: m_division(g_defaultDivision)
 	, m_needRedraw(true)
+	, m_isCulled(false)
 {
 }
 
@@ -34,7 +35,7 @@ void BaseGeometry::subDraw()
 
 }
 
-bool BaseGeometry::cullAndUpdate(const osg::CullStack &cullStack)
+bool BaseGeometry::doCullAndUpdate(const osg::CullStack &cullStack)
 {
 	return false;
 }
@@ -67,6 +68,12 @@ int BaseGeometry::computeDivision(float pixelSize)
 		div = 32;
 	return div;
 }
+
+bool BaseGeometry::cullAndUpdate(const osg::CullStack &cullStack)
+{
+	return m_isCulled = doCullAndUpdate(cullStack);
+}
+
 double GetEpsilon()
 {
 	return 0.00001;

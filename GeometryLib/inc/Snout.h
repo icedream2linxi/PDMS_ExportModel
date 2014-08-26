@@ -29,10 +29,9 @@ public:
 	void setTopVisible(bool visible);
 	bool isTopVisible() const;
 
-	virtual bool cullAndUpdate(const osg::CullStack &cullStack);
-
 protected:
 	virtual void subDraw();
+	virtual bool doCullAndUpdate(const osg::CullStack &cullStack);
 
 private:
 	osg::Vec3 m_org;

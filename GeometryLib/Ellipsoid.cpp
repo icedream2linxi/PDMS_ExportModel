@@ -129,7 +129,7 @@ void Ellipsoid::subDraw()
 	}
 }
 
-bool Ellipsoid::cullAndUpdate(const osg::CullStack &cullStack)
+bool Ellipsoid::doCullAndUpdate(const osg::CullStack &cullStack)
 {
 	float psa = cullStack.clampedPixelSize(m_center, m_dblALen * 2.0);
 	float psb = cullStack.clampedPixelSize(m_center, m_bRadius * 2.0);

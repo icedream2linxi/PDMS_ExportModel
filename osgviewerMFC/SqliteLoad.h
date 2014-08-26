@@ -3,11 +3,12 @@
 #include <osg/ref_ptr>
 #include <osg/Group>
 #include "sqlite3.h"
+#include <ViewCenterManipulator.h>
 
 class SqliteLoad
 {
 public:
-	SqliteLoad(osg::ref_ptr<osg::Group> &root, const std::string &filePath);
+	SqliteLoad(osg::ref_ptr<osg::Group> &root, const std::string &filePath, ViewCenterManipulator *mani);
 	~SqliteLoad();
 	bool doLoad();
 	const char *getErrorMessage() const;
@@ -33,6 +34,7 @@ private:
 private:
 	std::string m_filePath;
 	osg::ref_ptr<osg::Group> m_root;
+	ViewCenterManipulator *m_mani;
 
 	sqlite3 *m_pDb;
 	int m_errorCode;

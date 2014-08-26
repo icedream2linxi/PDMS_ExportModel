@@ -84,7 +84,7 @@ void Cylinder::subDraw()
 	}
 }
 
-bool Cylinder::cullAndUpdate(const osg::CullStack &cullStack)
+bool Cylinder::doCullAndUpdate(const osg::CullStack &cullStack)
 {
 	double dia = m_radius * 2.0;
 	float psb = cullStack.clampedPixelSize(m_org, dia);

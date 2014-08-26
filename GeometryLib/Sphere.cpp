@@ -107,7 +107,7 @@ void Sphere::subDraw()
 	addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUAD_STRIP, first, vertexArr->size() - first));
 }
 
-bool Sphere::cullAndUpdate(const osg::CullStack &cullStack)
+bool Sphere::doCullAndUpdate(const osg::CullStack &cullStack)
 {
 	float ps = cullStack.clampedPixelSize(m_center, m_radius * 2.0);
 	if (ps <= cullStack.getSmallFeatureCullingPixelSize())

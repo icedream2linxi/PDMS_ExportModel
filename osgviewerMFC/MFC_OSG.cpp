@@ -70,7 +70,7 @@ void cOSG::InitOSG(std::string modelname)
 void cOSG::InitManipulators(void)
 {
     // Create a trackball manipulator
-    trackball = new osgGA::TrackballManipulator();
+	trackball = new ViewCenterManipulator();
 
     // Create a Manipulator Switcher
     keyswitchManipulator = new osgGA::KeySwitchMatrixManipulator;
@@ -244,7 +244,7 @@ osg::ref_ptr<osg::Group> cOSG::InitOSGFromDb()
 	osg::ref_ptr<osg::Group> group(new osg::Group);
 	//NetLoad(group, m_ModelName);
 
-	SqliteLoad sl(group, m_ModelName);
+	SqliteLoad sl(group, m_ModelName, trackball);
 	if (!sl.doLoad())
 		AfxMessageBox(sl.getErrorMessage());
 

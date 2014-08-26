@@ -156,7 +156,7 @@ void CircularTorus::subDraw()
 	}
 }
 
-bool CircularTorus::cullAndUpdate(const osg::CullStack &cullStack)
+bool CircularTorus::doCullAndUpdate(const osg::CullStack &cullStack)
 {
 	osg::Vec3 vec = cullStack.getEyeLocal() - m_center;
 	vec.normalize();
