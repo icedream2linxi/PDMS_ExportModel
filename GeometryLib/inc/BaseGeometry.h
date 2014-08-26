@@ -6,6 +6,8 @@
 namespace Geometry
 {
 
+extern const int g_defaultDivision;
+
 class BaseGeometry :
 	public osg::Geometry
 {
@@ -21,6 +23,7 @@ public:
 protected:
 	virtual void subDraw();
 	void updateDivision(float pixelSize);
+	int computeDivision(float pixelSize);
 
 protected:
 	unsigned int m_division;

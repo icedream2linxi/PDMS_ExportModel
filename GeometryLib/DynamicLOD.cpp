@@ -72,8 +72,8 @@ void DynamicLOD::updateTraverse(osg::NodeVisitor& nv)
 			{
 				BaseGeometry *geo = dynamic_cast<BaseGeometry*>(geode->getDrawable(i));
 				if (geo->needRedraw())
-					//geo->draw();
-					geo->setUpdateCallback(updateCallback);
+					geo->draw();
+					//geo->setUpdateCallback(updateCallback);
 			}
 			node->accept(nv);
 		}

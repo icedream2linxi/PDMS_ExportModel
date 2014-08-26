@@ -893,7 +893,7 @@ bool SqliteLoad::loadSnout()
 	if ((m_errorCode = sqlite3_prepare16(m_pDb, zSql, -1, &pStmt, &pzTail)) != SQLITE_OK)
 		return false;
 
-	osg::ref_ptr<osg::Geode> ctGeode(new osg::Geode);
+	osg::ref_ptr<Geometry::DynamicLOD> load(new Geometry::DynamicLOD);
 
 	osg::Vec3 org, height, offset;
 	double bottomRadius, topRadius;
@@ -943,10 +943,12 @@ bool SqliteLoad::loadSnout()
 		snout->setColor(CvtColor(color));
 		snout->draw();
 
-		ctGeode->addDrawable(snout);
+		osg::ref_ptr<osg::Geode> snoutGeode(new osg::Geode);
+		snoutGeode->addDrawable(snout);
+		load->addChild(snoutGeode);
 	}
 
-	m_root->addChild(ctGeode);
+	m_root->addChild(load);
 	m_errorCode = sqlite3_finalize(pStmt);
 	pStmt = NULL;
 

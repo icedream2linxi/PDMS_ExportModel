@@ -8,6 +8,9 @@ namespace Geometry
 CircularTorus::CircularTorus()
 	: m_topVis(true)
 	, m_bottomVis(true)
+	, m_majorDivision(g_defaultDivision)
+	, m_minorDivision(g_defaultDivision)
+	, m_majorRadius(0.0)
 {
 }
 
@@ -18,6 +21,9 @@ CircularTorus::~CircularTorus()
 
 void CircularTorus::subDraw()
 {
+	computeAssistVar();
+	getPrimitiveSetList().clear();
+
 	osg::ref_ptr<osg::Vec3Array> vertexArr = new osg::Vec3Array;
 	osg::ref_ptr<osg::Vec3Array> normalArr = new osg::Vec3Array;
 	setVertexArray(vertexArr);
@@ -32,10 +38,10 @@ void CircularTorus::subDraw()
 		m_angle = 2 * M_PI;
 	}
 
-	int mainCount = (int)ceil(m_angle / (2 * M_PI / getDivision()));
+	int mainCount = (int)ceil(m_angle / (2 * M_PI / m_majorDivision));
 	double mainIncAngle = m_angle / mainCount;
 
-	int subCount = (int)getDivision();
+	int subCount = m_minorDivision;
 	double subIncAngle = 2 * M_PI / subCount;
 
 	osg::Vec3 mainVec = m_startPnt - m_center;
@@ -154,11 +160,30 @@ bool CircularTorus::cullAndUpdate(const osg::CullStack &cullStack)
 {
 	osg::Vec3 vec = cullStack.getEyeLocal() - m_center;
 	vec.normalize();
-	float radius = osg::maximum(m_startRadius, m_endRadius);
-	float ps = cullStack.clampedPixelSize(m_center + vec * radius, radius * 2);
+	const float radius = osg::maximum(m_startRadius, m_endRadius);
+	const float ps = cullStack.clampedPixelSize(m_center + vec * radius, radius * 2);
 	if (ps <= cullStack.getSmallFeatureCullingPixelSize())
 		return true;
+
+	const float majorPs = cullStack.clampedPixelSize(m_center, m_majorRadius * 2.0);
+	const int majorDiv = computeDivision(majorPs);
+	if (majorDiv != m_majorDivision)
+	{
+		m_majorDivision = majorDiv;
+		m_needRedraw = true;
+	}
+
+	const int minorDiv = computeDivision(ps);
+	if (minorDiv != m_minorDivision)
+	{
+		m_minorDivision = minorDiv;
+		m_needRedraw = true;
+	}
 	return false;
 }
 
+void CircularTorus::computeAssistVar()
+{
+	m_majorRadius = (m_startPnt - m_center).length();
+}
 } // namespace Geometry

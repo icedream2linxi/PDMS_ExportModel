@@ -18,6 +18,8 @@ Snout::~Snout()
 
 void Snout::subDraw()
 {
+	getPrimitiveSetList().clear();
+
 	osg::ref_ptr<osg::Vec3Array> vertexArr = new osg::Vec3Array;
 	osg::ref_ptr<osg::Vec3Array> normalArr = new osg::Vec3Array;
 	setVertexArray(vertexArr);
@@ -94,4 +96,15 @@ void Snout::subDraw()
 	addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUAD_STRIP, first, vertexArr->size() - first));
 }
 
+bool Snout::cullAndUpdate(const osg::CullStack &cullStack)
+{
+	float psb = cullStack.clampedPixelSize(m_org, m_bottomRadius * 2.0);
+	float pst = cullStack.clampedPixelSize(m_org + m_height, m_topRadius * 2.0);
+	float ps = osg::maximum(psb, pst);
+	if (ps <= cullStack.getSmallFeatureCullingPixelSize())
+		return true;
+
+	updateDivision(ps);
+	return false;
+}
 } // namespace Geometry

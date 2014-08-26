@@ -4,9 +4,11 @@
 namespace Geometry
 {
 
-	BaseGeometry::BaseGeometry()
-		: m_division(16)
-		, m_needRedraw(true)
+const int g_defaultDivision = 16;
+
+BaseGeometry::BaseGeometry()
+	: m_division(g_defaultDivision)
+	, m_needRedraw(true)
 {
 }
 
@@ -39,6 +41,17 @@ bool BaseGeometry::cullAndUpdate(const osg::CullStack &cullStack)
 
 void BaseGeometry::updateDivision(float pixelSize)
 {
+	int div = computeDivision(pixelSize);
+
+	if (m_division == div)
+		return;
+
+	m_division = div;
+	m_needRedraw = true;
+}
+
+int BaseGeometry::computeDivision(float pixelSize)
+{
 	int div = 8;
 	if (pixelSize < 40.0f)
 		div = 8;
@@ -52,14 +65,8 @@ void BaseGeometry::updateDivision(float pixelSize)
 		div = 24;
 	else
 		div = 32;
-
-	if (m_division == div)
-		return;
-
-	m_division = div;
-	m_needRedraw = true;
+	return div;
 }
-
 double GetEpsilon()
 {
 	return 0.00001;

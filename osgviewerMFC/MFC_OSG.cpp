@@ -211,7 +211,8 @@ void cOSG::InitCameraConfig(void)
     // Add the Camera Manipulator to the Viewer
     mViewer->setCameraManipulator(keyswitchManipulator.get());
 	mViewer->addEventHandler(new osgViewer::RecordCameraPathHandler);
-	camera->setUpdateCallback(new Geometry::DynamicLODUpdateCallback);
+	//camera->setUpdateCallback(new Geometry::DynamicLODUpdateCallback);
+	mRoot->setUpdateCallback(new Geometry::DynamicLODUpdateCallback);
 
     // Set the Scene Data
     mViewer->setSceneData(mRoot.get());

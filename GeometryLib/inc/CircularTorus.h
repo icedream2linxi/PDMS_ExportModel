@@ -35,6 +35,7 @@ public:
 	
 protected:
 	virtual void subDraw();
+	void computeAssistVar();
 
 private:
 	osg::Vec3 m_center;
@@ -46,6 +47,10 @@ private:
 	osg::Vec4 m_color;
 	bool m_topVis;
 	bool m_bottomVis;
+
+	int m_majorDivision;
+	int m_minorDivision;
+	double m_majorRadius;
 };
 
 
