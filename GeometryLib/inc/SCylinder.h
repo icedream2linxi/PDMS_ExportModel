@@ -29,6 +29,7 @@ public:
 
 protected:
 	virtual void subDraw();
+	virtual bool doCullAndUpdate(const osg::CullStack &cullStack);
 
 private:
 	osg::Vec3 m_org;

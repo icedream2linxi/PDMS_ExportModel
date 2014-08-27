@@ -840,7 +840,7 @@ bool SqliteLoad::loadSCylinder()
 	if ((m_errorCode = sqlite3_prepare16(m_pDb, zSql, -1, &pStmt, &pzTail)) != SQLITE_OK)
 		return false;
 
-	osg::ref_ptr<osg::Geode> ctGeode(new osg::Geode);
+	osg::ref_ptr<Geometry::DynamicLOD> lod(new Geometry::DynamicLOD(m_mani));
 
 	osg::Vec3 org, height, bottomNormal;
 	double radius;
@@ -887,10 +887,12 @@ bool SqliteLoad::loadSCylinder()
 		scylinder->setColor(CvtColor(color));
 		scylinder->draw();
 
+		osg::ref_ptr<osg::Geode> ctGeode(new osg::Geode);
 		ctGeode->addDrawable(scylinder);
+		lod->addChild(ctGeode);
 	}
 
-	m_root->addChild(ctGeode);
+	m_root->addChild(lod);
 	m_errorCode = sqlite3_finalize(pStmt);
 	pStmt = NULL;
 
@@ -1046,7 +1048,7 @@ bool SqliteLoad::loadWedge()
 	if ((m_errorCode = sqlite3_prepare16(m_pDb, zSql, -1, &pStmt, &pzTail)) != SQLITE_OK)
 		return false;
 
-	osg::ref_ptr<osg::Geode> boxGeode(new osg::Geode);
+	osg::ref_ptr<Geometry::DynamicLOD> lod(new Geometry::DynamicLOD(m_mani));
 
 	osg::Vec3 org, edge1, edge2, height;
 	int color;
@@ -1097,10 +1099,12 @@ bool SqliteLoad::loadWedge()
 		wedge->setColor(CvtColor(color));
 		wedge->draw();
 
-		boxGeode->addDrawable(wedge);
+		osg::ref_ptr<osg::Geode> wedgeGeode(new osg::Geode);
+		wedgeGeode->addDrawable(wedge);
+		lod->addChild(wedgeGeode);
 	}
 
-	m_root->addChild(boxGeode);
+	m_root->addChild(lod);
 	m_errorCode = sqlite3_finalize(pStmt);
 	pStmt = NULL;
 
@@ -1337,12 +1341,14 @@ bool SqliteLoad::loadCombineGeometry()
 	m_errorCode = sqlite3_finalize(pStmt);
 	pStmt = NULL;
 
-	osg::ref_ptr<osg::Geode> cgGeode(new osg::Geode);
+	osg::ref_ptr<osg::Group> group(new osg::Group);
 	for each(auto &entry in cgMap)
 	{
 		entry.second->draw();
+		osg::ref_ptr<osg::Geode> cgGeode(new osg::Geode);
 		cgGeode->addDrawable(entry.second);
+		group->addChild(cgGeode);
 	}
-	m_root->addChild(cgGeode);
+	m_root->addChild(group);
 	return true;
 }

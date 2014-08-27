@@ -18,6 +18,7 @@ SCylinder::~SCylinder()
 
 void SCylinder::subDraw()
 {
+	getPrimitiveSetList().clear();
 	osg::ref_ptr<osg::Vec3Array> vertexArr = new osg::Vec3Array;
 	osg::ref_ptr<osg::Vec3Array> normalArr = new osg::Vec3Array;
 	setVertexArray(vertexArr);
@@ -99,4 +100,14 @@ void SCylinder::subDraw()
 	}
 }
 
+bool SCylinder::doCullAndUpdate(const osg::CullStack &cullStack)
+{
+	float psb = cullStack.clampedPixelSize(m_org, m_radius * 2.0);
+	float pst = cullStack.clampedPixelSize(m_org + m_height, m_radius * 2.0);
+	float ps = osg::maximum(psb, pst);
+	if (ps <= cullStack.getSmallFeatureCullingPixelSize())
+		return true;
+	updateDivision(ps);
+	return false;
+}
 } // namespace Geometry
