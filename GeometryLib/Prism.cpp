@@ -6,6 +6,7 @@ namespace Geometry
 {
 
 Prism::Prism()
+	: m_radius(0.0)
 {
 }
 
@@ -16,6 +17,9 @@ Prism::~Prism()
 
 void Prism::subDraw()
 {
+	computeAssistVar();
+	getPrimitiveSetList().clear();
+
 	osg::ref_ptr<osg::Vec3Array> vertexArr = new osg::Vec3Array;
 	osg::ref_ptr<osg::Vec3Array> normalArr = new osg::Vec3Array;
 	setVertexArray(vertexArr);
@@ -72,4 +76,18 @@ void Prism::subDraw()
 	addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, first, vertexArr->size() - first));
 }
 
+bool Prism::doCullAndUpdate(const osg::CullStack &cullStack)
+{
+	float psb = cullStack.clampedPixelSize(m_org, m_radius * 2.0);
+	float pst = cullStack.clampedPixelSize(m_org + m_height, m_radius * 2.0);
+	float ps = osg::maximum(psb, pst);
+	if (ps <= cullStack.getSmallFeatureCullingPixelSize())
+		return true;
+	return false;
+}
+
+void Prism::computeAssistVar()
+{
+	m_radius = (m_bottomStartPnt - m_org).length();
+}
 } // namespace Geometry

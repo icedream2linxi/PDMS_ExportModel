@@ -25,6 +25,8 @@ public:
 
 protected:
 	virtual void subDraw();
+	virtual bool doCullAndUpdate(const osg::CullStack &cullStack);
+	void computeAssistVar();
 
 private:
 	osg::Vec3 m_org;
@@ -32,6 +34,8 @@ private:
 	osg::Vec3 m_bottomStartPnt;
 	int m_edgeNum;
 	osg::Vec4 m_color;
+
+	double m_radius;
 };
 
 

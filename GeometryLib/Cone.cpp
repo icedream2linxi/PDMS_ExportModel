@@ -17,6 +17,8 @@ Cone::~Cone()
 
 void Cone::subDraw()
 {
+	getPrimitiveSetList().clear();
+
 	osg::ref_ptr<osg::Vec3Array> vertexArr = new osg::Vec3Array;
 	osg::ref_ptr<osg::Vec3Array> normalArr = new osg::Vec3Array;
 	setVertexArray(vertexArr);
@@ -79,6 +81,16 @@ void Cone::subDraw()
 		normalArr->push_back(bottomNormal);
 		addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::TRIANGLE_FAN, first, vertexArr->size() - first));
 	}
+}
+
+bool Cone::doCullAndUpdate(const osg::CullStack &cullStack)
+{
+	float ps = cullStack.clampedPixelSize(m_org, m_radius * 2.0);
+	if (ps <= cullStack.getSmallFeatureCullingPixelSize())
+		return true;
+
+	updateDivision(ps);
+	return false;
 }
 
 } // namespace Geometry

@@ -71,8 +71,8 @@ bool SqliteLoad::doLoad()
 		return false;
 	if (!loadWedge())
 		return false;
-	//if (!loadCombineGeometry())
-	//	return false;
+	if (!loadCombineGeometry())
+		return false;
 
 	clock_t end = clock();
 	CString msg;
@@ -251,7 +251,7 @@ bool SqliteLoad::loadCone()
 	if ((m_errorCode = sqlite3_prepare16(m_pDb, zSql, -1, &pStmt, &pzTail)) != SQLITE_OK)
 		return false;
 
-	osg::ref_ptr<osg::Geode> ctGeode(new osg::Geode);
+	osg::ref_ptr<Geometry::DynamicLOD> lod(new Geometry::DynamicLOD(m_mani));
 
 	osg::Vec3 org, height, offset;
 	double radius;
@@ -298,10 +298,12 @@ bool SqliteLoad::loadCone()
 		cone->setColor(CvtColor(color));
 		cone->draw();
 
-		ctGeode->addDrawable(cone);
+		osg::ref_ptr<osg::Geode> coneGeode(new osg::Geode);
+		coneGeode->addDrawable(cone);
+		lod->addChild(coneGeode);
 	}
 
-	m_root->addChild(ctGeode);
+	m_root->addChild(lod);
 	m_errorCode = sqlite3_finalize(pStmt);
 	pStmt = NULL;
 
@@ -444,7 +446,7 @@ bool SqliteLoad::loadPrism()
 	if ((m_errorCode = sqlite3_prepare16(m_pDb, zSql, -1, &pStmt, &pzTail)) != SQLITE_OK)
 		return false;
 
-	osg::ref_ptr<osg::Geode> ctGeode(new osg::Geode);
+	osg::ref_ptr<Geometry::DynamicLOD> lod(new Geometry::DynamicLOD(m_mani));
 
 	osg::Vec3 org, height, bottomStartPnt;
 	int edgeNum, color;
@@ -490,10 +492,12 @@ bool SqliteLoad::loadPrism()
 		prism->setColor(CvtColor(color));
 		prism->draw();
 
-		ctGeode->addDrawable(prism);
+		osg::ref_ptr<osg::Geode> prismGeode(new osg::Geode);
+		prismGeode->addDrawable(prism);
+		lod->addChild(prismGeode);
 	}
 
-	m_root->addChild(ctGeode);
+	m_root->addChild(lod);
 	m_errorCode = sqlite3_finalize(pStmt);
 	pStmt = NULL;
 
@@ -512,7 +516,7 @@ bool SqliteLoad::loadPyramid()
 	if ((m_errorCode = sqlite3_prepare16(m_pDb, zSql, -1, &pStmt, &pzTail)) != SQLITE_OK)
 		return false;
 
-	osg::ref_ptr<osg::Geode> ctGeode(new osg::Geode);
+	osg::ref_ptr<osg::Group> group(new osg::Group);
 
 	osg::Vec3 org, height, xAxis, offset;
 	double bottomXLen, bottomYLen, topXLen, topYLen;
@@ -576,10 +580,12 @@ bool SqliteLoad::loadPyramid()
 		pyramid->setColor(CvtColor(color));
 		pyramid->draw();
 
-		ctGeode->addDrawable(pyramid);
+		osg::ref_ptr<osg::Geode> pyramidGeode(new osg::Geode);
+		pyramidGeode->addDrawable(pyramid);
+		group->addChild(pyramidGeode);
 	}
 
-	m_root->addChild(ctGeode);
+	m_root->addChild(group);
 	m_errorCode = sqlite3_finalize(pStmt);
 	pStmt = NULL;
 
@@ -598,7 +604,7 @@ bool SqliteLoad::loadRectCirc()
 	if ((m_errorCode = sqlite3_prepare16(m_pDb, zSql, -1, &pStmt, &pzTail)) != SQLITE_OK)
 		return false;
 
-	osg::ref_ptr<osg::Geode> ctGeode(new osg::Geode);
+	osg::ref_ptr<Geometry::DynamicLOD> lod(new Geometry::DynamicLOD(m_mani));
 
 	osg::Vec3 rectCenter, height, xLen, offset;
 	double yLen, radius;
@@ -656,10 +662,12 @@ bool SqliteLoad::loadRectCirc()
 		rectCirc->setColor(CvtColor(color));
 		rectCirc->draw();
 
+		osg::ref_ptr<osg::Geode> ctGeode(new osg::Geode);
 		ctGeode->addDrawable(rectCirc);
+		lod->addChild(ctGeode);
 	}
 
-	m_root->addChild(ctGeode);
+	m_root->addChild(lod);
 	m_errorCode = sqlite3_finalize(pStmt);
 	pStmt = NULL;
 
@@ -677,7 +685,7 @@ bool SqliteLoad::loadRectangularTorus()
 	if ((m_errorCode = sqlite3_prepare16(m_pDb, zSql, -1, &pStmt, &pzTail)) != SQLITE_OK)
 		return false;
 
-	osg::ref_ptr<osg::Geode> ctGeode(new osg::Geode);
+	osg::ref_ptr<Geometry::DynamicLOD> lod(new Geometry::DynamicLOD(m_mani));
 
 	osg::Vec3 center, startPnt, normal;
 	double startWidth, startHeight, endWidth, endHeight, angle;
@@ -736,10 +744,12 @@ bool SqliteLoad::loadRectangularTorus()
 		rt->setColor(CvtColor(color));
 		rt->draw();
 
+		osg::ref_ptr<osg::Geode> ctGeode(new osg::Geode);
 		ctGeode->addDrawable(rt);
+		lod->addChild(ctGeode);
 	}
 
-	m_root->addChild(ctGeode);
+	m_root->addChild(lod);
 	m_errorCode = sqlite3_finalize(pStmt);
 	pStmt = NULL;
 
@@ -757,7 +767,7 @@ bool SqliteLoad::loadSaddle()
 	if ((m_errorCode = sqlite3_prepare16(m_pDb, zSql, -1, &pStmt, &pzTail)) != SQLITE_OK)
 		return false;
 
-	osg::ref_ptr<osg::Geode> ctGeode(new osg::Geode);
+	osg::ref_ptr<Geometry::DynamicLOD> lod(new Geometry::DynamicLOD(m_mani));
 
 	osg::Vec3 org, xLen, zLen;
 	double yLen, radius;
@@ -807,10 +817,12 @@ bool SqliteLoad::loadSaddle()
 		saddle->setColor(CvtColor(color));
 		saddle->draw();
 
+		osg::ref_ptr<osg::Geode> ctGeode(new osg::Geode);
 		ctGeode->addDrawable(saddle);
+		lod->addChild(ctGeode);
 	}
 
-	m_root->addChild(ctGeode);
+	m_root->addChild(lod);
 	m_errorCode = sqlite3_finalize(pStmt);
 	pStmt = NULL;
 

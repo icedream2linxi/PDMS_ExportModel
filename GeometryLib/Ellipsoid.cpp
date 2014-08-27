@@ -43,11 +43,11 @@ void Ellipsoid::subDraw()
 	localToWold.makeRotate(osg::Z_AXIS, -bottomNormal);
 	osg::Vec3 xVec = localToWold * osg::X_AXIS;
 	osg::Vec3 yVec = xVec ^ bottomNormal;
-	int hCount = (int)getDivision();
+	int hCount = m_bDivision;
 	double hIncAng = 2 * M_PI / hCount;
 	osg::Quat hQuat(hIncAng, bottomNormal);
 
-	int vCount = (int)ceil(m_angle / hIncAng);
+	int vCount = (int)ceil(m_angle / (2 * M_PI / m_aDivision));
 	if (vCount & 1) // 如果是奇数，则变成偶数
 		++vCount;
 	double vIncAng = m_angle / vCount;

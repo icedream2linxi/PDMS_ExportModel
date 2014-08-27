@@ -18,6 +18,9 @@ RectangularTorus::~RectangularTorus()
 
 void RectangularTorus::subDraw()
 {
+	computeAssistVar();
+	getPrimitiveSetList().clear();
+
 	osg::ref_ptr<osg::Vec3Array> vertexArr = new osg::Vec3Array;
 	osg::ref_ptr<osg::Vec3Array> normalArr = new osg::Vec3Array;
 	setVertexArray(vertexArr);
@@ -251,4 +254,17 @@ void RectangularTorus::subDraw()
 	}
 }
 
+bool RectangularTorus::doCullAndUpdate(const osg::CullStack &cullStack)
+{
+	float ps = cullStack.clampedPixelSize(m_center, m_radius * 2.0);
+	if (ps <= cullStack.getSmallFeatureCullingPixelSize())
+		return true;
+	updateDivision(ps);
+	return false;
+}
+
+void RectangularTorus::computeAssistVar()
+{
+	m_radius = (m_startPnt - m_center).length();
+}
 } // namespace Geometry

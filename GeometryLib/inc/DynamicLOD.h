@@ -47,16 +47,16 @@ public:
 	}
 };
 
-class RedrawCallback : public osg::Drawable::UpdateCallback
-{
-public:
-	virtual void update(osg::NodeVisitor *nv, osg::Drawable *drawable)
-	{
-		BaseGeometry *geo = dynamic_cast<BaseGeometry*>(drawable);
-		if (geo->needRedraw())
-			geo->draw();
-	}
-};
+//class RedrawCallback : public osg::Drawable::UpdateCallback
+//{
+//public:
+//	virtual void update(osg::NodeVisitor *nv, osg::Drawable *drawable)
+//	{
+//		BaseGeometry *geo = dynamic_cast<BaseGeometry*>(drawable);
+//		if (geo->needRedraw())
+//			geo->draw();
+//	}
+//};
 
 } // namespace Geometry
 

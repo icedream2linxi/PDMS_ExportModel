@@ -4,7 +4,7 @@
 namespace Geometry
 {
 
-const int g_defaultDivision = 16;
+const int g_defaultDivision = 8;
 
 BaseGeometry::BaseGeometry()
 	: m_division(g_defaultDivision)
@@ -53,19 +53,31 @@ void BaseGeometry::updateDivision(float pixelSize)
 
 int BaseGeometry::computeDivision(float pixelSize)
 {
-	int div = 8;
-	if (pixelSize < 40.0f)
+	//int div = 8;
+	//if (pixelSize < 40.0f)
+	//	div = 8;
+	//else if (pixelSize < 120.0f)
+	//	div = 12;
+	//else if (pixelSize < 300.0f)
+	//	div = 16;
+	//else if (pixelSize < 600.0f)
+	//	div = 20;
+	//else if (pixelSize < 1000.0f)
+	//	div = 24;
+	//else
+	//	div = 32;
+
+	int div = 5;
+	if (pixelSize <= 40.0f)
+		div = 5;
+	else if (pixelSize <= 100.0f)
 		div = 8;
-	else if (pixelSize < 120.0f)
+	else if (pixelSize <= 500.0f)
 		div = 12;
-	else if (pixelSize < 300.0f)
+	else if (pixelSize <= 1000.0f)
 		div = 16;
-	else if (pixelSize < 600.0f)
-		div = 20;
-	else if (pixelSize < 1000.0f)
-		div = 24;
 	else
-		div = 32;
+		div = 20;
 	return div;
 }
 

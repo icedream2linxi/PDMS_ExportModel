@@ -9,7 +9,7 @@ using namespace osg;
 namespace Geometry
 {
 
-osg::ref_ptr<RedrawCallback> updateCallback(new RedrawCallback);
+//osg::ref_ptr<RedrawCallback> updateCallback(new RedrawCallback);
 
 DynamicLOD::DynamicLOD()
 	: m_manipulator(NULL)
@@ -33,7 +33,10 @@ void DynamicLOD::traverse(osg::NodeVisitor& nv)
 {
 	if (m_manipulator != NULL && !m_manipulator->isMouseRelease())
 	{
-		quickTraverse(nv);
+		if (nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
+			quickTraverse(nv);
+		else
+			__super::traverse(nv);
 		return;
 	}
 

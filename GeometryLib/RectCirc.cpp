@@ -16,6 +16,9 @@ RectCirc::~RectCirc()
 
 void RectCirc::subDraw()
 {
+	computeAssistVar();
+	getPrimitiveSetList().clear();
+
 	osg::ref_ptr<osg::Vec3Array> vertexArr = new osg::Vec3Array;
 	osg::ref_ptr<osg::Vec3Array> normalArr = new osg::Vec3Array;
 	setVertexArray(vertexArr);
@@ -176,4 +179,23 @@ void RectCirc::subDraw()
 	addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUAD_STRIP, first, vertexArr->size() - first));
 }
 
+bool RectCirc::doCullAndUpdate(const osg::CullStack &cullStack)
+{
+	float psr = cullStack.clampedPixelSize(m_rectCenter + m_height + m_offset, m_radius * 2.0);
+	float psl = cullStack.clampedPixelSize(m_rectCenter, m_assistLen * 2.0);
+	float ps = osg::maximum(psr, psl);
+	if (ps <= cullStack.getSmallFeatureCullingPixelSize())
+		return ps;
+
+	updateDivision(psr);
+	return false;
+}
+
+void RectCirc::computeAssistVar()
+{
+	osg::Vec3 yVec = m_height ^ m_xLen;
+	yVec.normalize();
+	yVec *= m_yLen;
+	m_assistLen = (m_xLen + yVec).length();
+}
 } // namespace Geometry

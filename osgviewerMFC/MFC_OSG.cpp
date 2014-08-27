@@ -87,6 +87,37 @@ void cOSG::InitManipulators(void)
     keyswitchManipulator->selectMatrixManipulator(0);  // Zero based index Value
 }
 
+
+class StatVisitor : public osg::NodeVisitor
+{
+public:
+	StatVisitor()
+		: m_vertexCount(0)
+		, osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+	{
+
+	}
+
+	virtual void apply(osg::Geode& node)
+	{
+		for (unsigned int i = 0; i < node.getNumDrawables(); ++i)
+		{
+			osg::Geometry *geometry = node.getDrawable(i)->asGeometry();
+			if (geometry == NULL)
+				continue;
+			m_vertexCount += geometry->getVertexArray()->getNumElements();
+		}
+	}
+
+	size_t getVertexCount() const
+	{
+		return m_vertexCount;
+	}
+
+private:
+	size_t m_vertexCount;
+};
+
 void cOSG::InitSceneGraph(void)
 {
     // Init the main Root Node/Group
@@ -146,6 +177,12 @@ void cOSG::InitSceneGraph(void)
 	osg::CullFace *cullFace = new osg::CullFace(osg::CullFace::BACK);
 	state->setAttribute(cullFace);
 	state->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
+
+	//StatVisitor sv;
+	//mRoot->traverse(sv);
+	//CString msg;
+	//msg.Format("Vertex Count = %d", sv.getVertexCount());
+	//AfxMessageBox(msg);
 }
 
 void cOSG::InitCameraConfig(void)
