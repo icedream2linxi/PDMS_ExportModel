@@ -60,6 +60,9 @@
     <ClInclude Include="NetLoad.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RvmLoad.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ChildFrm.cpp">
@@ -96,6 +99,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NetLoad.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RvmLoad.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

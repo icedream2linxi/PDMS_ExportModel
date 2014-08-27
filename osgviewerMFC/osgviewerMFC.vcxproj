@@ -169,6 +169,7 @@
     <ClInclude Include="MFC_OSG_MDIView.h" />
     <ClInclude Include="NetLoad.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="RvmLoad.h" />
     <ClInclude Include="sqlite3.h" />
     <ClInclude Include="sqlite3ext.h" />
     <ClInclude Include="SqliteLoad.h" />
@@ -184,6 +185,7 @@
     <ClCompile Include="MFC_OSG_MDIDoc.cpp" />
     <ClCompile Include="MFC_OSG_MDIView.cpp" />
     <ClCompile Include="NetLoad.cpp" />
+    <ClCompile Include="RvmLoad.cpp" />
     <ClCompile Include="sqlite3.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
