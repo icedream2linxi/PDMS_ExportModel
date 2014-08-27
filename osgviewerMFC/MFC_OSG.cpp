@@ -98,11 +98,6 @@ void cOSG::InitSceneGraph(void)
 	mRoot->getOrCreateStateSet()->setAttributeAndModes(ms, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 #endif
 
-	osg::StateSet *state = mRoot->getOrCreateStateSet();
-	osg::CullFace *cullFace = new osg::CullFace(osg::CullFace::BACK);
-	state->setAttribute(cullFace);
-	state->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
-
 	path modelFile(m_ModelName);
 	if (modelFile.extension() == ".db") {
 		mModel = InitOSGFromDb();
@@ -146,6 +141,11 @@ void cOSG::InitSceneGraph(void)
 	mRoot->addChild(mModel.get());
 	if (mPoints != NULL)
 		mRoot->addChild(mPoints);
+
+	osg::StateSet *state = mModel->getOrCreateStateSet();
+	osg::CullFace *cullFace = new osg::CullFace(osg::CullFace::BACK);
+	state->setAttribute(cullFace);
+	state->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
 }
 
 void cOSG::InitCameraConfig(void)
@@ -212,7 +212,6 @@ void cOSG::InitCameraConfig(void)
     mViewer->setCameraManipulator(keyswitchManipulator.get());
 	mViewer->addEventHandler(new osgViewer::RecordCameraPathHandler);
 	//camera->setUpdateCallback(new Geometry::DynamicLODUpdateCallback);
-	mRoot->setUpdateCallback(new Geometry::DynamicLODUpdateCallback);
 
     // Set the Scene Data
     mViewer->setSceneData(mRoot.get());
@@ -248,6 +247,7 @@ osg::ref_ptr<osg::Group> cOSG::InitOSGFromDb()
 	if (!sl.doLoad())
 		AfxMessageBox(sl.getErrorMessage());
 
+	group->setUpdateCallback(new Geometry::DynamicLODUpdateCallback);
 	return group;
 }
 
