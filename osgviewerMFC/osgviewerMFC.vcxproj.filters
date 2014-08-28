@@ -110,4 +110,15 @@
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\MFC_OSG_MDI.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\MFC_OSG_MDIDoc.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Toolbar.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
 </Project>

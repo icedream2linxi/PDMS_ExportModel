@@ -206,6 +206,11 @@
       <Project>{d5470c15-a5f6-4adf-949f-05ac9adea7ac}</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\MFC_OSG_MDI.ico" />
+    <Image Include="res\MFC_OSG_MDIDoc.ico" />
+    <Image Include="res\Toolbar.bmp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

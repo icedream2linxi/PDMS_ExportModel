@@ -33,6 +33,7 @@ public:
 	void SaveAs(const TCHAR *filename);
 
     osgViewer::Viewer* getViewer() { return mViewer; }
+	osg::ref_ptr<osg::Group> &getRoot();
 
 private:
 	void InitAxis(double width, double height);

@@ -333,6 +333,11 @@ void cOSG::SaveAs(const TCHAR *filename)
 	osgDB::writeNodeFile(*mRoot, filename);
 }
 
+osg::ref_ptr<osg::Group> & cOSG::getRoot()
+{
+	return mRoot;
+}
+
 
 /*void cOSG::Render(void* ptr)
 {

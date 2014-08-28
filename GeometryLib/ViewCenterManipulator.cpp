@@ -5,6 +5,7 @@
 ViewCenterManipulator::ViewCenterManipulator()
 	: m_isMouseRelease(true)
 {
+	setAutoComputeHomePosition(true);
 }
 
 

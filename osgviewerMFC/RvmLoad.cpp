@@ -125,11 +125,12 @@ bool RvmLoad::loadItem(int parentColor)
 		else
 			assert(false);
 	}
+	return true;
 }
 
 bool RvmLoad::loadPrim(int color)
 {
-	int v1, v2, type;
+	int v1, v2, type = 0;
 	m_fin >> v1, v2 >> type;
 
 	osg::Matrixd mat;
@@ -235,4 +236,5 @@ bool RvmLoad::loadPrim(int color)
 		assert(false);
 		break;
 	}
+	return true;
 }

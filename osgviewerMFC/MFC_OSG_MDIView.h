@@ -23,6 +23,7 @@ public:
     virtual void OnInitialUpdate();
     virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 protected:
+	void RestPos();
 
 // Implementation
 public:
@@ -45,8 +46,11 @@ protected:
     afx_msg void OnDestroy();
     afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
     afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-public:
 	afx_msg void OnFileSaveAs();
+	afx_msg void OnTestOsgBoxTest();
+	afx_msg void OnTestGeometryBoxTest();
+public:
+	afx_msg void OnViewSouthWest();
 };
 
 #ifndef _DEBUG  // debug version in MFC_OSG_MDIView.cpp
