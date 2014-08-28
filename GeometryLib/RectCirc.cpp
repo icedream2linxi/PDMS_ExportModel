@@ -185,7 +185,7 @@ bool RectCirc::doCullAndUpdate(const osg::CullStack &cullStack)
 	float psl = cullStack.clampedPixelSize(m_rectCenter, m_assistLen * 2.0);
 	float ps = osg::maximum(psr, psl);
 	if (ps <= cullStack.getSmallFeatureCullingPixelSize())
-		return ps;
+		return true;
 
 	updateDivision(psr);
 	return false;

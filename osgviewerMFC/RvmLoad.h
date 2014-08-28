@@ -1,5 +1,5 @@
 #pragma once
-#include <fstream>
+#include <osgDB/fstream>
 #include <osg/ref_ptr>
 #include <ViewCenterManipulator.h>
 #include <DynamicLOD.h>
@@ -27,6 +27,6 @@ private:
 	osg::ref_ptr<ViewCenterManipulator> m_mani;
 	osg::ref_ptr<Geometry::DynamicLOD> m_lod;
 
-	std::ifstream m_fin;
+	osgDB::ifstream m_fin;
 };
 

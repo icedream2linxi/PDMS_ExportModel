@@ -26,6 +26,7 @@ RvmLoad::RvmLoad(osg::ref_ptr<osg::Group> &root, const std::string &filePath, os
 	: m_root(root)
 	, m_filePath(filePath)
 	, m_mani(mani)
+	, m_fin(filePath.c_str())
 {
 }
 
@@ -80,9 +81,10 @@ bool RvmLoad::loadProject(const std::string &name)
 	{
 		m_fin >> flag;
 		if (flag != "CNTB")
-			return;
+			return false;
 		loadItem(1);
 	}
+	return true;
 }
 
 bool RvmLoad::loadItem(int parentColor)
