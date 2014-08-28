@@ -173,6 +173,8 @@ BEGIN
     BEGIN
         MENUITEM "Osg Box Test",                ID_TEST_OSG_BOX_TEST
         MENUITEM "Geometry Box Test",           ID_TEST_GEOMETRY_BOX_TEST
+        MENUITEM "Geometry Box Test 2",         ID_TEST_GEOMETRY_BOX_TEST2
+        MENUITEM "Osg Box Transform Test",      ID_TEST_OSG_BOX_TRANSFORM_TEST
     END
 END
 

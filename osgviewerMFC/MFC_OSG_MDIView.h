@@ -51,6 +51,8 @@ protected:
 	afx_msg void OnTestGeometryBoxTest();
 public:
 	afx_msg void OnViewSouthWest();
+	afx_msg void OnTestGeometryBoxTest2();
+	afx_msg void OnTestOsgBoxTransformTest();
 };
 
 #ifndef _DEBUG  // debug version in MFC_OSG_MDIView.cpp
